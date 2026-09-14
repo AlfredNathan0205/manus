@@ -1,15 +1,18 @@
 import { useEffect, useMemo, useRef, useState, type ElementType } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
+  Activity,
   AlertTriangle,
   ArrowUpRight,
   Banknote,
   BadgeCheck,
+  Bot,
   Box,
   BrainCircuit,
   Check,
   ChevronDown,
   CircleDot,
+  Cloud,
   Database,
   Factory,
   FileCheck2,
@@ -25,6 +28,7 @@ import {
   Network,
   Pause,
   Play,
+  Radio,
   RefreshCw,
   ScanLine,
   ShieldCheck,
@@ -41,6 +45,12 @@ const ASSETS = {
   levis: "/manus-storage/levi-strauss-logo_32a09afd.jpg",
   cognizant: "/manus-storage/cognizant-logo_b2f03f0b.png",
   ntt: "/manus-storage/ntt-data-logo_51231f78.png",
+  foundry: "/manus-storage/microsoft-foundry_b8befd3a.svg",
+  copilotStudio: "/manus-storage/copilot-studio_cd239b87.png",
+  fabric: "/manus-storage/microsoft-fabric_bb084905.svg",
+  uipath: "/manus-storage/uipath_b6902e84.svg",
+  langchain: "/manus-storage/langchain_5b02061f.svg",
+  azure: "/manus-storage/microsoft-azure_7e3847cf.svg",
 };
 
 type SectionId = "intro" | "tech" | "b2c" | "o2c" | "impact" | "next";
@@ -190,6 +200,30 @@ const technology = [
     icon: LockKeyhole,
     copy: "Security architecture, residency and sovereignty are explicit deployment workstreams, not issues deferred until launch.",
   },
+];
+
+type PlatformKey = "foundry" | "copilot" | "fabric" | "uipath" | "langchain" | "azure";
+
+const platformStack: { key: PlatformKey; name: string; role: string; logo: string; layer: string; copy: string }[] = [
+  { key: "foundry", name: "Microsoft Foundry", role: "Model and agent runtime", logo: ASSETS.foundry, layer: "Intelligence plane", copy: "Enterprise models, evaluations and agent runtimes are managed as a reusable production capability." },
+  { key: "copilot", name: "Copilot Studio", role: "Agent build and channels", logo: ASSETS.copilotStudio, layer: "Agent experience", copy: "Scoped agents are assembled, governed and connected to the human channels where work already arrives." },
+  { key: "langchain", name: "LangChain", role: "Multi-agent orchestration", logo: ASSETS.langchain, layer: "Decision fabric", copy: "Agent jobs branch, call tools, preserve state, escalate and resume without turning one prompt into an uncontrolled workflow." },
+  { key: "fabric", name: "Microsoft Fabric", role: "Governed operational context", logo: ASSETS.fabric, layer: "Data foundation", copy: "Customer, quote, inventory, capacity and production events become one governed context plane for every agent." },
+  { key: "uipath", name: "UiPath", role: "System action and documents", logo: ASSETS.uipath, layer: "Execution layer", copy: "RPA and document automation handle deterministic system work, while agents retain bounded decision responsibilities." },
+  { key: "azure", name: "Microsoft Azure", role: "Secure cloud foundation", logo: ASSETS.azure, layer: "Trust boundary", copy: "Identity, security, observability, residency and scale sit beneath every model, agent and automation." },
+];
+
+const swarmAgents: { name: string; domain: string; job: string; platform: PlatformKey; event: string; ring: "inner" | "outer" }[] = [
+  { name: "Brief Intake", domain: "B2C", job: "Structures incoming briefs and creates the first governed record.", platform: "copilot", event: "New brief classified · CRM write queued", ring: "outer" },
+  { name: "Feasibility", domain: "B2C", job: "Tests whether the request can be delivered and prepares the approval case.", platform: "foundry", event: "12 constraints evaluated · approval required", ring: "inner" },
+  { name: "Library Match", domain: "B2C", job: "Searches existing formulae before new perfumer work is created.", platform: "fabric", event: "1,842 formulations searched · 3 candidates", ring: "outer" },
+  { name: "Quote Match", domain: "O2C", job: "Reconciles every PO line against the governed commercial quote.", platform: "langchain", event: "PO CO-78431 · variance branch opened", ring: "inner" },
+  { name: "Order Creation", domain: "O2C", job: "Creates the order only after quote and credit controls clear.", platform: "uipath", event: "ERP transaction staged · control passed", ring: "outer" },
+  { name: "Mini-MRP", domain: "O2C", job: "Evaluates stock, safety stock, open POs, lead time and factory capacity.", platform: "fabric", event: "RM available · promise date calculated", ring: "inner" },
+  { name: "Production Planner", domain: "Factory", job: "Resolves solution/base requirements and releases the complete production route.", platform: "langchain", event: "BOM exploded · route sent to factory", ring: "outer" },
+  { name: "Status", domain: "Customer", job: "Turns dosing, finishing, packing and QC movements into live customer visibility.", platform: "copilot", event: "Portal updated · production in progress", ring: "inner" },
+  { name: "Shipping", domain: "Logistics", job: "Creates shipping and customs documents from controlled order data.", platform: "uipath", event: "Export document pack generated", ring: "outer" },
+  { name: "Invoice", domain: "Finance", job: "Listens for goods issue and dispatches the completed invoice automatically.", platform: "azure", event: "Goods issue received · invoice delivered", ring: "inner" },
 ];
 
 const briefToContract: ProcessStep[] = [
@@ -872,55 +906,164 @@ function ProfileSection() {
 }
 
 function TechSection() {
-  const [active, setActive] = useState(1);
-  const ActiveIcon = technology[active].icon;
+  const [activePlatform, setActivePlatform] = useState<PlatformKey>("copilot");
+  const [activeAgent, setActiveAgent] = useState(0);
+  const [swarmRunning, setSwarmRunning] = useState(true);
+  const reduced = useReducedMotion();
+  const selectedAgent = swarmAgents[activeAgent];
+  const displayedPlatformKey = swarmRunning ? selectedAgent.platform : activePlatform;
+  const selectedPlatform = platformStack.find((platform) => platform.key === displayedPlatformKey)!;
+  const layerPlatform: PlatformKey[] = ["copilot", "langchain", "foundry", "uipath", "fabric", "azure"];
+
+  useEffect(() => {
+    if (!swarmRunning) return;
+    const timer = window.setInterval(() => {
+      setActiveAgent((current) => (current + 1) % swarmAgents.length);
+    }, reduced ? 400 : 2200);
+    return () => window.clearInterval(timer);
+  }, [reduced, swarmRunning]);
+
+  const inspectPlatform = (key: PlatformKey) => {
+    setSwarmRunning(false);
+    setActivePlatform(key);
+    const matchingAgent = swarmAgents.findIndex((agent) => agent.platform === key);
+    if (matchingAgent >= 0) setActiveAgent(matchingAgent);
+  };
+
+  const inspectAgent = (index: number) => {
+    setSwarmRunning(false);
+    setActiveAgent(index);
+    setActivePlatform(swarmAgents[index].platform);
+  };
+
+  const toggleSwarm = () => {
+    if (swarmRunning) {
+      setActivePlatform(selectedAgent.platform);
+      setSwarmRunning(false);
+      return;
+    }
+    setSwarmRunning(true);
+  };
+
   return (
     <SectionFrame
-      eyebrow="The production stack"
-      title="Six layers. One operating system."
-      intro="Every layer has a specific job. Click through the stack to see how governance, agents, automation and data work as one system."
+      eyebrow="The production platform"
+      title="The agents do not float in space."
+      intro="They swarm around one governed enterprise platform—sharing models, context, controls and system access while each agent keeps a narrow operating job."
     >
-      <div className="tech-grid">
-        <div className="tech-list">
+      <div className="platform-shell">
+        <div className="platform-topbar">
+          <div><i /><span>EUROMA AGENT PLATFORM</span><b>PRODUCTION PATTERN</b></div>
+          <div className="platform-stats"><span><strong>10</strong> agents online</span><span><strong>6</strong> shared services</span><span><strong>2</strong> flows live</span></div>
+          <button type="button" onClick={toggleSwarm}>
+            {swarmRunning ? <Pause size={14} /> : <Play size={14} fill="currentColor" />}{swarmRunning ? "Pause swarm" : "Run swarm"}
+          </button>
+        </div>
+
+        <div className="platform-workspace">
+          <div className={`platform-map ${swarmRunning ? "running" : "paused"}`}>
+            <div className="platform-gridlines" />
+            <div className="azure-perimeter"><Cloud size={14} /><span>AZURE SECURITY · IDENTITY · OBSERVABILITY · RESIDENCY</span></div>
+            <div className="platform-orbit orbit-outer" />
+            <div className="platform-orbit orbit-inner" />
+            <svg className="platform-connections" viewBox="0 0 1000 650" preserveAspectRatio="none" aria-hidden="true">
+              <defs>
+                <linearGradient id="platformLine" x1="0" x2="1"><stop offset="0" stopColor="#e7b96a" stopOpacity=".08" /><stop offset=".5" stopColor="#e7b96a" stopOpacity=".68" /><stop offset="1" stopColor="#9fc46b" stopOpacity=".12" /></linearGradient>
+                <filter id="platformGlow"><feGaussianBlur stdDeviation="4" result="blur" /><feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge></filter>
+              </defs>
+              {[
+                "M500 325 C420 250 330 205 215 145",
+                "M500 325 C580 245 680 205 800 150",
+                "M500 325 C500 420 500 500 500 570",
+                "M500 325 C620 345 715 405 825 475",
+                "M500 325 C385 350 285 410 175 480",
+              ].map((path, index) => <motion.path key={path} d={path} fill="none" stroke="url(#platformLine)" strokeWidth="1.4" strokeDasharray="7 11" animate={{ strokeDashoffset: [0, -72] }} transition={{ duration: 3.8 + index * .35, repeat: Infinity, ease: "linear" }} />)}
+              {[
+                { path: "M500 325 C420 250 330 205 215 145", delay: 0 },
+                { path: "M500 325 C580 245 680 205 800 150", delay: .8 },
+                { path: "M500 325 C500 420 500 500 500 570", delay: 1.5 },
+                { path: "M500 325 C620 345 715 405 825 475", delay: .3 },
+                { path: "M500 325 C385 350 285 410 175 480", delay: 1.1 },
+              ].map((signal) => (
+                <circle key={signal.path} r="4" fill="#e7b96a" filter="url(#platformGlow)">
+                  <animateMotion dur="4.2s" begin={`${signal.delay}s`} repeatCount={reduced ? "0" : "indefinite"} path={signal.path} />
+                </circle>
+              ))}
+            </svg>
+
+            <div className="human-control-node"><UserCheck size={17} /><span>HUMAN CONTROL</span><b>NAMED APPROVALS</b></div>
+
+            {platformStack.map((platform) => (
+              <motion.button
+                type="button"
+                key={platform.key}
+                className={`platform-node node-${platform.key} ${displayedPlatformKey === platform.key ? "active" : ""}`}
+                onClick={() => inspectPlatform(platform.key)}
+                aria-pressed={activePlatform === platform.key}
+              >
+                <span className="platform-logo"><img src={platform.logo} alt={`${platform.name} logo`} /></span>
+                <span className="platform-node-copy"><strong>{platform.name}</strong><small>{platform.role}</small></span>
+                <i />
+              </motion.button>
+            ))}
+
+            {swarmAgents.map((agent, index) => {
+              const ringIndex = swarmAgents.slice(0, index).filter((item) => item.ring === agent.ring).length;
+              return (
+                <div
+                  className={`swarm-path ${agent.ring} ${swarmRunning ? "moving" : ""}`}
+                  key={agent.name}
+                  style={{ "--agent-delay": `${ringIndex * (agent.ring === "outer" ? -7.2 : -4.8)}s` } as React.CSSProperties}
+                >
+                  <div className="swarm-upright">
+                    <motion.button
+                      type="button"
+                      className={`swarm-agent ${activeAgent === index ? "active" : ""}`}
+                      onClick={() => inspectAgent(index)}
+                      animate={activeAgent === index ? { scale: [1, 1.08, 1] } : { scale: 1 }}
+                      transition={{ duration: .6 }}
+                      aria-label={`Inspect ${agent.name} agent`}
+                    >
+                      <span><Bot size={12} /></span><strong>{agent.name}</strong><small>{agent.domain}</small>
+                    </motion.button>
+                  </div>
+                </div>
+              );
+            })}
+
+            <div className="platform-live-ticker"><Radio size={13} /><span>{selectedAgent.event}</span><b>{swarmRunning ? "LIVE" : "INSPECT"}</b></div>
+          </div>
+
+          <aside className="platform-inspector">
+            <div className="inspector-status"><span><Activity size={13} />Selected service</span><b>{swarmRunning ? "SWARMING" : "PINNED"}</b></div>
+            <motion.div key={selectedPlatform.key} className="inspector-platform" initial={{ opacity: 0, x: 8 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: .18 }}>
+              <div className="inspector-logo"><img src={selectedPlatform.logo} alt={`${selectedPlatform.name} logo`} /></div>
+              <span>{selectedPlatform.layer}</span>
+              <h3>{selectedPlatform.name}</h3>
+              <strong>{selectedPlatform.role}</strong>
+              <p>{selectedPlatform.copy}</p>
+            </motion.div>
+            <div className="agent-signal-card">
+              <div><Radio size={13} /><span>ACTIVE AGENT / {String(activeAgent + 1).padStart(2, "0")}</span></div>
+              <h4>{selectedAgent.name}</h4>
+              <b>{selectedAgent.domain} · {selectedPlatform.name}</b>
+              <p>{selectedAgent.job}</p>
+              <div className="agent-event"><i /><span>{selectedAgent.event}</span></div>
+            </div>
+            <div className="platform-principle"><ShieldCheck size={18} /><div><strong>Shared platform. Bounded autonomy.</strong><p>Agents reuse the platform; authority remains explicit per job.</p></div></div>
+          </aside>
+        </div>
+
+        <div className="platform-layer-strip">
           {technology.map((layer, index) => {
             const Icon = layer.icon;
+            const key = layerPlatform[index];
             return (
-              <button
-                type="button"
-                key={layer.number}
-                className={`tech-row ${active === index ? "active" : ""}`}
-                onClick={() => setActive(index)}
-                aria-pressed={active === index}
-              >
-                <span className="tech-number">{layer.number}</span>
-                <span className="tech-icon"><Icon size={18} /></span>
-                <span className="tech-label"><strong>{layer.title}</strong><small>{layer.tools}</small></span>
-                <ArrowUpRight size={17} />
+              <button type="button" key={layer.number} className={displayedPlatformKey === key ? "active" : ""} onClick={() => inspectPlatform(key)}>
+                <span>{layer.number}</span><Icon size={16} /><div><strong>{layer.title}</strong><small>{layer.tools}</small></div>
               </button>
             );
           })}
-        </div>
-        <div className="tech-visual">
-          <div className="tech-gridlines" />
-          <div className="tech-status"><i /> SYSTEM LAYER {technology[active].number}</div>
-          <AnimatePresence mode="wait">
-            <motion.div
-              className="tech-core"
-              key={technology[active].title}
-              initial={{ opacity: 0, scale: 0.96, rotate: -2 }}
-              animate={{ opacity: 1, scale: 1, rotate: 0 }}
-              exit={{ opacity: 0, scale: 0.98, rotate: 2 }}
-              transition={{ duration: 0.32 }}
-            >
-              <div className="tech-core-icon"><ActiveIcon size={32} strokeWidth={1.35} /></div>
-              <span className="overline">{technology[active].tools}</span>
-              <h3>{technology[active].title}</h3>
-              <p>{technology[active].copy}</p>
-            </motion.div>
-          </AnimatePresence>
-          <div className="data-stream stream-one" />
-          <div className="data-stream stream-two" />
-          <div className="tech-caption"><ShieldCheck size={16} /> Governed by design</div>
         </div>
       </div>
     </SectionFrame>
@@ -1429,7 +1572,10 @@ function NextSection({ onNavigate }: { onNavigate: (id: SectionId) => void }) {
 }
 
 function AppShell() {
-  const [section, setSection] = useState<SectionId>("intro");
+  const [section, setSection] = useState<SectionId>(() => {
+    const requested = new URLSearchParams(window.location.search).get("section");
+    return navItems.some((item) => item.id === requested) ? requested as SectionId : "intro";
+  });
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isPresenting, setIsPresenting] = useState(false);
   const [lens, setLens] = useState<ExecutiveLens>("ceo");
@@ -1464,6 +1610,10 @@ function AppShell() {
   const navigate = (id: SectionId) => {
     setSection(id);
     setMobileOpen(false);
+    const url = new URL(window.location.href);
+    if (id === "intro") url.searchParams.delete("section");
+    else url.searchParams.set("section", id);
+    window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
