@@ -51,6 +51,8 @@ const ASSETS = {
   uipath: "/manus-storage/uipath_b6902e84.svg",
   langchain: "/manus-storage/langchain_5b02061f.svg",
   azure: "/manus-storage/microsoft-azure_7e3847cf.svg",
+  whatsapp: "/manus-storage/whatsapp_9008dd98.svg",
+  sap: "/manus-storage/sap_713309ae.svg",
 };
 
 type SectionId = "intro" | "tech" | "b2c" | "o2c" | "impact" | "next";
@@ -224,6 +226,41 @@ const swarmAgents: { name: string; domain: string; job: string; platform: Platfo
   { name: "Status", domain: "Customer", job: "Turns dosing, finishing, packing and QC movements into live customer visibility.", platform: "copilot", event: "Portal updated · production in progress", ring: "inner" },
   { name: "Shipping", domain: "Logistics", job: "Creates shipping and customs documents from controlled order data.", platform: "uipath", event: "Export document pack generated", ring: "outer" },
   { name: "Invoice", domain: "Finance", job: "Listens for goods issue and dispatches the completed invoice automatically.", platform: "azure", event: "Goods issue received · invoice delivered", ring: "inner" },
+];
+
+type EndpointKey = "email" | "whatsapp" | "crm" | "erp" | "factory";
+type TransactionStage = {
+  title: string;
+  system: string;
+  detail: string;
+  agent?: number;
+  platform: PlatformKey;
+  endpoint?: EndpointKey;
+  human?: boolean;
+  packet: string;
+  path: string;
+};
+
+const enterpriseEndpoints: { key: EndpointKey; name: string; role: string; icon: ElementType; logo?: string }[] = [
+  { key: "email", name: "Email", role: "PO intake · confirmation", icon: Mail },
+  { key: "whatsapp", name: "WhatsApp", role: "Regional PO channel", icon: Radio, logo: ASSETS.whatsapp },
+  { key: "crm", name: "CRM", role: "Quote · customer context", icon: BadgeCheck },
+  { key: "erp", name: "SAP ERP", role: "Order · credit · invoice", icon: Database, logo: ASSETS.sap },
+  { key: "factory", name: "Factory Control", role: "MRP · production · QC", icon: Factory },
+];
+
+const transactionJourney: TransactionStage[] = [
+  { title: "Purchase order received", system: "Email channel", detail: "PO CO-78431 arrives as a PDF and becomes a governed transaction packet.", platform: "copilot", endpoint: "email", packet: "PO · CO-78431", path: "M83 176 C165 176 235 112 332 91" },
+  { title: "Document read", system: "UiPath AI OCR", detail: "Customer, product, quantity, requested date and commercial lines are extracted with source evidence.", agent: 3, platform: "uipath", packet: "OCR · 98.7%", path: "M332 91 C390 150 455 245 500 325" },
+  { title: "Customer and quote context", system: "CRM + Microsoft Fabric", detail: "The packet retrieves the governed customer account and quote Q-78142 before any order is created.", platform: "fabric", endpoint: "crm", packet: "QUOTE · Q-78142", path: "M500 325 C365 330 225 290 83 268" },
+  { title: "Quote matched", system: "Quote Match Agent", detail: "Every PO line is reconciled against the approved quote, including price, currency, quantity and delivery terms.", agent: 3, platform: "langchain", packet: "MATCH · 4/4", path: "M83 268 C270 270 470 160 669 91" },
+  { title: "Commercial control", system: "Named human approval", detail: "The price variance is contained. Customer Service approves the correction before automation may continue.", platform: "foundry", human: true, packet: "HOLD · +£45.60", path: "M669 91 C610 130 550 175 500 201" },
+  { title: "Order and credit created", system: "SAP ERP", detail: "UiPath creates the order and SAP performs the automatic credit check against controlled master data.", agent: 4, platform: "uipath", endpoint: "erp", packet: "SO · 54001982", path: "M500 201 C650 220 800 270 916 319" },
+  { title: "Mini-MRP and promise", system: "Mini-MRP Agent", detail: "Raw material, safety stock, open POs, vendor lead time and factory capacity resolve the promise date.", agent: 5, platform: "fabric", packet: "PROMISE · 24 SEP", path: "M916 319 C760 390 640 510 500 591" },
+  { title: "Production route released", system: "Factory Control", detail: "The BOM and solution/base route are created and released to the correct factory work centre.", agent: 6, platform: "langchain", endpoint: "factory", packet: "PROD · 870144", path: "M500 591 C650 560 790 440 916 365" },
+  { title: "Production and QC tracked", system: "Status Agent", detail: "Dosing, finishing, packing and QC movements update the order state and customer portal continuously.", agent: 7, platform: "copilot", endpoint: "factory", packet: "QC · RELEASED", path: "M916 365 C730 300 520 210 332 91" },
+  { title: "Goods issue and invoice", system: "SAP ERP + Invoice Agent", detail: "Goods issue closes fulfilment, generates the invoice and writes the financial event back to SAP.", agent: 9, platform: "azure", endpoint: "erp", packet: "INV · 920184", path: "M332 91 C210 390 275 590 500 591 C700 590 780 380 916 319" },
+  { title: "Customer confirmation sent", system: "Email channel", detail: "Order confirmation, shipping documents and invoice leave through the customer channel with a complete audit trail.", agent: 8, platform: "uipath", endpoint: "email", packet: "COMPLETE · 11 EVENTS", path: "M916 319 C700 200 350 120 83 176" },
 ];
 
 const briefToContract: ProcessStep[] = [
@@ -909,21 +946,50 @@ function TechSection() {
   const [activePlatform, setActivePlatform] = useState<PlatformKey>("copilot");
   const [activeAgent, setActiveAgent] = useState(0);
   const [swarmRunning, setSwarmRunning] = useState(true);
+  const [transactionStage, setTransactionStage] = useState(-1);
+  const [transactionRunning, setTransactionRunning] = useState(false);
+  const [transactionApproved, setTransactionApproved] = useState(false);
+  const [transactionChannel, setTransactionChannel] = useState<"email" | "whatsapp">("email");
   const reduced = useReducedMotion();
-  const selectedAgent = swarmAgents[activeAgent];
-  const displayedPlatformKey = swarmRunning ? selectedAgent.platform : activePlatform;
+  const currentTransaction = transactionStage >= 0 ? transactionJourney[transactionStage] : null;
+  const displayedAgentIndex = currentTransaction?.agent ?? activeAgent;
+  const selectedAgent = swarmAgents[displayedAgentIndex];
+  const transactionActive = currentTransaction !== null;
+  const transactionComplete = transactionStage === transactionJourney.length - 1 && !transactionRunning;
+  const displayedEndpoint = currentTransaction?.endpoint === "email" && (transactionStage === 0 || transactionStage === transactionJourney.length - 1) ? transactionChannel : currentTransaction?.endpoint;
+  const transactionPath = currentTransaction && transactionChannel === "whatsapp" && transactionStage === 0
+    ? "M83 222 C170 220 245 125 332 91"
+    : currentTransaction && transactionChannel === "whatsapp" && transactionStage === transactionJourney.length - 1
+      ? "M916 319 C700 225 350 185 83 222"
+      : currentTransaction?.path;
+  const displayedPlatformKey = currentTransaction?.platform ?? (swarmRunning ? selectedAgent.platform : activePlatform);
   const selectedPlatform = platformStack.find((platform) => platform.key === displayedPlatformKey)!;
   const layerPlatform: PlatformKey[] = ["copilot", "langchain", "foundry", "uipath", "fabric", "azure"];
 
   useEffect(() => {
-    if (!swarmRunning) return;
+    if (!swarmRunning || transactionActive) return;
     const timer = window.setInterval(() => {
       setActiveAgent((current) => (current + 1) % swarmAgents.length);
     }, reduced ? 400 : 2200);
     return () => window.clearInterval(timer);
-  }, [reduced, swarmRunning]);
+  }, [reduced, swarmRunning, transactionActive]);
+
+  useEffect(() => {
+    if (!transactionRunning || !currentTransaction) return;
+    if (currentTransaction.human && !transactionApproved) return;
+    const timer = window.setTimeout(() => {
+      if (transactionStage >= transactionJourney.length - 1) {
+        setTransactionRunning(false);
+        return;
+      }
+      setTransactionStage((stage) => stage + 1);
+    }, reduced ? 320 : 1850);
+    return () => window.clearTimeout(timer);
+  }, [currentTransaction, reduced, transactionApproved, transactionRunning, transactionStage]);
 
   const inspectPlatform = (key: PlatformKey) => {
+    setTransactionStage(-1);
+    setTransactionRunning(false);
     setSwarmRunning(false);
     setActivePlatform(key);
     const matchingAgent = swarmAgents.findIndex((agent) => agent.platform === key);
@@ -931,17 +997,49 @@ function TechSection() {
   };
 
   const inspectAgent = (index: number) => {
+    setTransactionStage(-1);
+    setTransactionRunning(false);
     setSwarmRunning(false);
     setActiveAgent(index);
     setActivePlatform(swarmAgents[index].platform);
   };
 
   const toggleSwarm = () => {
+    if (transactionActive) return;
     if (swarmRunning) {
       setActivePlatform(selectedAgent.platform);
       setSwarmRunning(false);
       return;
     }
+    setSwarmRunning(true);
+  };
+
+  const runTransaction = () => {
+    setSwarmRunning(false);
+    setTransactionApproved(false);
+    setTransactionStage(0);
+    setTransactionRunning(true);
+  };
+
+  const toggleTransaction = () => {
+    if (!transactionActive || transactionComplete) {
+      runTransaction();
+      return;
+    }
+    setTransactionRunning((running) => !running);
+  };
+
+  const approveTransaction = () => {
+    if (!currentTransaction?.human) return;
+    setTransactionApproved(true);
+    setTransactionStage((stage) => Math.min(stage + 1, transactionJourney.length - 1));
+    setTransactionRunning(true);
+  };
+
+  const exitTransaction = () => {
+    setTransactionStage(-1);
+    setTransactionRunning(false);
+    setTransactionApproved(false);
     setSwarmRunning(true);
   };
 
@@ -955,13 +1053,39 @@ function TechSection() {
         <div className="platform-topbar">
           <div><i /><span>EUROMA AGENT PLATFORM</span><b>PRODUCTION PATTERN</b></div>
           <div className="platform-stats"><span><strong>10</strong> agents online</span><span><strong>6</strong> shared services</span><span><strong>2</strong> flows live</span></div>
-          <button type="button" onClick={toggleSwarm}>
-            {swarmRunning ? <Pause size={14} /> : <Play size={14} fill="currentColor" />}{swarmRunning ? "Pause swarm" : "Run swarm"}
+          <button type="button" onClick={toggleSwarm} disabled={transactionActive}>
+            {transactionActive ? <CircleDot size={14} /> : swarmRunning ? <Pause size={14} /> : <Play size={14} fill="currentColor" />}{transactionActive ? "Journey active" : swarmRunning ? "Pause swarm" : "Run swarm"}
           </button>
         </div>
 
+        <div className={`transaction-console ${transactionActive ? "active" : ""} ${currentTransaction?.human ? "control" : ""}`}>
+          <div className="transaction-intro">
+            <span><Zap size={14} />Follow one order</span>
+            <strong>{transactionActive ? currentTransaction.title : "Watch a customer PO cross the entire platform."}</strong>
+          </div>
+          <div className="transaction-channel" aria-label="Transaction intake channel">
+            <button type="button" className={transactionChannel === "email" ? "active" : ""} onClick={() => setTransactionChannel("email")} disabled={transactionActive && transactionStage > 0}><Mail size={13} />Email</button>
+            <button type="button" className={transactionChannel === "whatsapp" ? "active" : ""} onClick={() => setTransactionChannel("whatsapp")} disabled={transactionActive && transactionStage > 0}><img src={ASSETS.whatsapp} alt="" />WhatsApp</button>
+          </div>
+          <div className="transaction-progress">
+            <div><span>{transactionActive ? `Stage ${String(transactionStage + 1).padStart(2, "0")} / ${transactionJourney.length}` : "Ready to trace"}</span><b>{transactionActive ? currentTransaction.system : "PO CO-78431 · Colombia"}</b></div>
+            <div className="transaction-progress-rail"><i style={{ transform: `scaleX(${transactionActive ? (transactionStage + 1) / transactionJourney.length : 0})` }} /></div>
+          </div>
+          <div className="transaction-actions">
+            {currentTransaction?.human && !transactionApproved ? (
+              <button type="button" className="transaction-approve" onClick={approveTransaction}><UserCheck size={14} />Approve correction</button>
+            ) : (
+              <button type="button" className="transaction-run" onClick={toggleTransaction}>
+                {transactionRunning ? <Pause size={14} /> : transactionComplete ? <RefreshCw size={14} /> : <Play size={14} fill="currentColor" />}
+                {transactionRunning ? "Pause journey" : transactionComplete ? "Replay journey" : transactionActive ? "Resume journey" : "Run journey"}
+              </button>
+            )}
+            {transactionActive && <button type="button" className="transaction-exit" onClick={exitTransaction}>Exit</button>}
+          </div>
+        </div>
+
         <div className="platform-workspace">
-          <div className={`platform-map ${swarmRunning ? "running" : "paused"}`}>
+          <div className={`platform-map ${swarmRunning && !transactionActive ? "running" : "paused"} ${transactionActive ? "transaction-mode" : ""}`}>
             <div className="platform-gridlines" />
             <div className="azure-perimeter"><Cloud size={14} /><span>AZURE SECURITY · IDENTITY · OBSERVABILITY · RESIDENCY</span></div>
             <div className="platform-orbit orbit-outer" />
@@ -989,9 +1113,43 @@ function TechSection() {
                   <animateMotion dur="4.2s" begin={`${signal.delay}s`} repeatCount={reduced ? "0" : "indefinite"} path={signal.path} />
                 </circle>
               ))}
+              {currentTransaction && transactionPath && (
+                <g className="transaction-route" key={`${transactionStage}-${transactionChannel}`}>
+                  <motion.path d={transactionPath} fill="none" stroke="#f1c36f" strokeWidth="3" strokeLinecap="round" initial={{ pathLength: 0, opacity: .25 }} animate={{ pathLength: 1, opacity: 1 }} transition={{ duration: reduced ? .12 : 1.15, ease: "easeInOut" }} />
+                  <circle r="8" fill="#0b0d0a" stroke="#f1c36f" strokeWidth="2" filter="url(#platformGlow)">
+                    <animateMotion dur={reduced ? ".12s" : "1.15s"} repeatCount="1" fill="freeze" path={transactionPath} />
+                  </circle>
+                  <circle r="3" fill="#f1c36f">
+                    <animateMotion dur={reduced ? ".12s" : "1.15s"} repeatCount="1" fill="freeze" path={transactionPath} />
+                  </circle>
+                </g>
+              )}
             </svg>
 
-            <div className="human-control-node"><UserCheck size={17} /><span>HUMAN CONTROL</span><b>NAMED APPROVALS</b></div>
+            <div className="endpoint-rail endpoint-rail-left" aria-label="Customer and commercial systems">
+              {enterpriseEndpoints.filter((endpoint) => ["email", "whatsapp", "crm"].includes(endpoint.key)).map((endpoint) => {
+                const EndpointIcon = endpoint.icon;
+                return (
+                  <div key={endpoint.key} className={`enterprise-endpoint endpoint-${endpoint.key} ${displayedEndpoint === endpoint.key ? "active" : ""}`}>
+                    <span>{endpoint.logo ? <img src={endpoint.logo} alt="" /> : <EndpointIcon size={15} />}</span>
+                    <div><strong>{endpoint.name}</strong><small>{endpoint.role}</small></div><i />
+                  </div>
+                );
+              })}
+            </div>
+            <div className="endpoint-rail endpoint-rail-right" aria-label="ERP and factory systems">
+              {enterpriseEndpoints.filter((endpoint) => ["erp", "factory"].includes(endpoint.key)).map((endpoint) => {
+                const EndpointIcon = endpoint.icon;
+                return (
+                  <div key={endpoint.key} className={`enterprise-endpoint endpoint-${endpoint.key} ${displayedEndpoint === endpoint.key ? "active" : ""}`}>
+                    <span>{endpoint.logo ? <img src={endpoint.logo} alt="" /> : <EndpointIcon size={15} />}</span>
+                    <div><strong>{endpoint.name}</strong><small>{endpoint.role}</small></div><i />
+                  </div>
+                );
+              })}
+            </div>
+
+            <button type="button" className={`human-control-node ${currentTransaction?.human ? "active" : ""}`} onClick={approveTransaction} disabled={!currentTransaction?.human}><UserCheck size={17} /><span>{currentTransaction?.human ? "APPROVAL REQUIRED" : "HUMAN CONTROL"}</span><b>{currentTransaction?.human ? "RELEASE ORDER" : "NAMED APPROVALS"}</b></button>
 
             {platformStack.map((platform) => (
               <motion.button
@@ -1018,7 +1176,7 @@ function TechSection() {
                   <div className="swarm-upright">
                     <motion.button
                       type="button"
-                      className={`swarm-agent ${activeAgent === index ? "active" : ""}`}
+                      className={`swarm-agent ${(transactionActive ? currentTransaction?.agent === index : activeAgent === index) ? "active" : ""}`}
                       onClick={() => inspectAgent(index)}
                       animate={activeAgent === index ? { scale: [1, 1.08, 1] } : { scale: 1 }}
                       transition={{ duration: .6 }}
@@ -1031,11 +1189,12 @@ function TechSection() {
               );
             })}
 
-            <div className="platform-live-ticker"><Radio size={13} /><span>{selectedAgent.event}</span><b>{swarmRunning ? "LIVE" : "INSPECT"}</b></div>
+            {currentTransaction && <div className={`transaction-packet ${currentTransaction.human ? "held" : ""}`}><span>{currentTransaction.packet}</span><b>{currentTransaction.human ? "CONTROLLED STOP" : transactionComplete ? "COMPLETE" : "IN TRANSIT"}</b></div>}
+            <div className="platform-live-ticker"><Radio size={13} /><span>{currentTransaction ? currentTransaction.detail : selectedAgent.event}</span><b>{currentTransaction ? currentTransaction.human ? "HOLD" : transactionComplete ? "DONE" : "FLOWING" : swarmRunning ? "LIVE" : "INSPECT"}</b></div>
           </div>
 
           <aside className="platform-inspector">
-            <div className="inspector-status"><span><Activity size={13} />Selected service</span><b>{swarmRunning ? "SWARMING" : "PINNED"}</b></div>
+            <div className="inspector-status"><span><Activity size={13} />{transactionActive ? "Transaction service" : "Selected service"}</span><b>{transactionActive ? currentTransaction.human ? "CONTROL" : transactionComplete ? "COMPLETE" : "EXECUTING" : swarmRunning ? "SWARMING" : "PINNED"}</b></div>
             <motion.div key={selectedPlatform.key} className="inspector-platform" initial={{ opacity: 0, x: 8 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: .18 }}>
               <div className="inspector-logo"><img src={selectedPlatform.logo} alt={`${selectedPlatform.name} logo`} /></div>
               <span>{selectedPlatform.layer}</span>
@@ -1043,16 +1202,22 @@ function TechSection() {
               <strong>{selectedPlatform.role}</strong>
               <p>{selectedPlatform.copy}</p>
             </motion.div>
-            <div className="agent-signal-card">
-              <div><Radio size={13} /><span>ACTIVE AGENT / {String(activeAgent + 1).padStart(2, "0")}</span></div>
-              <h4>{selectedAgent.name}</h4>
-              <b>{selectedAgent.domain} · {selectedPlatform.name}</b>
-              <p>{selectedAgent.job}</p>
-              <div className="agent-event"><i /><span>{selectedAgent.event}</span></div>
+            <div className={`agent-signal-card ${transactionActive ? "transaction" : ""} ${currentTransaction?.human ? "control" : ""}`}>
+              <div><Radio size={13} /><span>{transactionActive ? `TRANSACTION STAGE / ${String(transactionStage + 1).padStart(2, "0")}` : `ACTIVE AGENT / ${String(activeAgent + 1).padStart(2, "0")}`}</span></div>
+              <h4>{transactionActive ? currentTransaction.title : selectedAgent.name}</h4>
+              <b>{transactionActive ? `${currentTransaction.system} · ${selectedPlatform.name}` : `${selectedAgent.domain} · ${selectedPlatform.name}`}</b>
+              <p>{transactionActive ? currentTransaction.detail : selectedAgent.job}</p>
+              <div className="agent-event"><i /><span>{transactionActive ? currentTransaction.packet : selectedAgent.event}</span></div>
             </div>
             <div className="platform-principle"><ShieldCheck size={18} /><div><strong>Shared platform. Bounded autonomy.</strong><p>Agents reuse the platform; authority remains explicit per job.</p></div></div>
           </aside>
         </div>
+
+        {transactionActive && (
+          <div className="transaction-ledger" aria-label="Complete transaction journey">
+            {transactionJourney.map((stage, index) => <div key={stage.title} className={index < transactionStage ? "done" : index === transactionStage ? "active" : "waiting"}><span>{String(index + 1).padStart(2, "0")}</span><i /> <strong>{stage.title}</strong><small>{index < transactionStage ? "Complete" : index === transactionStage ? stage.human ? "Human control" : "Executing" : "Waiting"}</small></div>)}
+          </div>
+        )}
 
         <div className="platform-layer-strip">
           {technology.map((layer, index) => {
