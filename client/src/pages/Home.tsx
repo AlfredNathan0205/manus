@@ -566,7 +566,7 @@ function ProcessFlow({
       setRunning(false);
       return;
     }
-    const timer = window.setTimeout(() => setActive((current) => current + 1), 720);
+    const timer = window.setTimeout(() => setActive((current) => current + 1), 1750);
     return () => window.clearTimeout(timer);
   }, [active, running, steps.length]);
 
@@ -630,8 +630,8 @@ function ProcessFlow({
                     <motion.span
                       className="signal-dot"
                       initial={{ x: 0, opacity: 0 }}
-                      animate={{ x: 48, opacity: [0, 1, 1, 0] }}
-                      transition={{ duration: 0.68, repeat: Infinity, ease: "linear" }}
+                      animate={{ x: 56, opacity: [0, 1, 1, 0] }}
+                      transition={{ duration: 1.45, repeat: Infinity, ease: "linear" }}
                     />
                   )}
                 </div>
