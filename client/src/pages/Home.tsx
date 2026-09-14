@@ -31,7 +31,7 @@ import {
 
 const ASSETS = {
   euroma: "/manus-storage/euroma-logo_e0add910.jpg",
-  cpl: "/manus-storage/cpl-aromas-logo_9af8b233.jpg",
+  cpl: "/manus-storage/cpl-aromas-purple-square_89f03cc9.jpg",
   symrise: "/manus-storage/symrise-logo_e03531b2.jpg",
   levis: "/manus-storage/levi-strauss-logo_32a09afd.jpg",
   cognizant: "/manus-storage/cognizant-logo_b2f03f0b.png",
@@ -97,21 +97,21 @@ const career = [
   {
     name: "Levi Strauss & Co.",
     role: "Enterprise systems & consulting leadership",
-    years: "2000 — 2012",
+    years: "2010 — 2012",
     logo: ASSETS.levis,
     copy: "A 12-year foundation in SAP, ERP and global transformation delivery across Singapore, San Francisco, France and India, progressing from hands-on consulting into programme and practice leadership.",
   },
   {
     name: "Cognizant",
     role: "Enterprise systems & consulting leadership",
-    years: "2000 — 2012",
+    years: "2008 — 2010",
     logo: ASSETS.cognizant,
     copy: "Multi-country enterprise delivery and architecture discipline across global clients, with a focus on systems that had to work in the real operating environment.",
   },
   {
     name: "Caritor / NTT DATA",
     role: "Enterprise technology delivery",
-    years: "2000 — 2012",
+    years: "2002 — 2007",
     logo: ASSETS.ntt,
     copy: "The early consulting chapter: enterprise systems, regional delivery and the operational discipline that still underpins every agent programme today.",
   },
