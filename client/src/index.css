@@ -129,9 +129,25 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 1px solid 
 .site-header nav button small { color: var(--faint); font-family: "IBM Plex Mono", monospace; font-size: 9px; letter-spacing: .04em; }
 .site-header nav button span { white-space: nowrap; font-size: 13px; font-weight: 650; letter-spacing: .01em; }
 .site-header nav button i { position: absolute; right: 12px; bottom: -1px; left: 12px; height: 2px; background: var(--gold); box-shadow: 0 0 16px rgba(231, 185, 106, .55); }
+.header-actions { justify-self: end; display: flex; align-items: center; gap: 16px; }
 .header-status { justify-self: end; display: flex; align-items: center; gap: 8px; color: var(--dim); font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: .1em; }
 .header-status i, .system-topline i, .tech-status i, .output-signal i { width: 6px; height: 6px; border-radius: 50%; background: var(--green); box-shadow: 0 0 12px rgba(159,196,107,.8); }
+.presentation-button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 38px; padding: 0 12px; border: 1px solid var(--line); color: #aaa9a1; background: rgba(255,255,255,.018); font-family: "IBM Plex Mono", monospace; font-size: 9px; text-transform: uppercase; letter-spacing: .08em; transition: color .2s var(--ease-out), border-color .2s var(--ease-out), background .2s var(--ease-out), transform .16s var(--ease-out); }
+.presentation-button:hover { color: var(--gold); border-color: var(--line-hot); background: rgba(231,185,106,.05); }
+.presentation-button:active { transform: scale(.97); }
 .mobile-menu { display: none; }
+
+.app-shell.presenting { overflow: auto; }
+.app-shell.presenting .site-header { grid-template-columns: 1fr auto; min-height: 58px; padding: 0 20px; background: rgba(9,10,8,.96); }
+.app-shell.presenting .brand-lockup, .app-shell.presenting .mobile-menu, .app-shell.presenting .header-status { display: none; }
+.app-shell.presenting .site-header nav { justify-self: center; height: 58px; }
+.app-shell.presenting .site-header nav button { padding: 0 18px; }
+.app-shell.presenting .header-actions { grid-column: 2; }
+.app-shell.presenting .presentation-button { color: #161008; border-color: var(--gold); background: var(--gold); }
+.app-shell.presenting main { min-height: calc(100vh - 58px); }
+.app-shell.presenting .profile-section, .app-shell.presenting .section-frame { padding-top: 46px; padding-bottom: 60px; }
+.app-shell.presenting .section-frame { min-height: calc(100vh - 58px); }
+.app-shell.presenting .site-footer { display: none; }
 
 main { width: 100%; min-height: calc(100vh - 120px); }
 .profile-section, .section-frame { width: min(1400px, 100%); margin: 0 auto; padding: 76px 54px 92px; }
@@ -398,6 +414,15 @@ main { width: 100%; min-height: calc(100vh - 120px); }
   .site-header nav { position: absolute; top: 71px; right: 0; left: 0; display: none; height: auto; padding: 12px 18px 18px; border-bottom: 1px solid var(--line); background: rgba(9,10,8,.97); backdrop-filter: blur(20px); }
   .site-header nav.open { display: grid; grid-template-columns: repeat(2, 1fr); }
   .site-header nav button { min-height: 48px; justify-content: flex-start; border-bottom: 1px solid var(--line); }
+  .header-actions { margin-left: auto; }
+  .presentation-button span { display: none; }
+  .presentation-button { width: 40px; padding: 0; }
+  .app-shell.presenting .site-header { display: grid; grid-template-columns: 1fr auto; min-height: 54px; padding: 0 12px; }
+  .app-shell.presenting .site-header nav { position: static; display: flex; justify-self: start; gap: 0; height: 54px; padding: 0; overflow-x: auto; border: 0; background: transparent; }
+  .app-shell.presenting .site-header nav button { flex: 0 0 auto; min-height: 54px; padding: 0 10px; border: 0; }
+  .app-shell.presenting .site-header nav button small { display: none; }
+  .app-shell.presenting .site-header nav button span { font-size: 11px; }
+  .app-shell.presenting .profile-section, .app-shell.presenting .section-frame { padding-top: 40px; }
   .profile-section, .section-frame { padding: 54px 24px 75px; }
   .hero-grid { grid-template-columns: 1fr; min-height: 0; }
   .orbital-card { max-width: 620px; width: 100%; justify-self: center; }

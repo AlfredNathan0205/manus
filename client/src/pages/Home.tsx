@@ -18,6 +18,8 @@ import {
   Layers3,
   LockKeyhole,
   Mail,
+  Maximize2,
+  Minimize2,
   Network,
   Pause,
   Play,
@@ -175,42 +177,42 @@ const briefToContract: ProcessStep[] = [
     copy: "The customer brief or enquiry arrives and enters the automated workflow.",
     kind: "agent",
     tags: ["Brief", "Enquiry"],
-    systems: ["Intake agent", "Email / enquiry channel"],
+    systems: ["Microsoft Copilot Studio · Brief Intake Agent", "LangChain · B2C orchestration", "Microsoft Fabric · governed brief context"],
   },
   {
     title: "CRM updated by agent",
     copy: "The agent structures the brief and updates the CRM against the correct customer, contact and opportunity.",
     kind: "agent",
     tags: ["CRM", "No re-keying"],
-    systems: ["CRM update agent", "CRM system"],
+    systems: ["Microsoft Copilot Studio · CRM Update Agent", "UiPath RPA · CRM write-back", "Microsoft Fabric · account and contact context"],
   },
   {
     title: "Sender acknowledged",
     copy: "An acknowledgement email is sent immediately so the sender knows the request has entered the process.",
     kind: "agent",
     tags: ["Automated email"],
-    systems: ["Acknowledgement agent", "Email service"],
+    systems: ["Microsoft Copilot Studio · Acknowledgement Agent", "UiPath RPA · outbound email"],
   },
   {
     title: "Feasibility calculated",
     copy: "The feasibility calculator agent checks whether the request can be delivered and emails the internal team with a feasible or decline recommendation.",
     kind: "decision",
     tags: ["Feasibility agent", "Internal email", "Feasible / decline"],
-    systems: ["Feasibility calculator agent", "Rules and operational data", "Internal email"],
+    systems: ["Microsoft Copilot Studio · Feasibility Calculator Agent", "Azure AI Foundry · enterprise AI runtime", "Microsoft Fabric · rules and operational data", "LangChain · feasible / decline branch"],
   },
   {
     title: "Human approval",
     copy: "A named person reviews and approves the feasibility recommendation before the request progresses or is declined.",
     kind: "human",
     tags: ["Required checkpoint"],
-    systems: ["Approval workflow", "Named business approver"],
+    systems: ["LangChain · human-in-the-loop checkpoint", "Microsoft Copilot Studio · Approval Agent", "CPL · named business approver"],
   },
   {
     title: "Library match",
     copy: "Once feasibility is approved, the agent searches the formulation library for an existing match.",
     kind: "decision",
     tags: ["Similarity search", "Cost data"],
-    systems: ["Library-match agent", "Formulation library", "System cost data", "Project creation workflow"],
+    systems: ["Microsoft Copilot Studio · Library Match Agent", "Azure AI Foundry · similarity reasoning", "Microsoft Fabric · formulation and cost data", "Microsoft Copilot Studio · Perfumer Project Agent"],
     branches: [
       {
         label: "Match found",
@@ -245,21 +247,21 @@ const orderToCash: ProcessStep[] = [
     copy: "The customer purchase order arrives by email or, in Colombia, Brazil and parts of the Middle East, through WhatsApp. Both channels enter the same workflow.",
     kind: "agent",
     tags: ["Email", "WhatsApp", "Regional channels"],
-    systems: ["Order intake agent", "Email", "WhatsApp"],
+    systems: ["Microsoft Copilot Studio · PO Intake Agent", "UiPath RPA · email and WhatsApp capture", "LangChain · O2C orchestration"],
   },
   {
     title: "Order acknowledged",
     copy: "An order acknowledgement is sent immediately before the remaining processing continues.",
     kind: "agent",
     tags: ["Customer response"],
-    systems: ["Acknowledgement agent", "Email / messaging service"],
+    systems: ["Microsoft Copilot Studio · Order Acknowledgement Agent", "UiPath RPA · outbound response"],
   },
   {
     title: "OCR matches PO to quote",
     copy: "The OCR agent reads the purchase order, extracts the order detail and matches it against the approved quote in CRM.",
     kind: "decision",
     tags: ["OCR", "Quote match"],
-    systems: ["OCR agent", "CRM quote", "Customer Service audit workflow"],
+    systems: ["AI-based OCR · PO extraction", "Microsoft Copilot Studio · Quote Match Agent", "Microsoft Fabric · CRM quote context", "LangChain · Customer Service audit branch"],
     branches: [
       { label: "Discrepancy", copy: "An audit is triggered to the Customer Service team. The issue must be resolved before order creation." },
       { label: "No discrepancy", copy: "The order creation agent starts automatically." },
@@ -270,7 +272,7 @@ const orderToCash: ProcessStep[] = [
     copy: "The order creation agent creates the sales order and runs the credit check automatically.",
     kind: "decision",
     tags: ["Order agent", "Credit control"],
-    systems: ["Order creation agent", "ERP order management", "Credit-check service", "Finance workflow"],
+    systems: ["Microsoft Copilot Studio · Order Creation Agent", "UiPath RPA · order-system entry", "Microsoft Fabric · customer and credit context", "LangChain · Finance escalation"],
     branches: [
       { label: "Credit fails", copy: "A workflow is triggered to Finance and the account manager for a human decision." },
       { label: "Credit passes", copy: "The flow moves directly into the automated mini-MRP run." },
@@ -281,7 +283,7 @@ const orderToCash: ProcessStep[] = [
     copy: "The agent checks raw-material stock, including safety stock, then uses factory capacity to determine the delivery date.",
     kind: "decision",
     tags: ["Raw materials", "Safety stock", "Factory capacity"],
-    systems: ["Mini-MRP agent", "Inventory and safety stock", "Open purchase orders", "Vendor lead times", "Factory capacity"],
+    systems: ["Microsoft Copilot Studio · Mini-MRP Agent", "Microsoft Fabric · RM and safety-stock data", "Microsoft Fabric · open POs and vendor lead times", "LangChain · buying / delivery branch"],
     branches: [
       { label: "RM shortage", copy: "A buying request is triggered. The customer is updated using open purchase orders or the vendor’s known lead time." },
       { label: "Materials clear", copy: "Capacity provides the delivery date and the order confirmation is sent to the customer." },
@@ -292,42 +294,42 @@ const orderToCash: ProcessStep[] = [
     copy: "The agent creates the production order, then decides whether a solution or base is required. It checks existing stock or explodes the bill of materials to produce it, and routes the work against available factory capacity.",
     kind: "decision",
     tags: ["Production order", "Solution / base", "BOM explosion", "Factory allocation"],
-    systems: ["Production-planning agent", "BOM engine", "Solution / base inventory", "Factory-capacity data"],
+    systems: ["Microsoft Copilot Studio · Production Planning Agent", "Microsoft Fabric · BOM and solution/base inventory", "LangChain · factory-capacity decision", "UiPath RPA · production-order creation"],
   },
   {
     title: "Released to shop floor",
     copy: "Once the production route is clear, the agent releases the order to the selected factory shop floor.",
     kind: "agent",
     tags: ["Factory release"],
-    systems: ["ERP production order", "Factory shop-floor system"],
+    systems: ["UiPath RPA · shop-floor release", "Microsoft Copilot Studio · Factory Release Agent"],
   },
   {
     title: "Production tracked live",
     copy: "The production agent updates each movement from the dosing bot through finished production and packing. The customer portal is updated throughout.",
     kind: "agent",
     tags: ["Dosing bot", "Finished", "Packing", "Customer portal"],
-    systems: ["Production agent", "Dosing bot", "Manufacturing status events", "Customer portal"],
+    systems: ["Microsoft Copilot Studio · Production Status Agent", "CPL · dosing bot", "Microsoft Fabric · manufacturing event stream", "Microsoft Copilot Studio · Customer Portal Update Agent"],
   },
   {
     title: "QC notified & updated",
     copy: "Production-complete status notifies Quality. QC performs its control and the QC system records the updated status before shipping continues.",
     kind: "human",
     tags: ["Production complete", "QC control", "System update"],
-    systems: ["Production-complete event", "QC system", "Quality team"],
+    systems: ["Microsoft Fabric · production-complete event", "LangChain · QC release checkpoint", "CPL · Quality team"],
   },
   {
     title: "Shipping & delivery tracked",
     copy: "Shipping status and delivery movement are tracked, while the agent generates shipping, customs and supporting documents automatically.",
     kind: "agent",
     tags: ["Delivery movement", "Shipping documents", "Customs"],
-    systems: ["Shipping agent", "Logistics tracking", "Document-generation agent", "Customs data"],
+    systems: ["Microsoft Copilot Studio · Shipping & Documentation Agent", "UiPath RPA · shipping and customs documents", "Microsoft Fabric · tracking and customs data"],
   },
   {
     title: "Goods issue → invoice",
     copy: "As soon as goods issue is posted, the invoice is generated and sent automatically.",
     kind: "agent",
     tags: ["Goods issue", "Invoice"],
-    systems: ["ERP goods issue", "Invoice agent", "Customer email"],
+    systems: ["UiPath RPA · goods-issue event", "Microsoft Copilot Studio · Invoice Dispatch Agent", "LangChain · invoice trigger orchestration"],
   },
 ];
 
@@ -986,7 +988,34 @@ function NextSection({ onNavigate }: { onNavigate: (id: SectionId) => void }) {
 function AppShell() {
   const [section, setSection] = useState<SectionId>("intro");
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [isPresenting, setIsPresenting] = useState(false);
   const currentIndex = navItems.findIndex((item) => item.id === section);
+
+  useEffect(() => {
+    const syncFullscreenState = () => {
+      if (!document.fullscreenElement) setIsPresenting(false);
+    };
+    document.addEventListener("fullscreenchange", syncFullscreenState);
+    return () => document.removeEventListener("fullscreenchange", syncFullscreenState);
+  }, []);
+
+  const togglePresentation = async () => {
+    if (isPresenting) {
+      if (document.fullscreenElement) await document.exitFullscreen();
+      setIsPresenting(false);
+      return;
+    }
+
+    setMobileOpen(false);
+    setIsPresenting(true);
+    if (!document.fullscreenElement) {
+      try {
+        await document.documentElement.requestFullscreen();
+      } catch {
+        // Keep the distraction-free in-page presentation layout when native fullscreen is unavailable.
+      }
+    }
+  };
 
   const navigate = (id: SectionId) => {
     setSection(id);
@@ -1028,7 +1057,7 @@ function AppShell() {
   };
 
   return (
-    <div className="app-shell">
+    <div className={`app-shell ${isPresenting ? "presenting" : ""}`}>
       <div className="ambient ambient-one" />
       <div className="ambient ambient-two" />
       <header className="site-header">
@@ -1054,7 +1083,13 @@ function AppShell() {
             </button>
           ))}
         </nav>
-        <div className="header-status"><i />LIVE SYSTEMS</div>
+        <div className="header-actions">
+          <div className="header-status"><i />LIVE SYSTEMS</div>
+          <button type="button" className="presentation-button" onClick={togglePresentation} aria-pressed={isPresenting} title={isPresenting ? "Exit presentation mode" : "Enter full-screen presentation mode"}>
+            {isPresenting ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
+            <span>{isPresenting ? "Exit full screen" : "Present"}</span>
+          </button>
+        </div>
       </header>
 
       <main>
