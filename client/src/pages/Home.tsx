@@ -46,7 +46,14 @@ type ProcessStep = {
   copy: string;
   kind: StepKind;
   tags?: string[];
+  systems?: string[];
   branches?: { label: string; copy: string }[];
+};
+
+type Outcome = {
+  value: string;
+  label: string;
+  copy: string;
 };
 
 const navItems: { id: SectionId; label: string; kicker: string }[] = [
@@ -168,36 +175,42 @@ const briefToContract: ProcessStep[] = [
     copy: "The customer brief or enquiry arrives and enters the automated workflow.",
     kind: "agent",
     tags: ["Brief", "Enquiry"],
+    systems: ["Intake agent", "Email / enquiry channel"],
   },
   {
     title: "CRM updated by agent",
     copy: "The agent structures the brief and updates the CRM against the correct customer, contact and opportunity.",
     kind: "agent",
     tags: ["CRM", "No re-keying"],
+    systems: ["CRM update agent", "CRM system"],
   },
   {
     title: "Sender acknowledged",
     copy: "An acknowledgement email is sent immediately so the sender knows the request has entered the process.",
     kind: "agent",
     tags: ["Automated email"],
+    systems: ["Acknowledgement agent", "Email service"],
   },
   {
     title: "Feasibility calculated",
     copy: "The feasibility calculator agent checks whether the request can be delivered and emails the internal team with a feasible or decline recommendation.",
     kind: "decision",
     tags: ["Feasibility agent", "Internal email", "Feasible / decline"],
+    systems: ["Feasibility calculator agent", "Rules and operational data", "Internal email"],
   },
   {
     title: "Human approval",
     copy: "A named person reviews and approves the feasibility recommendation before the request progresses or is declined.",
     kind: "human",
     tags: ["Required checkpoint"],
+    systems: ["Approval workflow", "Named business approver"],
   },
   {
     title: "Library match",
     copy: "Once feasibility is approved, the agent searches the formulation library for an existing match.",
     kind: "decision",
     tags: ["Similarity search", "Cost data"],
+    systems: ["Library-match agent", "Formulation library", "System cost data", "Project creation workflow"],
     branches: [
       {
         label: "Match found",
@@ -211,24 +224,42 @@ const briefToContract: ProcessStep[] = [
   },
 ];
 
+const briefToContractManual: ProcessStep[] = [
+  { title: "Brief received", copy: "A person monitors the incoming channel, identifies the request and decides where it belongs.", kind: "human", tags: ["Inbox monitoring"] },
+  { title: "CRM entered manually", copy: "The brief is re-keyed into CRM and linked to the customer, contact and opportunity.", kind: "human", tags: ["Manual entry", "CRM"] },
+  { title: "Acknowledgement written", copy: "A person prepares and sends the receipt email to the customer.", kind: "human", tags: ["Manual email"] },
+  { title: "Feasibility checked", copy: "Internal teams gather the relevant information and assess whether the brief can be delivered.", kind: "human", tags: ["Multiple hand-offs"] },
+  { title: "Decision communicated", copy: "The feasible or decline decision is reviewed internally and communicated through email.", kind: "human", tags: ["Internal coordination"] },
+  { title: "Library searched", copy: "A person searches for a prior formulation, prepares the quote or creates a new perfumer project.", kind: "human", tags: ["Manual search", "Manual costing"] },
+];
+
+const briefOutcomes: Outcome[] = [
+  { value: "Shorter", label: "brief-to-decision cycle", copy: "CRM entry, acknowledgement, feasibility and matching start without waiting for separate manual hand-offs." },
+  { value: "Less", label: "administrative effort", copy: "Agents handle capture, updates, emails, repeatable checks and project creation." },
+  { value: "100%", label: "approval gates retained", copy: "People still approve feasibility and every matched formulation before a quote is shared." },
+];
+
 const orderToCash: ProcessStep[] = [
   {
     title: "PO received",
     copy: "The customer purchase order arrives by email or, in Colombia, Brazil and parts of the Middle East, through WhatsApp. Both channels enter the same workflow.",
     kind: "agent",
     tags: ["Email", "WhatsApp", "Regional channels"],
+    systems: ["Order intake agent", "Email", "WhatsApp"],
   },
   {
     title: "Order acknowledged",
     copy: "An order acknowledgement is sent immediately before the remaining processing continues.",
     kind: "agent",
     tags: ["Customer response"],
+    systems: ["Acknowledgement agent", "Email / messaging service"],
   },
   {
     title: "OCR matches PO to quote",
     copy: "The OCR agent reads the purchase order, extracts the order detail and matches it against the approved quote in CRM.",
     kind: "decision",
     tags: ["OCR", "Quote match"],
+    systems: ["OCR agent", "CRM quote", "Customer Service audit workflow"],
     branches: [
       { label: "Discrepancy", copy: "An audit is triggered to the Customer Service team. The issue must be resolved before order creation." },
       { label: "No discrepancy", copy: "The order creation agent starts automatically." },
@@ -239,6 +270,7 @@ const orderToCash: ProcessStep[] = [
     copy: "The order creation agent creates the sales order and runs the credit check automatically.",
     kind: "decision",
     tags: ["Order agent", "Credit control"],
+    systems: ["Order creation agent", "ERP order management", "Credit-check service", "Finance workflow"],
     branches: [
       { label: "Credit fails", copy: "A workflow is triggered to Finance and the account manager for a human decision." },
       { label: "Credit passes", copy: "The flow moves directly into the automated mini-MRP run." },
@@ -249,6 +281,7 @@ const orderToCash: ProcessStep[] = [
     copy: "The agent checks raw-material stock, including safety stock, then uses factory capacity to determine the delivery date.",
     kind: "decision",
     tags: ["Raw materials", "Safety stock", "Factory capacity"],
+    systems: ["Mini-MRP agent", "Inventory and safety stock", "Open purchase orders", "Vendor lead times", "Factory capacity"],
     branches: [
       { label: "RM shortage", copy: "A buying request is triggered. The customer is updated using open purchase orders or the vendor’s known lead time." },
       { label: "Materials clear", copy: "Capacity provides the delivery date and the order confirmation is sent to the customer." },
@@ -259,37 +292,64 @@ const orderToCash: ProcessStep[] = [
     copy: "The agent creates the production order, then decides whether a solution or base is required. It checks existing stock or explodes the bill of materials to produce it, and routes the work against available factory capacity.",
     kind: "decision",
     tags: ["Production order", "Solution / base", "BOM explosion", "Factory allocation"],
+    systems: ["Production-planning agent", "BOM engine", "Solution / base inventory", "Factory-capacity data"],
   },
   {
     title: "Released to shop floor",
     copy: "Once the production route is clear, the agent releases the order to the selected factory shop floor.",
     kind: "agent",
     tags: ["Factory release"],
+    systems: ["ERP production order", "Factory shop-floor system"],
   },
   {
     title: "Production tracked live",
     copy: "The production agent updates each movement from the dosing bot through finished production and packing. The customer portal is updated throughout.",
     kind: "agent",
     tags: ["Dosing bot", "Finished", "Packing", "Customer portal"],
+    systems: ["Production agent", "Dosing bot", "Manufacturing status events", "Customer portal"],
   },
   {
     title: "QC notified & updated",
     copy: "Production-complete status notifies Quality. QC performs its control and the QC system records the updated status before shipping continues.",
     kind: "human",
     tags: ["Production complete", "QC control", "System update"],
+    systems: ["Production-complete event", "QC system", "Quality team"],
   },
   {
     title: "Shipping & delivery tracked",
     copy: "Shipping status and delivery movement are tracked, while the agent generates shipping, customs and supporting documents automatically.",
     kind: "agent",
     tags: ["Delivery movement", "Shipping documents", "Customs"],
+    systems: ["Shipping agent", "Logistics tracking", "Document-generation agent", "Customs data"],
   },
   {
     title: "Goods issue → invoice",
     copy: "As soon as goods issue is posted, the invoice is generated and sent automatically.",
     kind: "agent",
     tags: ["Goods issue", "Invoice"],
+    systems: ["ERP goods issue", "Invoice agent", "Customer email"],
   },
+];
+
+const orderToCashManual: ProcessStep[] = [
+  { title: "PO monitored", copy: "People monitor email and regional WhatsApp channels, then identify and route each order.", kind: "human", tags: ["Email", "WhatsApp"] },
+  { title: "Order re-keyed", copy: "PO lines are read and entered into the order system by hand.", kind: "human", tags: ["Manual entry"] },
+  { title: "Quote checked", copy: "The PO is compared with the CRM quote and discrepancies are passed to Customer Service.", kind: "human", tags: ["CRM comparison"] },
+  { title: "Credit coordinated", copy: "Credit results, Finance involvement and account-manager decisions are coordinated manually.", kind: "human", tags: ["Finance hand-off"] },
+  { title: "Materials planned", copy: "Teams check raw materials, safety stock, purchase orders, supplier lead times and factory capacity.", kind: "human", tags: ["Planning hand-offs"] },
+  { title: "Production planned", copy: "Planners decide the solution or base route, expand the BOM and select the factory.", kind: "human", tags: ["BOM", "Capacity"] },
+  { title: "Factory updated", copy: "Production orders are released and status is chased across dosing, finishing and packing.", kind: "human", tags: ["Shop-floor follow-up"] },
+  { title: "Customer updated", copy: "Order progress is gathered and communicated to the customer through separate status updates.", kind: "human", tags: ["Status chasing"] },
+  { title: "QC coordinated", copy: "Production completion is passed to Quality and the result is checked before shipping.", kind: "human", tags: ["Quality hand-off"] },
+  { title: "Shipping prepared", copy: "Tracking, shipping paperwork and customs documentation are assembled manually.", kind: "human", tags: ["Documents", "Customs"] },
+  { title: "Invoice triggered", copy: "Goods issue is checked and the invoice is prepared and sent as a separate activity.", kind: "human", tags: ["Manual invoice step"] },
+];
+
+const orderOutcomes: Outcome[] = [
+  { value: "Faster", label: "order-to-confirm cycle", copy: "OCR, quote matching, order creation, credit and mini-MRP run as one connected sequence." },
+  { value: "Live", label: "customer order visibility", copy: "Production movements update the customer portal instead of depending on manual status chasing." },
+  { value: "Touchless", label: "goods-issue to invoice", copy: "The posted goods issue triggers invoice generation and delivery automatically." },
+  { value: "Stronger", label: "exception control", copy: "PO discrepancies, failed credit checks and QC remain visible, routed exceptions rather than hidden automation." },
 ];
 
 function KindIcon({ kind }: { kind: StepKind }) {
@@ -546,40 +606,54 @@ function TechSection() {
 
 function ProcessFlow({
   steps,
+  manualSteps,
   eyebrow,
   title,
   intro,
   before,
   today,
   checkpoints,
+  outcomes,
 }: {
   steps: ProcessStep[];
+  manualSteps: ProcessStep[];
   eyebrow: string;
   title: string;
   intro: string;
   before: string;
   today: string;
   checkpoints: string[];
+  outcomes: Outcome[];
 }) {
   const [active, setActive] = useState(0);
   const [running, setRunning] = useState(false);
+  const [view, setView] = useState<"manual" | "automated">("automated");
   const railRef = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
+  const displayedSteps = view === "automated" ? steps : manualSteps;
 
   useEffect(() => {
     if (!running) return;
-    if (active >= steps.length - 1) {
+    if (active >= displayedSteps.length - 1) {
       setRunning(false);
       return;
     }
     const timer = window.setTimeout(() => setActive((current) => current + 1), 1750);
     return () => window.clearTimeout(timer);
-  }, [active, running, steps.length]);
+  }, [active, running, displayedSteps.length]);
 
   useEffect(() => {
     const node = railRef.current?.querySelector(`[data-node="${active}"]`);
     node?.scrollIntoView({ behavior: reduced ? "auto" : "smooth", inline: "center", block: "nearest" });
   }, [active, reduced]);
+
+  const changeView = (nextView: "manual" | "automated") => {
+    if (nextView === view) return;
+    setRunning(false);
+    setActive(0);
+    setView(nextView);
+    if (railRef.current) railRef.current.scrollLeft = 0;
+  };
 
   const run = () => {
     if (running) {
@@ -590,77 +664,117 @@ function ProcessFlow({
     window.setTimeout(() => setRunning(true), 120);
   };
 
-  const current = steps[active];
+  const current = displayedSteps[active];
   return (
     <SectionFrame eyebrow={eyebrow} title={title} intro={intro}>
-      <div className="transformation-compare">
-        <div className="compare-card before">
-          <div className="compare-label"><span>Before transformation</span><b>MANUAL</b></div>
-          <p>{before}</p>
+      <div className="process-view-control">
+        <div className="view-toggle" role="group" aria-label="Process view">
+          <button type="button" className={view === "manual" ? "active" : ""} onClick={() => changeView("manual")} aria-pressed={view === "manual"}>
+            <span>Before transformation</span><small>Manual</small>
+            {view === "manual" && <motion.i layoutId={`view-toggle-${title}`} transition={{ duration: .38, ease: [0.23, 1, 0.32, 1] }} />}
+          </button>
+          <button type="button" className={view === "automated" ? "active" : ""} onClick={() => changeView("automated")} aria-pressed={view === "automated"}>
+            <span>Today at CPL</span><small>Automated</small>
+            {view === "automated" && <motion.i layoutId={`view-toggle-${title}`} transition={{ duration: .38, ease: [0.23, 1, 0.32, 1] }} />}
+          </button>
         </div>
-        <div className="compare-arrow"><ArrowUpRight size={20} /></div>
-        <div className="compare-card today">
-          <div className="compare-label"><span>Today at CPL</span><b>AUTOMATED</b></div>
-          <p>{today}</p>
-        </div>
+        <AnimatePresence mode="wait">
+          <motion.div
+            className={`view-summary ${view}`}
+            key={view}
+            initial={{ opacity: 0, x: view === "automated" ? 12 : -12 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: view === "automated" ? -12 : 12 }}
+            transition={{ duration: .28 }}
+          >
+            <span>{view === "automated" ? "LIVE AT CPL" : "PRE-TRANSFORMATION"}</span>
+            <p>{view === "automated" ? today : before}</p>
+          </motion.div>
+        </AnimatePresence>
       </div>
       <div className="flow-toolbar">
         <div className="legend">
-          <span><i className="agent" />Agent action</span>
-          <span><i className="decision" />Decision</span>
-          <span><i className="human" />Human control</span>
+          {view === "automated" ? (
+            <>
+              <span><i className="agent" />Agent action</span>
+              <span><i className="decision" />Decision</span>
+              <span><i className="human" />Human control</span>
+              <span className="hover-cue"><Network size={12} />Hover a step for systems</span>
+            </>
+          ) : (
+            <>
+              <span><i className="human" />Manual task</span>
+              <span><i className="handoff" />Human hand-off</span>
+            </>
+          )}
         </div>
         <button className="run-button" type="button" onClick={run}>
           {running ? <Pause size={15} /> : <Play size={15} fill="currentColor" />}
-          {running ? "Pause flow" : "Run the flow"}
+          {running ? "Pause flow" : view === "automated" ? "Run automated flow" : "Walk manual flow"}
         </button>
       </div>
 
-      <div className="flow-shell">
-        <div className="flow-rail" ref={railRef}>
-          {steps.map((step, index) => (
-            <div className="flow-unit" key={step.title}>
-              <motion.button
-                type="button"
-                data-node={index}
-                className={`flow-node ${step.kind} ${active === index ? "active" : ""} ${active > index ? "passed" : ""}`}
-                onClick={() => { setRunning(false); setActive(index); }}
-                whileTap={{ scale: 0.98 }}
-                aria-pressed={active === index}
-              >
-                <span className="node-top"><b>{String(index + 1).padStart(2, "0")}</b><KindIcon kind={step.kind} /></span>
-                <strong>{step.title}</strong>
-                <small>{step.kind === "human" ? "Human checkpoint" : step.kind === "decision" ? "Decision gate" : "Autonomous action"}</small>
-                {active === index && <motion.i layoutId={`node-glow-${title}`} className="node-glow" />}
-              </motion.button>
-              {index < steps.length - 1 && (
-                <div className={`flow-connector ${active > index ? "passed" : ""}`}>
-                  <div className="connector-track" />
-                  <motion.div
-                    className="connector-energy"
-                    initial={false}
-                    animate={{ scaleX: active > index ? 1 : 0 }}
-                    transition={{ duration: 0.42, ease: [0.23, 1, 0.32, 1] }}
-                  />
-                  <span className="connector-arrow">›</span>
-                  {running && active === index && (
-                    <motion.span
-                      className="signal-dot"
-                      initial={{ x: 0, opacity: 0 }}
-                      animate={{ x: 56, opacity: [0, 1, 1, 0] }}
-                      transition={{ duration: 1.45, repeat: Infinity, ease: "linear" }}
-                    />
+      <div className={`flow-shell ${view}`}>
+        <AnimatePresence mode="wait">
+          <motion.div
+            className="flow-rail"
+            ref={railRef}
+            key={view}
+            initial={{ opacity: 0, x: view === "automated" ? 30 : -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: view === "automated" ? -30 : 30 }}
+            transition={{ duration: .38, ease: [0.23, 1, 0.32, 1] }}
+          >
+            {displayedSteps.map((step, index) => (
+              <div className="flow-unit" key={`${view}-${step.title}`}>
+                <motion.button
+                  type="button"
+                  data-node={index}
+                  className={`flow-node ${step.kind} ${active === index ? "active" : ""} ${active > index ? "passed" : ""}`}
+                  onClick={() => { setRunning(false); setActive(index); }}
+                  whileTap={{ scale: 0.98 }}
+                  aria-pressed={active === index}
+                >
+                  <span className="node-top"><b>{String(index + 1).padStart(2, "0")}</b><KindIcon kind={step.kind} /></span>
+                  <strong>{step.title}</strong>
+                  <small>{view === "manual" ? "Manual task" : step.kind === "human" ? "Human checkpoint" : step.kind === "decision" ? "Decision gate" : "Autonomous action"}</small>
+                  {view === "automated" && step.systems && (
+                    <span className="system-hover">
+                      <span><Network size={13} />Systems & agents</span>
+                      {step.systems.map((system) => <b key={system}>{system}</b>)}
+                    </span>
                   )}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
+                  {active === index && <motion.i layoutId={`node-glow-${title}-${view}`} className="node-glow" />}
+                </motion.button>
+                {index < displayedSteps.length - 1 && (
+                  <div className={`flow-connector ${active > index ? "passed" : ""}`}>
+                    <div className="connector-track" />
+                    <motion.div
+                      className="connector-energy"
+                      initial={false}
+                      animate={{ scaleX: active > index ? 1 : 0 }}
+                      transition={{ duration: 0.42, ease: [0.23, 1, 0.32, 1] }}
+                    />
+                    <span className="connector-arrow">›</span>
+                    {running && active === index && (
+                      <motion.span
+                        className="signal-dot"
+                        initial={{ x: 0, opacity: 0 }}
+                        animate={{ x: 56, opacity: [0, 1, 1, 0] }}
+                        transition={{ duration: 1.45, repeat: Infinity, ease: "linear" }}
+                      />
+                    )}
+                  </div>
+                )}
+              </div>
+            ))}
+          </motion.div>
+        </AnimatePresence>
 
         <AnimatePresence mode="wait">
           <motion.div
             className={`flow-detail ${current.kind}`}
-            key={`${title}-${active}`}
+            key={`${title}-${view}-${active}`}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
@@ -668,12 +782,18 @@ function ProcessFlow({
           >
             <div className="detail-number">{String(active + 1).padStart(2, "0")}</div>
             <div className="detail-main">
-              <div className="detail-kind"><KindIcon kind={current.kind} /> {current.kind === "human" ? "Human control" : current.kind === "decision" ? "Decision gate" : "Agent action"}</div>
+              <div className="detail-kind"><KindIcon kind={current.kind} /> {view === "manual" ? "Manual task" : current.kind === "human" ? "Human control" : current.kind === "decision" ? "Decision gate" : "Agent action"}</div>
               <h3>{current.title}</h3>
               <p>{current.copy}</p>
               {current.tags && <div className="tag-row">{current.tags.map((tag) => <span key={tag}>{tag}</span>)}</div>}
+              {view === "automated" && current.systems && (
+                <div className="system-detail">
+                  <span><Network size={14} />Systems & agents in this step</span>
+                  <div>{current.systems.map((system) => <b key={system}>{system}</b>)}</div>
+                </div>
+              )}
             </div>
-            {current.branches && (
+            {view === "automated" && current.branches && (
               <div className="branch-grid">
                 {current.branches.map((branch, index) => (
                   <motion.div
@@ -698,6 +818,23 @@ function ProcessFlow({
         <div className="checkpoint-title"><ShieldCheck size={19} /><span>Controls that do not move</span></div>
         <div className="checkpoint-items">
           {checkpoints.map((item) => <div key={item}><Check size={14} />{item}</div>)}
+        </div>
+      </div>
+
+      <div className="outcomes-panel">
+        <div className="outcomes-heading">
+          <div><span className="overline">Outcome of the transformation</span><h2>What changes in operation.</h2></div>
+          <p>Directional outcomes from the implemented design. Use the Impact tab to model quantified cycle-time and capacity gains with CPL or Euroma operating data.</p>
+        </div>
+        <div className="outcome-grid">
+          {outcomes.map((outcome, index) => (
+            <motion.article key={outcome.label} className="outcome-card" whileHover={{ y: -4 }}>
+              <span>0{index + 1}</span>
+              <strong>{outcome.value}</strong>
+              <h3>{outcome.label}</h3>
+              <p>{outcome.copy}</p>
+            </motion.article>
+          ))}
         </div>
       </div>
     </SectionFrame>
@@ -863,23 +1000,27 @@ function AppShell() {
     if (section === "b2c") return (
       <ProcessFlow
         steps={briefToContract}
+        manualSteps={briefToContractManual}
         eyebrow="Implemented at CPL Aromas"
         title="Brief to contract: before and today."
         intro="The manual process is the pre-transformation baseline. The interactive flow below is what runs at CPL today. Click any node or play the complete automated journey."
         before="Teams received the brief, entered it into CRM, acknowledged the sender, checked feasibility, searched the library and prepared the next action through separate manual hand-offs."
         today="Agents carry the brief from intake through CRM, acknowledgement, feasibility and library matching, while people retain approval over feasibility, matched formulations and customer quotes."
         checkpoints={["Human approval before feasible or decline", "Human approval of a library match before formulation details and quote are shared"]}
+        outcomes={briefOutcomes}
       />
     );
     if (section === "o2c") return (
       <ProcessFlow
         steps={orderToCash}
+        manualSteps={orderToCashManual}
         eyebrow="Implemented at CPL Aromas"
         title="Order to cash: before and today."
         intro="The manual process is the pre-transformation baseline. The interactive flow below shows the connected automation running at CPL today, from incoming PO to invoice."
         before="People moved the order between inboxes, CRM, order entry, credit, planning, procurement, factories, quality, shipping and invoicing, repeatedly checking status and re-entering information."
         today="Agents read and reconcile the PO, create and check the order, plan materials and capacity, create production, update the customer portal, coordinate quality and shipping, and trigger the invoice at goods issue."
         checkpoints={["PO discrepancies go to Customer Service for audit", "Credit failures go to Finance and the account manager", "Quality control is completed before shipping progresses"]}
+        outcomes={orderOutcomes}
       />
     );
     if (section === "impact") return <ImpactSection />;
