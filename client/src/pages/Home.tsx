@@ -164,48 +164,48 @@ const technology = [
 
 const briefToContract: ProcessStep[] = [
   {
-    title: "Brief arrives",
-    copy: "The agent captures the enquiry at source and logs it without manual re-keying.",
+    title: "Brief / enquiry arrives",
+    copy: "The customer brief or enquiry arrives and enters the automated workflow.",
     kind: "agent",
-    tags: ["Email", "Portal", "CRM"],
+    tags: ["Brief", "Enquiry"],
   },
   {
-    title: "CRM structured",
-    copy: "The brief is classified, structured and attached to the right account and contact.",
+    title: "CRM updated by agent",
+    copy: "The agent structures the brief and updates the CRM against the correct customer, contact and opportunity.",
     kind: "agent",
-    tags: ["Agent"],
+    tags: ["CRM", "No re-keying"],
   },
   {
-    title: "Receipt confirmed",
-    copy: "The customer gets an immediate acknowledgement while the work continues behind it.",
+    title: "Sender acknowledged",
+    copy: "An acknowledgement email is sent immediately so the sender knows the request has entered the process.",
     kind: "agent",
-    tags: ["Customer response"],
+    tags: ["Automated email"],
   },
   {
-    title: "Feasibility tested",
-    copy: "The brief is checked against what can actually be made and delivered.",
+    title: "Feasibility calculated",
+    copy: "The feasibility calculator agent checks whether the request can be delivered and emails the internal team with a feasible or decline recommendation.",
     kind: "decision",
-    tags: ["Rules", "Capacity", "Compliance"],
+    tags: ["Feasibility agent", "Internal email", "Feasible / decline"],
   },
   {
-    title: "Human sign-off",
-    copy: "A named person confirms the feasibility decision before the flow can progress or decline the work.",
+    title: "Human approval",
+    copy: "A named person reviews and approves the feasibility recommendation before the request progresses or is declined.",
     kind: "human",
     tags: ["Required checkpoint"],
   },
   {
-    title: "Library matched",
-    copy: "The agent searches the existing formulation library before starting original work.",
+    title: "Library match",
+    copy: "Once feasibility is approved, the agent searches the formulation library for an existing match.",
     kind: "decision",
     tags: ["Similarity search", "Cost data"],
     branches: [
       {
         label: "Match found",
-        copy: "A person approves the match. The agent then sends a system-priced quote.",
+        copy: "A person approves the match. The formulation details and a quote based on system cost are shared with the sender.",
       },
       {
         label: "No match",
-        copy: "A new project is created and routed to the perfumer team.",
+        copy: "A new project is created and routed to the perfumer team to pick up and begin original work.",
       },
     ],
   },
@@ -214,77 +214,79 @@ const briefToContract: ProcessStep[] = [
 const orderToCash: ProcessStep[] = [
   {
     title: "PO received",
-    copy: "Email or WhatsApp enters the same controlled flow.",
+    copy: "The customer purchase order arrives by email or, in Colombia, Brazil and parts of the Middle East, through WhatsApp. Both channels enter the same workflow.",
     kind: "agent",
-    tags: ["Email", "WhatsApp"],
+    tags: ["Email", "WhatsApp", "Regional channels"],
   },
   {
-    title: "Receipt confirmed",
-    copy: "The customer knows the purchase order landed before processing begins.",
+    title: "Order acknowledged",
+    copy: "An order acknowledgement is sent immediately before the remaining processing continues.",
     kind: "agent",
+    tags: ["Customer response"],
   },
   {
-    title: "PO reconciled",
-    copy: "OCR extracts the order and checks it against the approved CRM quote.",
+    title: "OCR matches PO to quote",
+    copy: "The OCR agent reads the purchase order, extracts the order detail and matches it against the approved quote in CRM.",
     kind: "decision",
     tags: ["OCR", "Quote match"],
     branches: [
-      { label: "Mismatch", copy: "Customer Service audits and resolves it before order creation." },
-      { label: "Match", copy: "Order creation continues automatically." },
+      { label: "Discrepancy", copy: "An audit is triggered to the Customer Service team. The issue must be resolved before order creation." },
+      { label: "No discrepancy", copy: "The order creation agent starts automatically." },
     ],
   },
   {
-    title: "Credit checked",
-    copy: "The order is created and the credit check runs in the same motion.",
+    title: "Order created & credit checked",
+    copy: "The order creation agent creates the sales order and runs the credit check automatically.",
     kind: "decision",
-    tags: ["Finance control"],
+    tags: ["Order agent", "Credit control"],
     branches: [
-      { label: "Fail", copy: "Finance and the account manager decide how to proceed." },
-      { label: "Pass", copy: "The flow moves straight into material planning." },
+      { label: "Credit fails", copy: "A workflow is triggered to Finance and the account manager for a human decision." },
+      { label: "Credit passes", copy: "The flow moves directly into the automated mini-MRP run." },
     ],
   },
   {
     title: "Mini-MRP run",
-    copy: "Raw materials, safety stock and factory capacity are checked to establish a delivery date.",
+    copy: "The agent checks raw-material stock, including safety stock, then uses factory capacity to determine the delivery date.",
     kind: "decision",
-    tags: ["Materials", "Capacity"],
+    tags: ["Raw materials", "Safety stock", "Factory capacity"],
     branches: [
-      { label: "Short", copy: "A buying request is raised and the customer is updated against supplier lead time." },
-      { label: "Clear", copy: "The delivery date is confirmed automatically." },
+      { label: "RM shortage", copy: "A buying request is triggered. The customer is updated using open purchase orders or the vendor’s known lead time." },
+      { label: "Materials clear", copy: "Capacity provides the delivery date and the order confirmation is sent to the customer." },
     ],
   },
   {
-    title: "Production raised",
-    copy: "The agent checks solution or base stock, explodes the bill of materials where needed, and selects available factory capacity.",
-    kind: "agent",
-    tags: ["BOM", "Factory allocation"],
+    title: "Production order routed",
+    copy: "The agent creates the production order, then decides whether a solution or base is required. It checks existing stock or explodes the bill of materials to produce it, and routes the work against available factory capacity.",
+    kind: "decision",
+    tags: ["Production order", "Solution / base", "BOM explosion", "Factory allocation"],
   },
   {
-    title: "Factory released",
-    copy: "Production starts and the customer portal begins updating in real time.",
+    title: "Released to shop floor",
+    copy: "Once the production route is clear, the agent releases the order to the selected factory shop floor.",
     kind: "agent",
+    tags: ["Factory release"],
   },
   {
-    title: "Production tracked",
-    copy: "Dosing, finishing and packing movements are posted as they happen.",
+    title: "Production tracked live",
+    copy: "The production agent updates each movement from the dosing bot through finished production and packing. The customer portal is updated throughout.",
     kind: "agent",
-    tags: ["Live status"],
+    tags: ["Dosing bot", "Finished", "Packing", "Customer portal"],
   },
   {
-    title: "QC released",
-    copy: "Quality receives the completion signal and records the result. Shipping cannot proceed without sign-off.",
+    title: "QC notified & updated",
+    copy: "Production-complete status notifies Quality. QC performs its control and the QC system records the updated status before shipping continues.",
     kind: "human",
-    tags: ["Required checkpoint"],
+    tags: ["Production complete", "QC control", "System update"],
   },
   {
-    title: "Shipping prepared",
-    copy: "Tracking and shipping paperwork, including customs documents, are generated automatically.",
+    title: "Shipping & delivery tracked",
+    copy: "Shipping status and delivery movement are tracked, while the agent generates shipping, customs and supporting documents automatically.",
     kind: "agent",
-    tags: ["Customs", "Tracking"],
+    tags: ["Delivery movement", "Shipping documents", "Customs"],
   },
   {
-    title: "Invoice sent",
-    copy: "Goods issue triggers the invoice immediately. There is no separate manual invoicing step.",
+    title: "Goods issue → invoice",
+    copy: "As soon as goods issue is posted, the invoice is generated and sent automatically.",
     kind: "agent",
     tags: ["Goods issue", "Invoice"],
   },
@@ -547,12 +549,16 @@ function ProcessFlow({
   eyebrow,
   title,
   intro,
+  before,
+  today,
   checkpoints,
 }: {
   steps: ProcessStep[];
   eyebrow: string;
   title: string;
   intro: string;
+  before: string;
+  today: string;
   checkpoints: string[];
 }) {
   const [active, setActive] = useState(0);
@@ -587,6 +593,17 @@ function ProcessFlow({
   const current = steps[active];
   return (
     <SectionFrame eyebrow={eyebrow} title={title} intro={intro}>
+      <div className="transformation-compare">
+        <div className="compare-card before">
+          <div className="compare-label"><span>Before transformation</span><b>MANUAL</b></div>
+          <p>{before}</p>
+        </div>
+        <div className="compare-arrow"><ArrowUpRight size={20} /></div>
+        <div className="compare-card today">
+          <div className="compare-label"><span>Today at CPL</span><b>AUTOMATED</b></div>
+          <p>{today}</p>
+        </div>
+      </div>
       <div className="flow-toolbar">
         <div className="legend">
           <span><i className="agent" />Agent action</span>
@@ -846,19 +863,23 @@ function AppShell() {
     if (section === "b2c") return (
       <ProcessFlow
         steps={briefToContract}
-        eyebrow="Live at CPL Aromas"
-        title="Brief to contract, without the dead time."
-        intro="Six controlled steps from incoming brief to matched formulation or new creative project. Click any node, or run the whole flow."
-        checkpoints={["Feasibility requires named approval", "Library match requires human confirmation before quote"]}
+        eyebrow="Implemented at CPL Aromas"
+        title="Brief to contract: before and today."
+        intro="The manual process is the pre-transformation baseline. The interactive flow below is what runs at CPL today. Click any node or play the complete automated journey."
+        before="Teams received the brief, entered it into CRM, acknowledged the sender, checked feasibility, searched the library and prepared the next action through separate manual hand-offs."
+        today="Agents carry the brief from intake through CRM, acknowledgement, feasibility and library matching, while people retain approval over feasibility, matched formulations and customer quotes."
+        checkpoints={["Human approval before feasible or decline", "Human approval of a library match before formulation details and quote are shared"]}
       />
     );
     if (section === "o2c") return (
       <ProcessFlow
         steps={orderToCash}
-        eyebrow="Live at CPL Aromas"
-        title="Order to cash, connected end to end."
-        intro="Eleven steps from purchase order to invoice. The agent carries context across commercial, planning, factory, quality and logistics systems."
-        checkpoints={["PO mismatches go to Customer Service", "Credit failures go to Finance", "Shipping waits for human QC release"]}
+        eyebrow="Implemented at CPL Aromas"
+        title="Order to cash: before and today."
+        intro="The manual process is the pre-transformation baseline. The interactive flow below shows the connected automation running at CPL today, from incoming PO to invoice."
+        before="People moved the order between inboxes, CRM, order entry, credit, planning, procurement, factories, quality, shipping and invoicing, repeatedly checking status and re-entering information."
+        today="Agents read and reconcile the PO, create and check the order, plan materials and capacity, create production, update the customer portal, coordinate quality and shipping, and trigger the invoice at goods issue."
+        checkpoints={["PO discrepancies go to Customer Service for audit", "Credit failures go to Finance and the account manager", "Quality control is completed before shipping progresses"]}
       />
     );
     if (section === "impact") return <ImpactSection />;
