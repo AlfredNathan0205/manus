@@ -419,11 +419,40 @@ const orderTwinEvents: TwinEvent[] = [
   { title: "Invoice dispatched", system: "Invoice Dispatch Agent · goods issue", copy: "Goods issue triggers invoice generation and customer delivery.", customer: "Shipped and invoiced", minutes: 20 },
 ];
 
+const discrepancyResolutions = [
+  {
+    id: "correct",
+    title: "Correct PO to contracted quote",
+    owner: "Customer Service · Colombia",
+    detail: "Apply £27.00/kg from CRM quote Q-78142 and preserve the agreed commercial position.",
+    impact: "£45.60 variance removed",
+    recommended: true,
+  },
+  {
+    id: "accept",
+    title: "Accept the PO price",
+    owner: "Account manager approval",
+    detail: "Accept £27.76/kg, document the commercial exception and retain the higher order value.",
+    impact: "+£45.60 order value",
+    recommended: false,
+  },
+  {
+    id: "return",
+    title: "Request a revised PO",
+    owner: "Customer action required",
+    detail: "Keep order creation blocked and send the evidence packet. The demonstration resumes after simulating receipt of the revised PO.",
+    impact: "Promise date held",
+    recommended: false,
+  },
+] as const;
+
 function OrderDigitalTwin({ lens }: { lens: ExecutiveLens }) {
   const [scenario, setScenario] = useState<"straight" | "exception">("exception");
   const [active, setActive] = useState(-1);
   const [running, setRunning] = useState(false);
+  const [resolution, setResolution] = useState<(typeof discrepancyResolutions)[number]["id"]>("correct");
   const reduced = useReducedMotion();
+  const selectedResolution = discrepancyResolutions.find((item) => item.id === resolution)!;
 
   const events = useMemo<TwinEvent[]>(() => {
     if (scenario === "straight") return orderTwinEvents;
@@ -440,14 +469,14 @@ function OrderDigitalTwin({ lens }: { lens: ExecutiveLens }) {
       {
         title: "Human resolution recorded",
         system: "CPL Customer Service · human control",
-        copy: "Customer Service confirms the agreed price and releases the corrected order with a named decision in the audit trail.",
+        copy: `Customer Service records “${selectedResolution.title}” and releases the transaction with a named decision in the audit trail.`,
         customer: "Exception resolved",
         minutes: 5,
         human: true,
       },
       ...orderTwinEvents.slice(3).map((event) => ({ ...event, minutes: event.minutes + 3 })),
     ];
-  }, [scenario]);
+  }, [scenario, selectedResolution.title]);
 
   useEffect(() => {
     if (!running || active < 0) return;
@@ -466,6 +495,7 @@ function OrderDigitalTwin({ lens }: { lens: ExecutiveLens }) {
   const changeScenario = (next: "straight" | "exception") => {
     setRunning(false);
     setActive(-1);
+    setResolution("correct");
     setScenario(next);
   };
 
@@ -486,6 +516,8 @@ function OrderDigitalTwin({ lens }: { lens: ExecutiveLens }) {
   const current = active >= 0 ? events[active] : null;
   const completed = active >= events.length - 1;
   const progress = active < 0 ? 0 : ((active + 1) / events.length) * 100;
+  const exceptionVisible = scenario === "exception" && active >= 3;
+  const exceptionResolved = scenario === "exception" && active >= 4;
 
   return (
     <div className={`digital-twin ${current?.exception ? "exception-active" : ""}`}>
@@ -500,9 +532,9 @@ function OrderDigitalTwin({ lens }: { lens: ExecutiveLens }) {
             <button type="button" className={scenario === "straight" ? "active" : ""} onClick={() => changeScenario("straight")}>Straight through</button>
             <button type="button" className={scenario === "exception" ? "active" : ""} onClick={() => changeScenario("exception")}><AlertTriangle size={13} />Inject discrepancy</button>
           </div>
-          <button type="button" className="run-button twin-run" onClick={run}>
-            {running ? <Pause size={15} /> : completed ? <RefreshCw size={15} /> : <Play size={15} fill="currentColor" />}
-            {running ? "Pause order" : completed ? "Replay order" : "Run live order"}
+          <button type="button" className="run-button twin-run" onClick={run} disabled={!!current?.exception}>
+            {current?.exception ? <LockKeyhole size={15} /> : running ? <Pause size={15} /> : completed ? <RefreshCw size={15} /> : <Play size={15} fill="currentColor" />}
+            {current?.exception ? "Awaiting human" : running ? "Pause order" : completed ? "Replay order" : "Run live order"}
           </button>
         </div>
       </div>
@@ -549,8 +581,8 @@ function OrderDigitalTwin({ lens }: { lens: ExecutiveLens }) {
               <h3>{current?.title ?? "Run the order from intake to invoice."}</h3>
               <p>{current?.copy ?? "Choose the straight-through route or inject a discrepancy to demonstrate human-in-the-loop control."}</p>
               {current?.exception && (
-                <button type="button" className="twin-approval" onClick={approveException}>
-                  <UserCheck size={15} />Approve correction & continue
+                <button type="button" className="twin-approval" onClick={() => document.querySelector(".exception-protocol")?.scrollIntoView({ behavior: "smooth", block: "center" })}>
+                  <AlertTriangle size={15} />Review exception protocol
                 </button>
               )}
             </motion.div>
@@ -562,6 +594,82 @@ function OrderDigitalTwin({ lens }: { lens: ExecutiveLens }) {
           </div>
           <p className="twin-disclaimer"><CircleDot size={12} />Illustrative transaction trace for the meeting—not a measured Euroma cycle-time claim.</p>
         </div>
+
+        <AnimatePresence>
+          {exceptionVisible && (
+            <motion.div
+              className={`exception-protocol ${exceptionResolved ? "resolved" : ""}`}
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: .38, ease: [0.23, 1, 0.32, 1] }}
+            >
+              <div className="exception-header">
+                <div>
+                  <span><AlertTriangle size={14} />EXCEPTION / EX-24091</span>
+                  <h3>{exceptionResolved ? "Decision recorded. Control released." : "Commercial price variance requires a person."}</h3>
+                </div>
+                <div className="exception-owner">
+                  <span>Assigned owner</span><strong>Customer Service · Colombia</strong><b>{exceptionResolved ? "RESOLVED · T+05 MIN" : "SLA · 15 MIN"}</b>
+                </div>
+              </div>
+
+              <div className="evidence-grid">
+                <div className="evidence-card">
+                  <span>01 · Source evidence</span>
+                  <div><small>CRM QUOTE · Q-78142</small><strong>Amber Solution 12</strong><p><b>60 KG</b><em>£27.00 / KG</em></p></div>
+                  <div className="evidence-po"><small>CUSTOMER PO · CO-78431</small><strong>Amber Solution 12</strong><p><b>60 KG</b><em>£27.76 / KG</em></p></div>
+                </div>
+                <div className="exposure-card">
+                  <span>02 · Financial exposure</span>
+                  <strong>+2.8%</strong>
+                  <p>Unit variance <b>+£0.76/kg</b></p>
+                  <p>Order-line exposure <b>£45.60</b></p>
+                  <p>Downstream posting <b>blocked</b></p>
+                </div>
+                <div className="containment-card">
+                  <span>03 · Automatic containment</span>
+                  <div><LockKeyhole size={16} /><p><strong>Order creation frozen</strong><small>No ERP posting or credit consumption.</small></p></div>
+                  <div><ShieldCheck size={16} /><p><strong>Promise protected</strong><small>Customer sees “validation paused.”</small></p></div>
+                  <div><UserCheck size={16} /><p><strong>Owner routed</strong><small>Evidence sent to the correct CS queue.</small></p></div>
+                </div>
+              </div>
+
+              <div className="protocol-track" aria-label="Discrepancy handling stages">
+                {["Detect variance", "Contain transaction", "Assemble evidence", "Human decision", "Write back", "Resume flow"].map((stage, index) => {
+                  const state = active >= 5 ? "done" : exceptionResolved ? (index < 4 ? "done" : index === 4 ? "live" : "wait") : index < 3 ? "done" : index === 3 ? "live" : "wait";
+                  return <div className={state} key={stage}><span>{String(index + 1).padStart(2, "0")}</span><i /><strong>{stage}</strong><small>{state === "done" ? "Complete" : state === "live" ? "In control" : "Waiting"}</small></div>;
+                })}
+              </div>
+
+              <div className="resolution-section">
+                <div className="resolution-heading">
+                  <div><span>04 · Human decision</span><h4>{exceptionResolved ? selectedResolution.title : "Choose the authorised resolution."}</h4></div>
+                  <p>Agents provide evidence and enforce the hold. A named person owns the commercial decision.</p>
+                </div>
+                <div className="resolution-grid">
+                  {discrepancyResolutions.map((option) => (
+                    <button type="button" key={option.id} className={`${resolution === option.id ? "active" : ""} ${option.recommended ? "recommended" : ""}`} onClick={() => !exceptionResolved && setResolution(option.id)} disabled={exceptionResolved}>
+                      <span>{option.recommended ? "Recommended" : option.owner}</span>
+                      <strong>{option.title}</strong>
+                      <p>{option.detail}</p>
+                      <b>{option.impact}</b>
+                    </button>
+                  ))}
+                </div>
+                {!exceptionResolved ? (
+                  <button type="button" className="record-decision" onClick={approveException}><FileCheck2 size={16} />Record “{selectedResolution.title}” & continue</button>
+                ) : (
+                  <div className="writeback-receipt">
+                    <div><BadgeCheck size={19} /><span>CONTROL RECEIPT</span><b>DECISION IMMUTABLE</b></div>
+                    <p><strong>{selectedResolution.title}</strong> recorded by Customer Service · Colombia at T+05. CRM quote evidence, PO exception, decision reason and owner written to audit ID <b>EX-24091</b>. Order Creation Agent released.</p>
+                    <div className="writeback-systems"><span>CRM exception log · updated</span><span>Customer portal · resolved</span><span>LangChain branch · released</span><span>UiPath order entry · resumed</span></div>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
