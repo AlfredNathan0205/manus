@@ -43,7 +43,7 @@ import {
 const ASSETS = {
   euroma: "/manus-storage/euroma-logo_e0add910.jpg",
   cpl: "/manus-storage/cpl-aromas-purple-square_89f03cc9.jpg",
-  symrise: "/manus-storage/symrise-logo_e03531b2.jpg",
+  symrise: "/manus-storage/symrise-logo-trimmed_ae94798c.png",
   levis: "/manus-storage/levi-strauss-logo_32a09afd.jpg",
   cognizant: "/manus-storage/cognizant-logo_b2f03f0b.png",
   ntt: "/manus-storage/ntt-data-logo_51231f78.png",
@@ -153,14 +153,14 @@ const career = [
     role: "Global Head of Digitalization & IT Director",
     years: "2012 — 2017",
     logo: ASSETS.symrise,
-    copy: "Led global innovation, IoT and big-data programmes across regions, reporting to the Global CIO and Flavor Division President. Built an early AI bot for perfume creation before applied AI became standard industry language.",
+    copy: "Led the SAP rollout across the APAC region and global innovation and big-data programmes, reporting to the Global CIO and Flavor Division President. Worked on an early AI bot for perfume creation and implemented EEG-based consumer panel testing for the Fragrance Division.",
   },
   {
     name: "Levi Strauss & Co.",
     role: "Enterprise systems & consulting leadership",
     years: "2010 — 2012",
     logo: ASSETS.levis,
-    copy: "A 12-year foundation in SAP, ERP and global transformation delivery across Singapore, San Francisco, France and India, progressing from hands-on consulting into programme and practice leadership.",
+    copy: "A 12-year foundation in SAP, ERP and global transformation delivery across Singapore, San Francisco, Belgium and India, progressing from hands-on consulting into programme and practice leadership.",
   },
   {
     name: "Cognizant",
