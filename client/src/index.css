@@ -375,15 +375,13 @@ main { width: 100%; min-height: calc(100vh - 120px); }
 .view-summary > span { color: var(--gold); font-family: "IBM Plex Mono", monospace; font-size: 9px; letter-spacing: .1em; }
 .view-summary.manual > span { color: #94968c; }
 .view-summary p { max-width: 760px; margin: 11px 0 0; color: #aaa9a1; font-size: 14px; line-height: 1.65; }
-.cycle-time-bridge { display: grid; grid-template-columns: minmax(0, 1fr) 180px minmax(0, 1fr); margin: -8px 0 22px; border: 1px solid var(--line); background: rgba(10,12,9,.84); }
-.cycle-time-side { position: relative; min-height: 122px; padding: 21px 25px; overflow: hidden; transition: background .22s var(--ease-out), box-shadow .22s var(--ease-out); }
-.cycle-time-side.manual { text-align: right; }.cycle-time-side.automated { text-align: left; }
-.cycle-time-side.active { background: linear-gradient(135deg, rgba(231,185,106,.08), transparent 60%); box-shadow: inset 0 -2px 0 var(--gold); }
-.cycle-time-side > span, .cycle-time-side > small, .cycle-time-compression span, .cycle-time-compression small { display: block; font-family: "IBM Plex Mono", monospace; text-transform: uppercase; letter-spacing: .08em; }
-.cycle-time-side > span { color: #73756d; font-size: 8px; }.cycle-time-side > strong { display: block; margin-top: 8px; color: var(--ink); font-family: "Cormorant Garamond", serif; font-size: 39px; font-weight: 500; line-height: .9; }.cycle-time-side > small { margin-top: 9px; color: #5f6159; font-size: 7px; }
-.cycle-time-side.automated > strong, .cycle-time-side.automated.active > span { color: var(--gold); }
-.cycle-time-compression { display: flex; flex-direction: column; align-items: center; justify-content: center; border-right: 1px solid var(--line); border-left: 1px solid var(--line); color: var(--green); text-align: center; background: radial-gradient(circle, rgba(159,196,107,.06), transparent 62%); }
-.cycle-time-compression span { margin-top: 8px; color: #797b72; font-size: 7px; }.cycle-time-compression strong { margin-top: 3px; color: var(--green); font-family: "Cormorant Garamond", serif; font-size: 30px; font-weight: 500; line-height: 1; }.cycle-time-compression small { margin-top: 5px; color: #565850; font-size: 6px; }
+.elapsed-time-console { display: grid; grid-template-columns: minmax(210px, .58fr) minmax(0, 1.42fr); gap: 10px 34px; align-items: end; min-height: 122px; margin: -8px 0 22px; padding: 21px 25px 17px; border: 1px solid var(--line); background: radial-gradient(circle at 84% 14%, rgba(231,185,106,.065), transparent 34%), rgba(10,12,9,.86); }
+.elapsed-time-console.manual { background: radial-gradient(circle at 16% 14%, rgba(255,255,255,.04), transparent 34%), rgba(10,12,9,.86); }
+.elapsed-time-meta { align-self: start; display: flex; align-items: center; justify-content: space-between; gap: 15px; }.elapsed-time-meta span { display: flex; align-items: center; gap: 8px; color: var(--gold); font-family: "IBM Plex Mono", monospace; font-size: 9px; text-transform: uppercase; letter-spacing: .09em; }.elapsed-time-console.manual .elapsed-time-meta span { color: #a4a69d; }.elapsed-time-meta b { padding: 5px 7px; color: var(--green); border: 1px solid rgba(159,196,107,.22); font-family: "IBM Plex Mono", monospace; font-size: 7px; font-weight: 500; text-transform: uppercase; letter-spacing: .08em; }
+.elapsed-time-value { grid-row: 1 / 3; grid-column: 2; display: flex; align-items: baseline; justify-content: flex-end; gap: 18px; min-width: 0; text-align: right; }.elapsed-time-value strong { color: var(--gold); font-family: "Cormorant Garamond", serif; font-size: clamp(52px, 6vw, 82px); font-weight: 500; line-height: .78; letter-spacing: -.045em; }.elapsed-time-console.manual .elapsed-time-value strong { color: var(--ink); }.elapsed-time-value span { flex: none; color: #6b6d65; font-family: "IBM Plex Mono", monospace; font-size: 8px; text-transform: uppercase; letter-spacing: .08em; }
+.elapsed-time-progress { grid-column: 1 / -1; height: 2px; overflow: hidden; background: var(--line); }.elapsed-time-progress i { display: block; width: 100%; height: 100%; background: linear-gradient(90deg, var(--gold), var(--green)); box-shadow: 0 0 10px rgba(231,185,106,.34); transform-origin: left; }
+.elapsed-time-console.manual .elapsed-time-progress i { background: #9fa198; box-shadow: none; }
+.elapsed-time-foot { grid-column: 1 / -1; display: flex; justify-content: space-between; gap: 20px; color: #666860; font-family: "IBM Plex Mono", monospace; font-size: 8px; text-transform: uppercase; letter-spacing: .075em; }
 .flow-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
 .legend { display: flex; flex-wrap: wrap; gap: 18px; }
 .legend span { display: flex; align-items: center; gap: 7px; color: var(--dim); font-family: "IBM Plex Mono", monospace; font-size: 10px; text-transform: uppercase; letter-spacing: .07em; }
@@ -836,9 +834,9 @@ main { width: 100%; min-height: calc(100vh - 120px); }
   .view-toggle button { min-height: 92px; padding: 16px; }
   .view-toggle button span { font-size: 20px; }
   .view-summary { min-height: 0; }
-  .cycle-time-bridge { grid-template-columns: minmax(0, 1fr) 92px minmax(0, 1fr); }
-  .cycle-time-side { min-height: 108px; padding: 17px 12px; }.cycle-time-side > strong { font-size: 30px; }.cycle-time-side > span { font-size: 7px; }.cycle-time-side > small { font-size: 6px; }
-  .cycle-time-compression strong { font-size: 23px; }.cycle-time-compression span { margin-top: 6px; font-size: 6px; }.cycle-time-compression small { display: none; }
+  .elapsed-time-console { grid-template-columns: 1fr; gap: 13px; min-height: 0; padding: 18px; }
+  .elapsed-time-meta { grid-column: 1; }.elapsed-time-value { grid-row: auto; grid-column: 1; align-items: flex-end; justify-content: space-between; text-align: left; }.elapsed-time-value strong { font-size: 52px; }.elapsed-time-value span { max-width: 90px; line-height: 1.45; text-align: right; }
+  .elapsed-time-progress, .elapsed-time-foot { grid-column: 1; }.elapsed-time-foot { font-size: 7px; }
   .flow-toolbar { align-items: flex-end; gap: 18px; }
   .legend { display: none; }
   .run-button { margin-left: auto; }

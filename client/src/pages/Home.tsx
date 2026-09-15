@@ -365,7 +365,7 @@ const briefToContractManual: ProcessStep[] = [
 ];
 
 const briefOutcomes: Outcome[] = [
-  { value: "2 days → 2 min", label: "brief-to-decision cycle", copy: "CRM entry, acknowledgement, feasibility and matching start without waiting for separate manual hand-offs." },
+  { value: "Cycle time", label: "brief-to-decision cycle", copy: "CRM entry, acknowledgement, feasibility and matching start without waiting for separate manual hand-offs." },
   { value: "Less", label: "administrative effort", copy: "Agents handle capture, updates, emails, repeatable checks and project creation." },
   { value: "100%", label: "approval gates retained", copy: "People still approve feasibility and every matched formulation before a quote is shared." },
 ];
@@ -477,7 +477,7 @@ const orderToCashManual: ProcessStep[] = [
 ];
 
 const orderOutcomes: Outcome[] = [
-  { value: "3 days → 3 min", label: "order-to-confirm cycle", copy: "OCR, quote matching, order creation, credit and mini-MRP run as one connected sequence." },
+  { value: "Cycle time", label: "order-to-confirm cycle", copy: "OCR, quote matching, order creation, credit and mini-MRP run as one connected sequence." },
   { value: "Live", label: "customer order visibility", copy: "Production movements update the customer portal instead of depending on manual status chasing." },
   { value: "Touchless", label: "goods-issue to invoice", copy: "The posted goods issue triggers invoice generation and delivery automatically." },
   { value: "Stronger", label: "exception control", copy: "PO discrepancies, failed credit checks and QC remain visible, routed exceptions rather than hidden automation." },
@@ -1367,6 +1367,22 @@ function TechSection() {
   );
 }
 
+function formatProcessElapsed(totalMinutes: number, progress: number, finalLabel: string) {
+  if (progress >= 1) return finalLabel;
+  const elapsedSeconds = Math.round(totalMinutes * 60 * progress);
+  if (totalMinutes <= 10) {
+    const minutes = Math.floor(elapsedSeconds / 60);
+    const seconds = elapsedSeconds % 60;
+    return minutes > 0 ? `${minutes}m ${String(seconds).padStart(2, "0")}s` : `${seconds}s`;
+  }
+  const elapsedMinutes = Math.round(elapsedSeconds / 60);
+  const days = Math.floor(elapsedMinutes / 1440);
+  const hours = Math.floor((elapsedMinutes % 1440) / 60);
+  const minutes = elapsedMinutes % 60;
+  if (days > 0) return `${days}d ${hours}h ${String(minutes).padStart(2, "0")}m`;
+  return `${hours}h ${String(minutes).padStart(2, "0")}m`;
+}
+
 function ProcessFlow({
   steps,
   manualSteps,
@@ -1379,6 +1395,8 @@ function ProcessFlow({
   today,
   manualDuration,
   automatedDuration,
+  manualDurationMinutes,
+  automatedDurationMinutes,
   checkpoints,
   outcomes,
 }: {
@@ -1393,6 +1411,8 @@ function ProcessFlow({
   today: string;
   manualDuration: string;
   automatedDuration: string;
+  manualDurationMinutes: number;
+  automatedDurationMinutes: number;
   checkpoints: string[];
   outcomes: Outcome[];
 }) {
@@ -1437,6 +1457,11 @@ function ProcessFlow({
 
   const current = displayedSteps[active];
   const lensMessage = processLensMessages[process][lens];
+  const elapsedProgress = displayedSteps.length > 1 ? active / (displayedSteps.length - 1) : 1;
+  const currentDuration = view === "manual" ? manualDuration : automatedDuration;
+  const currentDurationMinutes = view === "manual" ? manualDurationMinutes : automatedDurationMinutes;
+  const elapsedLabel = formatProcessElapsed(currentDurationMinutes, elapsedProgress, currentDuration);
+  const elapsedStatus = active >= displayedSteps.length - 1 ? "Complete" : running ? "Running" : active === 0 ? "Ready" : "Paused";
   return (
     <SectionFrame eyebrow={eyebrow} title={title} intro={intro}>
       <AnimatePresence mode="wait">
@@ -1477,15 +1502,26 @@ function ProcessFlow({
           </motion.div>
         </AnimatePresence>
       </div>
-      <div className={`cycle-time-bridge ${view}`} aria-label={`Cycle time reduced from ${manualDuration} to ${automatedDuration}`}>
-        <motion.div className={`cycle-time-side manual ${view === "manual" ? "active" : ""}`} animate={{ opacity: view === "manual" ? 1 : .58 }} transition={{ duration: .22 }}>
-          <span>Manual elapsed time</span><strong>{manualDuration}</strong><small>Before transformation</small>
+      <AnimatePresence mode="wait">
+        <motion.div
+          className={`elapsed-time-console ${view}`}
+          key={`${process}-${view}`}
+          initial={{ opacity: 0, y: 7 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -7 }}
+          transition={{ duration: .24 }}
+          aria-live="polite"
+          aria-label={`${view === "manual" ? "Manual" : "Agent"} elapsed time ${elapsedLabel}; target ${currentDuration}`}
+        >
+          <div className="elapsed-time-meta"><span><Gauge size={15} />{view === "manual" ? "Manual elapsed time" : "Agent elapsed time"}</span><b>{elapsedStatus}</b></div>
+          <div className="elapsed-time-value">
+            <motion.strong key={`${view}-${active}`} initial={{ opacity: .45, y: 5 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .2 }}>{elapsedLabel}</motion.strong>
+            <span>Target · {currentDuration}</span>
+          </div>
+          <div className="elapsed-time-progress"><motion.i initial={false} animate={{ scaleX: elapsedProgress }} transition={{ duration: .42, ease: [0.23, 1, 0.32, 1] }} /></div>
+          <div className="elapsed-time-foot"><span>Step {String(active + 1).padStart(2, "0")} / {String(displayedSteps.length).padStart(2, "0")}</span><span>{Math.round(elapsedProgress * 100)}% of elapsed cycle</span></div>
         </motion.div>
-        <div className="cycle-time-compression"><Gauge size={17} /><span>Cycle compressed</span><strong>1,440×</strong><small>Days become minutes</small></div>
-        <motion.div className={`cycle-time-side automated ${view === "automated" ? "active" : ""}`} animate={{ opacity: view === "automated" ? 1 : .58 }} transition={{ duration: .22 }}>
-          <span>Agent elapsed time</span><strong>{automatedDuration}</strong><small>Live at CPL</small>
-        </motion.div>
-      </div>
+      </AnimatePresence>
       <div className="flow-toolbar">
         <div className="legend">
           {view === "automated" ? (
@@ -1626,7 +1662,7 @@ function ProcessFlow({
           {outcomes.map((outcome, index) => (
             <motion.article key={outcome.label} className="outcome-card" whileHover={{ y: -4 }}>
               <span>0{index + 1}</span>
-              <strong>{outcome.value}</strong>
+              <strong>{index === 0 ? currentDuration : outcome.value}</strong>
               <h3>{outcome.label}</h3>
               <p>{outcome.copy}</p>
             </motion.article>
@@ -1943,6 +1979,8 @@ function AppShell() {
         today="Agents carry the brief from intake through CRM, acknowledgement, feasibility and library matching, while people retain approval over feasibility, matched formulations and customer quotes."
         manualDuration="2 days"
         automatedDuration="2 minutes"
+        manualDurationMinutes={2880}
+        automatedDurationMinutes={2}
         checkpoints={["Human approval before feasible or decline", "Human approval of a library match before formulation details and quote are shared"]}
         outcomes={briefOutcomes}
       />
@@ -1960,6 +1998,8 @@ function AppShell() {
         today="Agents read and reconcile the PO, create and check the order, plan materials and capacity, create production, update the customer portal, coordinate quality and shipping, and trigger the invoice at goods issue."
         manualDuration="3 days"
         automatedDuration="3 minutes"
+        manualDurationMinutes={4320}
+        automatedDurationMinutes={3}
         checkpoints={["PO discrepancies go to Customer Service for audit", "Credit failures go to Finance and the account manager", "Quality control is completed before shipping progresses"]}
         outcomes={orderOutcomes}
       />
