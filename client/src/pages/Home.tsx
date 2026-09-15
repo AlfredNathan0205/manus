@@ -364,6 +364,10 @@ const briefToContractManual: ProcessStep[] = [
   { title: "Library searched", copy: "A person searches for a prior formulation, prepares the quote or creates a new perfumer project.", kind: "human", tags: ["Manual search", "Manual costing"] },
 ];
 
+// Illustrative active-processing allocations. They are intentionally non-uniform and sum to the stated end-to-end comparison.
+const briefAutomatedStepSeconds = [8, 14, 6, 27, 39, 26];
+const briefManualStepSeconds = [3, 5, 2, 17, 8, 13].map((hours) => hours * 3600);
+
 const briefOutcomes: Outcome[] = [
   { value: "Cycle time", label: "brief-to-decision cycle", copy: "CRM entry, acknowledgement, feasibility and matching start without waiting for separate manual hand-offs." },
   { value: "Less", label: "administrative effort", copy: "Agents handle capture, updates, emails, repeatable checks and project creation." },
@@ -476,8 +480,12 @@ const orderToCashManual: ProcessStep[] = [
   { title: "Invoice triggered", copy: "Goods issue is checked and the invoice is prepared and sent as a separate activity.", kind: "human", tags: ["Manual invoice step"] },
 ];
 
+// Processing effort only: physical manufacturing, production queues and delivery transit are outside this illustrated clock.
+const orderAutomatedStepSeconds = [7, 5, 24, 18, 29, 28, 9, 12, 17, 19, 12];
+const orderManualStepSeconds = [4, 8, 9, 6, 10, 11, 4, 5, 4, 7, 4].map((hours) => hours * 3600);
+
 const orderOutcomes: Outcome[] = [
-  { value: "Cycle time", label: "order-to-confirm cycle", copy: "OCR, quote matching, order creation, credit and mini-MRP run as one connected sequence." },
+  { value: "Cycle time", label: "illustrative processing cycle", copy: "The comparison covers administrative and agent processing; physical manufacturing, production queues and delivery transit are excluded." },
   { value: "Live", label: "customer order visibility", copy: "Production movements update the customer portal instead of depending on manual status chasing." },
   { value: "Touchless", label: "goods-issue to invoice", copy: "The posted goods issue triggers invoice generation and delivery automatically." },
   { value: "Stronger", label: "exception control", copy: "PO discrepancies, failed credit checks and QC remain visible, routed exceptions rather than hidden automation." },
@@ -1367,20 +1375,21 @@ function TechSection() {
   );
 }
 
-function formatProcessElapsed(totalMinutes: number, progress: number, finalLabel: string) {
-  if (progress >= 1) return finalLabel;
-  const elapsedSeconds = Math.round(totalMinutes * 60 * progress);
-  if (totalMinutes <= 10) {
-    const minutes = Math.floor(elapsedSeconds / 60);
-    const seconds = elapsedSeconds % 60;
-    return minutes > 0 ? `${minutes}m ${String(seconds).padStart(2, "0")}s` : `${seconds}s`;
+function formatProcessSeconds(seconds: number, finalLabel?: string) {
+  if (finalLabel) return finalLabel;
+  const safeSeconds = Math.max(0, Math.round(seconds));
+  if (safeSeconds < 60) return `${safeSeconds}s`;
+  if (safeSeconds < 3600) {
+    const minutes = Math.floor(safeSeconds / 60);
+    const remainder = safeSeconds % 60;
+    return remainder ? `${minutes}m ${String(remainder).padStart(2, "0")}s` : `${minutes}m`;
   }
-  const elapsedMinutes = Math.round(elapsedSeconds / 60);
-  const days = Math.floor(elapsedMinutes / 1440);
-  const hours = Math.floor((elapsedMinutes % 1440) / 60);
-  const minutes = elapsedMinutes % 60;
-  if (days > 0) return `${days}d ${hours}h ${String(minutes).padStart(2, "0")}m`;
-  return `${hours}h ${String(minutes).padStart(2, "0")}m`;
+  const totalMinutes = Math.round(safeSeconds / 60);
+  const days = Math.floor(totalMinutes / 1440);
+  const hours = Math.floor((totalMinutes % 1440) / 60);
+  const minutes = totalMinutes % 60;
+  if (days > 0) return [`${days}d`, hours ? `${hours}h` : "", minutes ? `${String(minutes).padStart(2, "0")}m` : ""].filter(Boolean).join(" ");
+  return `${hours}h${minutes ? ` ${String(minutes).padStart(2, "0")}m` : ""}`;
 }
 
 function ProcessFlow({
@@ -1395,8 +1404,8 @@ function ProcessFlow({
   today,
   manualDuration,
   automatedDuration,
-  manualDurationMinutes,
-  automatedDurationMinutes,
+  manualStepSeconds,
+  automatedStepSeconds,
   checkpoints,
   outcomes,
 }: {
@@ -1411,27 +1420,71 @@ function ProcessFlow({
   today: string;
   manualDuration: string;
   automatedDuration: string;
-  manualDurationMinutes: number;
-  automatedDurationMinutes: number;
+  manualStepSeconds: number[];
+  automatedStepSeconds: number[];
   checkpoints: string[];
   outcomes: Outcome[];
 }) {
   const [active, setActive] = useState(0);
   const [running, setRunning] = useState(false);
   const [view, setView] = useState<"manual" | "automated">("automated");
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const railRef = useRef<HTMLDivElement>(null);
+  const playbackIdRef = useRef(0);
   const reduced = useReducedMotion();
   const displayedSteps = view === "automated" ? steps : manualSteps;
+  const displayedStepSeconds = view === "automated" ? automatedStepSeconds : manualStepSeconds;
+  const totalDurationSeconds = displayedStepSeconds.reduce((sum, duration) => sum + duration, 0);
+  const activeStepStart = displayedStepSeconds.slice(0, active).reduce((sum, duration) => sum + duration, 0);
+  const activeStepEnd = activeStepStart + displayedStepSeconds[active];
+  const elapsedComplete = elapsedSeconds >= totalDurationSeconds;
 
   useEffect(() => {
     if (!running) return;
-    if (active >= displayedSteps.length - 1) {
-      setRunning(false);
+    const playbackId = ++playbackIdRef.current;
+    const startValue = Math.max(activeStepStart, Math.min(elapsedSeconds, activeStepEnd));
+    const remaining = activeStepEnd - startValue;
+    if (remaining <= 0) {
+      if (active >= displayedSteps.length - 1) setRunning(false);
+      else setActive((current) => current + 1);
       return;
     }
-    const timer = window.setTimeout(() => setActive((current) => current + 1), 1750);
-    return () => window.clearTimeout(timer);
-  }, [active, running, displayedSteps.length]);
+    const averageTaskSeconds = totalDurationSeconds / displayedStepSeconds.length;
+    const taskWeight = displayedStepSeconds[active] / averageTaskSeconds;
+    const fullSegmentDuration = Math.max(1300, Math.min(2600, 1200 + taskWeight * 550));
+    const segmentDuration = Math.max(260, fullSegmentDuration * (remaining / displayedStepSeconds[active]));
+    const startedAt = performance.now();
+    let frame = 0;
+    let reducedTimer = 0;
+    const completeStep = () => {
+      if (playbackId !== playbackIdRef.current) return;
+      setElapsedSeconds(activeStepEnd);
+      if (active >= displayedSteps.length - 1) setRunning(false);
+      else setActive((current) => current + 1);
+    };
+    if (reduced) {
+      reducedTimer = window.setTimeout(completeStep, segmentDuration);
+      return () => { playbackIdRef.current += 1; window.clearTimeout(reducedTimer); };
+    }
+    const tick = (now: number) => {
+      if (playbackId !== playbackIdRef.current) return;
+      const progress = Math.min((now - startedAt) / segmentDuration, 1);
+      setElapsedSeconds(Math.round(startValue + remaining * progress));
+      if (progress >= 1) completeStep();
+      else frame = window.requestAnimationFrame(tick);
+    };
+    frame = window.requestAnimationFrame(tick);
+    return () => { playbackIdRef.current += 1; window.cancelAnimationFrame(frame); };
+  // elapsedSeconds is intentionally captured only when a step starts or playback resumes.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active, running, view, activeStepStart, activeStepEnd, displayedStepSeconds, displayedSteps.length, reduced, totalDurationSeconds]);
+
+  useEffect(() => {
+    if (displayedSteps.length !== displayedStepSeconds.length) {
+      setRunning(false);
+      console.error("Process timing profile does not match the number of process steps.");
+    }
+  }, [displayedSteps.length, displayedStepSeconds.length]);
 
   useEffect(() => {
     const node = railRef.current?.querySelector(`[data-node="${active}"]`);
@@ -1440,28 +1493,36 @@ function ProcessFlow({
 
   const changeView = (nextView: "manual" | "automated") => {
     if (nextView === view) return;
+    playbackIdRef.current += 1;
     setRunning(false);
     setActive(0);
+    setElapsedSeconds(0);
     setView(nextView);
     if (railRef.current) railRef.current.scrollLeft = 0;
   };
 
   const run = () => {
     if (running) {
+      playbackIdRef.current += 1;
       setRunning(false);
       return;
     }
-    setActive(0);
-    window.setTimeout(() => setRunning(true), 120);
+    if (elapsedComplete) {
+      setActive(0);
+      setElapsedSeconds(0);
+      window.setTimeout(() => setRunning(true), 120);
+      return;
+    }
+    setRunning(true);
   };
 
   const current = displayedSteps[active];
   const lensMessage = processLensMessages[process][lens];
-  const elapsedProgress = displayedSteps.length > 1 ? active / (displayedSteps.length - 1) : 1;
   const currentDuration = view === "manual" ? manualDuration : automatedDuration;
-  const currentDurationMinutes = view === "manual" ? manualDurationMinutes : automatedDurationMinutes;
-  const elapsedLabel = formatProcessElapsed(currentDurationMinutes, elapsedProgress, currentDuration);
-  const elapsedStatus = active >= displayedSteps.length - 1 ? "Complete" : running ? "Running" : active === 0 ? "Ready" : "Paused";
+  const elapsedProgress = totalDurationSeconds ? elapsedSeconds / totalDurationSeconds : 0;
+  const elapsedLabel = formatProcessSeconds(elapsedSeconds, elapsedComplete ? currentDuration : undefined);
+  const elapsedStatus = elapsedComplete ? "Complete" : running ? "Ticking" : elapsedSeconds === 0 ? "Ready" : "Paused";
+  const scopeNote = process === "order" ? "Illustrative processing time · excludes physical manufacturing, production queues and delivery transit" : "Illustrative active-processing time · task durations vary by work performed";
   return (
     <SectionFrame eyebrow={eyebrow} title={title} intro={intro}>
       <AnimatePresence mode="wait">
@@ -1504,22 +1565,23 @@ function ProcessFlow({
       </div>
       <AnimatePresence mode="wait">
         <motion.div
-          className={`elapsed-time-console ${view}`}
+          className={`elapsed-time-console ${view} ${running ? "ticking" : ""}`}
           key={`${process}-${view}`}
           initial={{ opacity: 0, y: 7 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -7 }}
           transition={{ duration: .24 }}
-          aria-live="polite"
+          aria-live={running ? "off" : "polite"}
           aria-label={`${view === "manual" ? "Manual" : "Agent"} elapsed time ${elapsedLabel}; target ${currentDuration}`}
         >
-          <div className="elapsed-time-meta"><span><Gauge size={15} />{view === "manual" ? "Manual elapsed time" : "Agent elapsed time"}</span><b>{elapsedStatus}</b></div>
+          <div className="elapsed-time-meta"><span><Gauge size={15} />{view === "manual" ? "Manual processing time" : "Agent processing time"}</span><b>{elapsedStatus}</b></div>
           <div className="elapsed-time-value">
             <motion.strong key={`${view}-${active}`} initial={{ opacity: .45, y: 5 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .2 }}>{elapsedLabel}</motion.strong>
             <span>Target · {currentDuration}</span>
           </div>
           <div className="elapsed-time-progress"><motion.i initial={false} animate={{ scaleX: elapsedProgress }} transition={{ duration: .42, ease: [0.23, 1, 0.32, 1] }} /></div>
-          <div className="elapsed-time-foot"><span>Step {String(active + 1).padStart(2, "0")} / {String(displayedSteps.length).padStart(2, "0")}</span><span>{Math.round(elapsedProgress * 100)}% of elapsed cycle</span></div>
+          <div className="elapsed-time-foot"><span>Step {String(active + 1).padStart(2, "0")} / {String(displayedSteps.length).padStart(2, "0")}</span><span>{Math.round(elapsedProgress * 100)}% of processing cycle</span></div>
+          <div className="elapsed-time-scope"><CircleDot size={12} /><span>{scopeNote}</span></div>
         </motion.div>
       </AnimatePresence>
       <div className="flow-toolbar">
@@ -1555,19 +1617,31 @@ function ProcessFlow({
             exit={{ opacity: 0, x: view === "automated" ? -30 : 30 }}
             transition={{ duration: .38, ease: [0.23, 1, 0.32, 1] }}
           >
-            {displayedSteps.map((step, index) => (
+            {displayedSteps.map((step, index) => {
+              const taskSeconds = displayedStepSeconds[index];
+              const cumulativeSeconds = displayedStepSeconds.slice(0, index + 1).reduce((sum, duration) => sum + duration, 0);
+              const stepComplete = elapsedSeconds >= cumulativeSeconds;
+              const cumulativeLabel = formatProcessSeconds(cumulativeSeconds, index === displayedSteps.length - 1 ? currentDuration : undefined);
+              return (
               <div className="flow-unit" key={`${view}-${step.title}`}>
                 <motion.button
                   type="button"
                   data-node={index}
-                  className={`flow-node ${step.kind} ${active === index ? "active" : ""} ${active > index ? "passed" : ""}`}
-                  onClick={() => { setRunning(false); setActive(index); }}
+                  className={`flow-node ${step.kind} ${active === index ? "active" : ""} ${stepComplete ? "passed completed" : ""}`}
+                  onClick={() => { playbackIdRef.current += 1; setRunning(false); setActive(index); setElapsedSeconds(cumulativeSeconds); }}
                   whileTap={{ scale: 0.98 }}
                   aria-pressed={active === index}
                 >
                   <span className="node-top"><b>{String(index + 1).padStart(2, "0")}</b><KindIcon kind={step.kind} /></span>
                   <strong>{step.title}</strong>
                   <small>{view === "manual" ? "Manual task" : step.kind === "human" ? "Human checkpoint" : step.kind === "decision" ? "Decision gate" : "Autonomous action"}</small>
+                  <AnimatePresence>
+                    {stepComplete && (
+                      <motion.span className="node-timing" initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+                        <b>Task +{formatProcessSeconds(taskSeconds)}</b><em>Cumulative {cumulativeLabel}</em>
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
                   {view === "automated" && step.systems && (
                     <span className="system-hover">
                       <span><Network size={13} />Systems & agents</span>
@@ -1586,18 +1660,14 @@ function ProcessFlow({
                       transition={{ duration: 0.42, ease: [0.23, 1, 0.32, 1] }}
                     />
                     <span className="connector-arrow">›</span>
+                    {running && active === index && <span className="connector-ticks" aria-hidden="true"><i /><i /><i /></span>}
                     {running && active === index && (
-                      <motion.span
-                        className="signal-dot"
-                        initial={{ x: 0, opacity: 0 }}
-                        animate={{ x: 56, opacity: [0, 1, 1, 0] }}
-                        transition={{ duration: 1.45, repeat: Infinity, ease: "linear" }}
-                      />
+                      <motion.span className="signal-dot" initial={{ x: 0, opacity: 0 }} animate={{ x: 56, opacity: [0, 1, 1, 0] }} transition={{ duration: .72, repeat: Infinity, ease: "linear" }} />
                     )}
                   </div>
                 )}
               </div>
-            ))}
+            );})}
           </motion.div>
         </AnimatePresence>
 
@@ -1656,7 +1726,7 @@ function ProcessFlow({
       <div className="outcomes-panel">
         <div className="outcomes-heading">
           <div><span className="overline">Outcome of the transformation</span><h2>What changes in operation.</h2></div>
-          <p>The cycle time reflects the CPL before-and-today comparison shown above. Other outcomes remain directional; use the Impact tab to model capacity and value with CPL or Euroma operating data.</p>
+          <p>{process === "order" ? "The timer uses non-uniform illustrative processing allocations. It excludes physical manufacturing, production queues and delivery transit; other outcomes remain directional." : "The timer uses non-uniform illustrative processing allocations across the CPL before-and-today comparison. Other outcomes remain directional."} Use the Impact tab to model capacity and value with CPL or Euroma operating data.</p>
         </div>
         <div className="outcome-grid">
           {outcomes.map((outcome, index) => (
@@ -1979,8 +2049,8 @@ function AppShell() {
         today="Agents carry the brief from intake through CRM, acknowledgement, feasibility and library matching, while people retain approval over feasibility, matched formulations and customer quotes."
         manualDuration="2 days"
         automatedDuration="2 minutes"
-        manualDurationMinutes={2880}
-        automatedDurationMinutes={2}
+        manualStepSeconds={briefManualStepSeconds}
+        automatedStepSeconds={briefAutomatedStepSeconds}
         checkpoints={["Human approval before feasible or decline", "Human approval of a library match before formulation details and quote are shared"]}
         outcomes={briefOutcomes}
       />
@@ -1998,8 +2068,8 @@ function AppShell() {
         today="Agents read and reconcile the PO, create and check the order, plan materials and capacity, create production, update the customer portal, coordinate quality and shipping, and trigger the invoice at goods issue."
         manualDuration="3 days"
         automatedDuration="3 minutes"
-        manualDurationMinutes={4320}
-        automatedDurationMinutes={3}
+        manualStepSeconds={orderManualStepSeconds}
+        automatedStepSeconds={orderAutomatedStepSeconds}
         checkpoints={["PO discrepancies go to Customer Service for audit", "Credit failures go to Finance and the account manager", "Quality control is completed before shipping progresses"]}
         outcomes={orderOutcomes}
       />
