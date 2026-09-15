@@ -365,7 +365,7 @@ const briefToContractManual: ProcessStep[] = [
 ];
 
 const briefOutcomes: Outcome[] = [
-  { value: "Shorter", label: "brief-to-decision cycle", copy: "CRM entry, acknowledgement, feasibility and matching start without waiting for separate manual hand-offs." },
+  { value: "2 days → 2 min", label: "brief-to-decision cycle", copy: "CRM entry, acknowledgement, feasibility and matching start without waiting for separate manual hand-offs." },
   { value: "Less", label: "administrative effort", copy: "Agents handle capture, updates, emails, repeatable checks and project creation." },
   { value: "100%", label: "approval gates retained", copy: "People still approve feasibility and every matched formulation before a quote is shared." },
 ];
@@ -477,7 +477,7 @@ const orderToCashManual: ProcessStep[] = [
 ];
 
 const orderOutcomes: Outcome[] = [
-  { value: "Faster", label: "order-to-confirm cycle", copy: "OCR, quote matching, order creation, credit and mini-MRP run as one connected sequence." },
+  { value: "3 days → 3 min", label: "order-to-confirm cycle", copy: "OCR, quote matching, order creation, credit and mini-MRP run as one connected sequence." },
   { value: "Live", label: "customer order visibility", copy: "Production movements update the customer portal instead of depending on manual status chasing." },
   { value: "Touchless", label: "goods-issue to invoice", copy: "The posted goods issue triggers invoice generation and delivery automatically." },
   { value: "Stronger", label: "exception control", copy: "PO discrepancies, failed credit checks and QC remain visible, routed exceptions rather than hidden automation." },
@@ -1377,6 +1377,8 @@ function ProcessFlow({
   intro,
   before,
   today,
+  manualDuration,
+  automatedDuration,
   checkpoints,
   outcomes,
 }: {
@@ -1389,6 +1391,8 @@ function ProcessFlow({
   intro: string;
   before: string;
   today: string;
+  manualDuration: string;
+  automatedDuration: string;
   checkpoints: string[];
   outcomes: Outcome[];
 }) {
@@ -1472,6 +1476,15 @@ function ProcessFlow({
             <p>{view === "automated" ? today : before}</p>
           </motion.div>
         </AnimatePresence>
+      </div>
+      <div className={`cycle-time-bridge ${view}`} aria-label={`Cycle time reduced from ${manualDuration} to ${automatedDuration}`}>
+        <motion.div className={`cycle-time-side manual ${view === "manual" ? "active" : ""}`} animate={{ opacity: view === "manual" ? 1 : .58 }} transition={{ duration: .22 }}>
+          <span>Manual elapsed time</span><strong>{manualDuration}</strong><small>Before transformation</small>
+        </motion.div>
+        <div className="cycle-time-compression"><Gauge size={17} /><span>Cycle compressed</span><strong>1,440×</strong><small>Days become minutes</small></div>
+        <motion.div className={`cycle-time-side automated ${view === "automated" ? "active" : ""}`} animate={{ opacity: view === "automated" ? 1 : .58 }} transition={{ duration: .22 }}>
+          <span>Agent elapsed time</span><strong>{automatedDuration}</strong><small>Live at CPL</small>
+        </motion.div>
       </div>
       <div className="flow-toolbar">
         <div className="legend">
@@ -1607,7 +1620,7 @@ function ProcessFlow({
       <div className="outcomes-panel">
         <div className="outcomes-heading">
           <div><span className="overline">Outcome of the transformation</span><h2>What changes in operation.</h2></div>
-          <p>Directional outcomes from the implemented design. Use the Impact tab to model quantified cycle-time and capacity gains with CPL or Euroma operating data.</p>
+          <p>The cycle time reflects the CPL before-and-today comparison shown above. Other outcomes remain directional; use the Impact tab to model capacity and value with CPL or Euroma operating data.</p>
         </div>
         <div className="outcome-grid">
           {outcomes.map((outcome, index) => (
@@ -1928,6 +1941,8 @@ function AppShell() {
         intro="The manual process is the pre-transformation baseline. The interactive flow below is what runs at CPL today. Click any node or play the complete automated journey."
         before="Teams received the brief, entered it into CRM, acknowledged the sender, checked feasibility, searched the library and prepared the next action through separate manual hand-offs."
         today="Agents carry the brief from intake through CRM, acknowledgement, feasibility and library matching, while people retain approval over feasibility, matched formulations and customer quotes."
+        manualDuration="2 days"
+        automatedDuration="2 minutes"
         checkpoints={["Human approval before feasible or decline", "Human approval of a library match before formulation details and quote are shared"]}
         outcomes={briefOutcomes}
       />
@@ -1943,6 +1958,8 @@ function AppShell() {
         intro="The manual process is the pre-transformation baseline. The interactive flow below shows the connected automation running at CPL today, from incoming PO to invoice."
         before="People moved the order between inboxes, CRM, order entry, credit, planning, procurement, factories, quality, shipping and invoicing, repeatedly checking status and re-entering information."
         today="Agents read and reconcile the PO, create and check the order, plan materials and capacity, create production, update the customer portal, coordinate quality and shipping, and trigger the invoice at goods issue."
+        manualDuration="3 days"
+        automatedDuration="3 minutes"
         checkpoints={["PO discrepancies go to Customer Service for audit", "Credit failures go to Finance and the account manager", "Quality control is completed before shipping progresses"]}
         outcomes={orderOutcomes}
       />
