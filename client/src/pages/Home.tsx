@@ -910,7 +910,7 @@ function ProfileSection() {
       <div className="hero-grid">
         <div className="hero-copy">
           <div className="eyebrow"><span />Production AI, not a roadmap</div>
-          <h1>The agents are<br />already <em>running.</em></h1>
+          <h1>The agents are<br /><em>live.</em></h1>
           <p className="hero-lede">
             Built inside CPL Aromas, where formulation, compliance, manufacturing and customer promises meet the real world.
           </p>
@@ -1162,7 +1162,7 @@ function TechSection() {
   return (
     <SectionFrame
       eyebrow="The production platform"
-      title="The agents do not float in space."
+      title="A single agentic platform."
       intro="They swarm around one governed enterprise platform—sharing models, context, controls and system access while each agent keeps a narrow operating job."
     >
       <div className="platform-shell">
