@@ -108,6 +108,7 @@ const ventures = [
     name: "Olfyne",
     meta: "Creative intelligence",
     copy: "Generative and agentic AI inside the perfumer’s creative process.",
+    award: "Finalist · Tech Innovation of the Year · Beautyworld Middle East",
     icon: Sparkles,
   },
   {
@@ -117,10 +118,10 @@ const ventures = [
     icon: Fingerprint,
   },
   {
-    name: "Genesis",
-    meta: "Product engineering",
-    copy: "Full-stack PLM engineering for industry-specific AI products.",
-    icon: Layers3,
+    name: "Trend Analysis MCP",
+    meta: "Signal intelligence",
+    copy: "An MCP-powered trend engine that turns live market signals into structured beauty and fragrance intelligence.",
+    icon: Network,
   },
 ];
 
@@ -879,7 +880,7 @@ function ProfileSection() {
       <div className="profile-statement">
         <span className="statement-index">ALFRED / 01</span>
         <p>
-          CIO and Global Operating Board Member at CPL Aromas. Former Global Head of Digitalization at Symrise. I know the full flavour and fragrance value chain, and I still build.
+          CIO and Global Operating Board Member at CPL Aromas. Former Global Head of Digitalization at Symrise. I understand the full flavour and fragrance value chain, and I still build.
         </p>
       </div>
 
@@ -907,6 +908,7 @@ function ProfileSection() {
                 <span className="overline">{venture.meta}</span>
                 <h3>{venture.name}</h3>
                 <p>{venture.copy}</p>
+                {venture.award && <div className="venture-award"><BadgeCheck size={13} /><span>{venture.award}</span></div>}
               </motion.article>
             );
           })}
@@ -1760,7 +1762,7 @@ function NextSection({ onNavigate }: { onNavigate: (id: SectionId) => void }) {
         </div>
       </div>
       <div className="closing-line">
-        <span>NEVODIA × EUROMA</span>
+        <span>ALFRED × EUROMA</span>
         <strong>Production AI. Human control.</strong>
         <span>2026</span>
       </div>
@@ -1857,7 +1859,7 @@ function AppShell() {
       <div className="ambient ambient-two" />
       <header className="site-header">
         <button className="brand-lockup" type="button" onClick={() => navigate("intro")} aria-label="Go to Alfred profile">
-          <span className="nevodia-mark"><i>N</i><b>Nevodia</b></span>
+          <span className="nevodia-mark"><i>A</i><b>Alfred</b></span>
           <span className="brand-cross">×</span>
           <img src={ASSETS.euroma} alt="Euroma" />
         </button>

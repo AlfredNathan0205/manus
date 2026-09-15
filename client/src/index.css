@@ -157,9 +157,9 @@ main { width: 100%; min-height: calc(100vh - 120px); }
 .profile-section, .section-frame { width: min(1400px, 100%); margin: 0 auto; padding: 76px 54px 92px; }
 .section-frame { min-height: calc(100vh - 120px); }
 .eyebrow, .overline { font-family: "IBM Plex Mono", monospace; text-transform: uppercase; letter-spacing: .15em; }
-.eyebrow { display: flex; align-items: center; gap: 10px; margin-bottom: 25px; color: var(--gold); font-size: 12px; }
-.eyebrow span { width: 28px; height: 1px; background: var(--gold); }
-.overline { color: var(--gold); font-size: 11px; }
+.eyebrow { display: flex; align-items: center; margin-bottom: 25px; color: var(--gold); font-size: 12px; }
+.eyebrow > span { display: none; }
+.overline { color: var(--gold); border: 0; font-size: 11px; text-decoration: none; }
 
 .hero-grid { display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(400px, .92fr); align-items: center; gap: clamp(50px, 8vw, 130px); min-height: 600px; }
 .hero-copy h1, .section-heading h1 {
@@ -215,6 +215,8 @@ main { width: 100%; min-height: calc(100vh - 120px); }
 .venture-top span { color: var(--faint); font-family: "IBM Plex Mono", monospace; font-size: 10px; }
 .venture-card h3 { margin: 9px 0 10px; font-family: "Cormorant Garamond", serif; font-size: 36px; font-weight: 500; }
 .venture-card p { max-width: 340px; margin: 0; color: #aaa9a1; font-size: 15px; line-height: 1.68; }
+.venture-award { display: flex; align-items: flex-start; gap: 8px; margin-top: 20px; padding-top: 14px; color: var(--green); border-top: 1px solid rgba(159,196,107,.18); }
+.venture-award svg { flex: 0 0 auto; margin-top: 1px; }.venture-award span { max-width: 310px; font-family: "IBM Plex Mono", monospace; font-size: 9px; line-height: 1.55; text-transform: uppercase; letter-spacing: .045em; }
 .career-block { padding-bottom: 40px; }
 .brand-rail { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
 .brand-tile { position: relative; display: flex; flex-direction: column; justify-content: space-between; min-width: 0; min-height: 145px; padding: 0; overflow: hidden; border: 1px solid var(--line); background: #f1f0eb; transition: transform .22s var(--ease-out), border-color .22s; }
