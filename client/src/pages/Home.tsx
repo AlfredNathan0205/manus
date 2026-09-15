@@ -53,6 +53,8 @@ const ASSETS = {
   azure: "/manus-storage/microsoft-azure_7e3847cf.svg",
   whatsapp: "/manus-storage/whatsapp_9008dd98.svg",
   sap: "/manus-storage/sap_713309ae.svg",
+  dynamics365: "/manus-storage/dynamics365_b2a9ff92.svg",
+  fricke: "/manus-storage/fricke-mark_03d95843.png",
 };
 
 type SectionId = "intro" | "tech" | "b2c" | "o2c" | "impact" | "next";
@@ -244,21 +246,21 @@ type TransactionStage = {
 const enterpriseEndpoints: { key: EndpointKey; name: string; role: string; icon: ElementType; logo?: string }[] = [
   { key: "email", name: "Email", role: "PO intake · confirmation", icon: Mail },
   { key: "whatsapp", name: "WhatsApp", role: "Regional PO channel", icon: Radio, logo: ASSETS.whatsapp },
-  { key: "crm", name: "CRM", role: "Quote · customer context", icon: BadgeCheck },
-  { key: "erp", name: "SAP ERP", role: "Order · credit · invoice", icon: Database, logo: ASSETS.sap },
-  { key: "factory", name: "Factory Control", role: "MRP · production · QC", icon: Factory },
+  { key: "crm", name: "Dynamics 365", role: "CRM · quote · customer", icon: BadgeCheck, logo: ASSETS.dynamics365 },
+  { key: "erp", name: "SAP", role: "ERP · order · credit · invoice", icon: Database, logo: ASSETS.sap },
+  { key: "factory", name: "Fricke", role: "Dosing · production · status", icon: Factory, logo: ASSETS.fricke },
 ];
 
 const transactionJourney: TransactionStage[] = [
   { title: "Purchase order received", system: "Email channel", detail: "PO CO-78431 arrives as a PDF and becomes a governed transaction packet.", platform: "copilot", endpoint: "email", packet: "PO · CO-78431", path: "M83 176 C165 176 235 112 332 91" },
   { title: "Document read", system: "UiPath AI OCR", detail: "Customer, product, quantity, requested date and commercial lines are extracted with source evidence.", agent: 3, platform: "uipath", packet: "OCR · 98.7%", path: "M332 91 C390 150 455 245 500 325" },
-  { title: "Customer and quote context", system: "CRM + Microsoft Fabric", detail: "The packet retrieves the governed customer account and quote Q-78142 before any order is created.", platform: "fabric", endpoint: "crm", packet: "QUOTE · Q-78142", path: "M500 325 C365 330 225 290 83 268" },
+  { title: "Customer and quote context", system: "Dynamics 365 + Microsoft Fabric", detail: "The packet retrieves the governed Dynamics 365 customer account and quote Q-78142 before any order is created.", platform: "fabric", endpoint: "crm", packet: "QUOTE · Q-78142", path: "M500 325 C365 330 225 290 83 268" },
   { title: "Quote matched", system: "Quote Match Agent", detail: "Every PO line is reconciled against the approved quote, including price, currency, quantity and delivery terms.", agent: 3, platform: "langchain", packet: "MATCH · 4/4", path: "M83 268 C270 270 470 160 669 91" },
   { title: "Commercial control", system: "Named human approval", detail: "The price variance is contained. Customer Service approves the correction before automation may continue.", platform: "foundry", human: true, packet: "HOLD · +£45.60", path: "M669 91 C610 130 550 175 500 201" },
   { title: "Order and credit created", system: "SAP ERP", detail: "UiPath creates the order and SAP performs the automatic credit check against controlled master data.", agent: 4, platform: "uipath", endpoint: "erp", packet: "SO · 54001982", path: "M500 201 C650 220 800 270 916 319" },
   { title: "Mini-MRP and promise", system: "Mini-MRP Agent", detail: "Raw material, safety stock, open POs, vendor lead time and factory capacity resolve the promise date.", agent: 5, platform: "fabric", packet: "PROMISE · 24 SEP", path: "M916 319 C760 390 640 510 500 591" },
-  { title: "Production route released", system: "Factory Control", detail: "The BOM and solution/base route are created and released to the correct factory work centre.", agent: 6, platform: "langchain", endpoint: "factory", packet: "PROD · 870144", path: "M500 591 C650 560 790 440 916 365" },
-  { title: "Production and QC tracked", system: "Status Agent", detail: "Dosing, finishing, packing and QC movements update the order state and customer portal continuously.", agent: 7, platform: "copilot", endpoint: "factory", packet: "QC · RELEASED", path: "M916 365 C730 300 520 210 332 91" },
+  { title: "Production route released", system: "Fricke production system", detail: "The BOM and solution/base route are created and released to the correct Fricke work centre.", agent: 6, platform: "langchain", endpoint: "factory", packet: "PROD · 870144", path: "M500 591 C650 560 790 440 916 365" },
+  { title: "Production and QC tracked", system: "Fricke + Status Agent", detail: "Fricke dosing and production movements, followed by packing and QC events, update the order state and customer portal continuously.", agent: 7, platform: "copilot", endpoint: "factory", packet: "QC · RELEASED", path: "M916 365 C730 300 520 210 332 91" },
   { title: "Goods issue and invoice", system: "SAP ERP + Invoice Agent", detail: "Goods issue closes fulfilment, generates the invoice and writes the financial event back to SAP.", agent: 9, platform: "azure", endpoint: "erp", packet: "INV · 920184", path: "M332 91 C210 390 275 590 500 591 C700 590 780 380 916 319" },
   { title: "Customer confirmation sent", system: "Email channel", detail: "Order confirmation, shipping documents and invoice leave through the customer channel with a complete audit trail.", agent: 8, platform: "uipath", endpoint: "email", packet: "COMPLETE · 11 EVENTS", path: "M916 319 C700 200 350 120 83 176" },
 ];
