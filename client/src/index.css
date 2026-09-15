@@ -299,8 +299,10 @@ main { width: 100%; min-height: calc(100vh - 120px); }
 .platform-node.active > i { background: var(--green); box-shadow: 0 0 9px rgba(159,196,107,.7); }
 .platform-logo { display: grid; place-items: center; flex: 0 0 38px; width: 38px; height: 38px; overflow: hidden; border: 1px solid rgba(255,255,255,.075); background: rgba(255,255,255,.035); }
 .platform-logo img { width: 26px; height: 26px; object-fit: contain; }
+.platform-logo-langchain { flex-basis: 72px; width: 72px; }.platform-logo-langchain img { width: 60px; height: 20px; }
 .platform-node-copy { display: flex; flex-direction: column; min-width: 0; }
 .platform-node-copy strong { color: inherit; font-size: 10px; font-weight: 650; }.platform-node-copy small { margin-top: 4px; color: #65675f; font-size: 8px; white-space: nowrap; }
+.node-langchain .platform-node-copy strong { display: none; }.node-langchain .platform-node-copy small { margin-top: 0; }
 .node-foundry { top: 50%; left: 50%; min-width: 196px; min-height: 74px; transform: translate(-50%,-50%); border-color: rgba(111,108,229,.38); }
 .node-foundry .platform-logo { width: 48px; height: 48px; flex-basis: 48px; background: rgba(87,82,221,.07); }.node-foundry .platform-logo img { width: 34px; height: 34px; }
 .node-copilot { top: 10%; left: 23%; }.node-langchain { top: 10%; right: 23%; }.node-fabric { right: 50%; bottom: 5%; transform: translateX(50%); }.node-uipath { right: 22%; bottom: 17%; }.node-azure { bottom: 17%; left: 22%; }
@@ -325,6 +327,7 @@ main { width: 100%; min-height: calc(100vh - 120px); }
 .inspector-platform { padding: 43px 0 30px; border-bottom: 1px solid var(--line); }
 .inspector-logo { display: grid; place-items: center; width: 66px; height: 66px; margin-bottom: 28px; border: 1px solid var(--line-hot); background: rgba(255,255,255,.035); }
 .inspector-logo img { width: 44px; height: 44px; object-fit: contain; }.inspector-platform > span { color: var(--gold); font-family: "IBM Plex Mono", monospace; font-size: 8px; text-transform: uppercase; letter-spacing: .08em; }
+.inspector-logo-langchain { width: 154px; }.inspector-logo-langchain img { width: 126px; height: 30px; }
 .inspector-platform h3 { margin: 9px 0 5px; font-family: "Cormorant Garamond", serif; font-size: 34px; font-weight: 500; line-height: .95; }.inspector-platform > strong { color: #85877d; font-size: 10px; font-weight: 550; }.inspector-platform p { margin: 15px 0 0; color: #999a91; font-size: 11px; line-height: 1.65; }
 .agent-signal-card { margin-top: 18px; padding: 17px; border: 1px solid var(--line); background: rgba(255,255,255,.012); }
 .agent-signal-card > div:first-child { display: flex; align-items: center; gap: 7px; color: var(--green); font-family: "IBM Plex Mono", monospace; font-size: 7px; letter-spacing: .065em; }.agent-signal-card h4 { margin: 17px 0 4px; color: #d0cec4; font-family: "Cormorant Garamond", serif; font-size: 25px; font-weight: 500; }.agent-signal-card > b { color: var(--gold); font-family: "IBM Plex Mono", monospace; font-size: 7px; font-weight: 500; text-transform: uppercase; }.agent-signal-card > p { margin: 12px 0 16px; color: #85877d; font-size: 10px; line-height: 1.55; }
@@ -799,6 +802,7 @@ main { width: 100%; min-height: calc(100vh - 120px); }
   .azure-perimeter::after { display: none; }
   .platform-node { min-width: 112px; min-height: 48px; gap: 7px; padding: 6px 8px; }
   .platform-logo { width: 31px; height: 31px; flex-basis: 31px; }.platform-logo img { width: 23px; height: 23px; }
+  .platform-logo-langchain { width: 56px; flex-basis: 56px; }.platform-logo-langchain img { width: 46px; height: 16px; }
   .platform-node-copy strong { font-size: 8px; }.platform-node-copy small { display: none; }
   .node-foundry { min-width: 132px; min-height: 58px; }.node-foundry .platform-logo { width: 38px; height: 38px; flex-basis: 38px; }.node-foundry .platform-logo img { width: 28px; height: 28px; }
   .node-copilot { top: 22%; left: 3%; }.node-langchain { top: 22%; right: 3%; }.node-fabric { bottom: 17%; }.node-uipath { right: 2%; bottom: 29%; }.node-azure { bottom: 29%; left: 2%; }

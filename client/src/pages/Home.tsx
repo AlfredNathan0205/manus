@@ -52,7 +52,7 @@ const ASSETS = {
   copilotStudio: "/manus-storage/copilot-studio_cd239b87.png",
   fabric: "/manus-storage/microsoft-fabric_bb084905.svg",
   uipath: "/manus-storage/uipath_b6902e84.svg",
-  langchain: "/manus-storage/langchain_5b02061f.svg",
+  langchain: "/manus-storage/langchain-wordmark-white_558c3431.svg",
   azure: "/manus-storage/microsoft-azure_7e3847cf.svg",
   whatsapp: "/manus-storage/whatsapp_9008dd98.svg",
   sap: "/manus-storage/sap_713309ae.svg",
@@ -1275,7 +1275,7 @@ function TechSection() {
                 onClick={() => inspectPlatform(platform.key)}
                 aria-pressed={activePlatform === platform.key}
               >
-                <span className="platform-logo"><img src={platform.logo} alt={`${platform.name} logo`} /></span>
+                <span className={`platform-logo platform-logo-${platform.key}`}><img src={platform.logo} alt={`${platform.name} logo`} /></span>
                 <span className="platform-node-copy"><strong>{platform.name}</strong><small>{platform.role}</small></span>
                 <i />
               </motion.button>
@@ -1312,7 +1312,7 @@ function TechSection() {
           <aside className="platform-inspector">
             <div className="inspector-status"><span><Activity size={13} />{transactionActive ? "Transaction service" : "Selected service"}</span><b>{transactionActive ? currentTransaction.human ? "CONTROL" : transactionComplete ? "COMPLETE" : "EXECUTING" : swarmRunning ? "SWARMING" : "PINNED"}</b></div>
             <motion.div key={selectedPlatform.key} className="inspector-platform" initial={{ opacity: 0, x: 8 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: .18 }}>
-              <div className="inspector-logo"><img src={selectedPlatform.logo} alt={`${selectedPlatform.name} logo`} /></div>
+              <div className={`inspector-logo inspector-logo-${selectedPlatform.key}`}><img src={selectedPlatform.logo} alt={`${selectedPlatform.name} logo`} /></div>
               <span>{selectedPlatform.layer}</span>
               <h3>{selectedPlatform.name}</h3>
               <strong>{selectedPlatform.role}</strong>
