@@ -52,12 +52,12 @@ const ASSETS = {
   copilotStudio: "/manus-storage/copilot-studio_cd239b87.png",
   fabric: "/manus-storage/microsoft-fabric_bb084905.svg",
   uipath: "/manus-storage/uipath_b6902e84.svg",
-  langchain: "/manus-storage/langchain-wordmark-white_558c3431.svg",
+  langchain: "/manus-storage/langchain-lockup-black_23052684.svg",
   azure: "/manus-storage/microsoft-azure_7e3847cf.svg",
   whatsapp: "/manus-storage/whatsapp_9008dd98.svg",
   sap: "/manus-storage/sap_713309ae.svg",
   dynamics365: "/manus-storage/dynamics365_b2a9ff92.svg",
-  fricke: "/manus-storage/fricke-mark_03d95843.png",
+  fricke: "/manus-storage/fricke-full-logo_753621e3.svg",
   olfyneAward: "/manus-storage/olfyne-beautyworld-finalist-alfred_abe3e404.png",
 };
 
@@ -1247,7 +1247,7 @@ function TechSection() {
                 const EndpointIcon = endpoint.icon;
                 return (
                   <div key={endpoint.key} className={`enterprise-endpoint endpoint-${endpoint.key} ${displayedEndpoint === endpoint.key ? "active" : ""}`}>
-                    <span>{endpoint.logo ? <img src={endpoint.logo} alt="" /> : <EndpointIcon size={15} />}</span>
+                    <span>{endpoint.logo ? <img src={endpoint.logo} alt={`${endpoint.name} logo`} /> : <EndpointIcon size={15} />}</span>
                     <div><strong>{endpoint.name}</strong><small>{endpoint.role}</small></div><i />
                   </div>
                 );
@@ -1258,7 +1258,7 @@ function TechSection() {
                 const EndpointIcon = endpoint.icon;
                 return (
                   <div key={endpoint.key} className={`enterprise-endpoint endpoint-${endpoint.key} ${displayedEndpoint === endpoint.key ? "active" : ""}`}>
-                    <span>{endpoint.logo ? <img src={endpoint.logo} alt="" /> : <EndpointIcon size={15} />}</span>
+                    <span>{endpoint.logo ? <img src={endpoint.logo} alt={`${endpoint.name} logo`} /> : <EndpointIcon size={15} />}</span>
                     <div><strong>{endpoint.name}</strong><small>{endpoint.role}</small></div><i />
                   </div>
                 );
