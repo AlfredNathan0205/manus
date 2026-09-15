@@ -36,6 +36,7 @@ import {
   Sparkles,
   UserCheck,
   Workflow,
+  X,
   Zap,
 } from "lucide-react";
 
@@ -56,6 +57,7 @@ const ASSETS = {
   sap: "/manus-storage/sap_713309ae.svg",
   dynamics365: "/manus-storage/dynamics365_b2a9ff92.svg",
   fricke: "/manus-storage/fricke-mark_03d95843.png",
+  olfyneAward: "/manus-storage/olfyne-beautyworld-finalist-alfred_abe3e404.png",
 };
 
 type SectionId = "intro" | "tech" | "b2c" | "o2c" | "impact" | "next";
@@ -109,18 +111,31 @@ const ventures = [
     meta: "Creative intelligence",
     copy: "Generative and agentic AI inside the perfumer’s creative process.",
     award: "Finalist · Tech Innovation of the Year · Beautyworld Middle East",
+    awardImage: ASSETS.olfyneAward,
+    demoTitle: "A creative brief becomes an intentional fragrance direction.",
+    demo: "Olfyne brings generative and agentic intelligence into the perfumer’s workflow without removing authorship, judgement or the final creative decision.",
+    steps: ["Structure the creative brief", "Explore governed directions", "Perfumer evaluates and decides"],
+    result: "Faster creative exploration with the perfumer visibly in control.",
     icon: Sparkles,
   },
   {
     name: "CortiSleeve",
     meta: "Human intent layer",
     copy: "Patent-pending middleware that keeps human intent inside autonomous agent loops.",
+    demoTitle: "Human intent becomes an enforceable runtime boundary.",
+    demo: "CortiSleeve carries purpose, constraints and escalation rules through an agent workflow so autonomy cannot quietly drift away from the original human instruction.",
+    steps: ["Capture intent and boundaries", "Monitor agent decisions", "Stop, explain or escalate"],
+    result: "Autonomy that remains accountable to the person who initiated the work.",
     icon: Fingerprint,
   },
   {
     name: "Trend Analysis MCP",
     meta: "Signal intelligence",
     copy: "An MCP-powered trend engine that turns live market signals into structured beauty and fragrance intelligence.",
+    demoTitle: "Fragmented market signals become a decision-ready trend brief.",
+    demo: "Trend Analysis MCP gives agents a structured route into current beauty, fragrance and consumer signals, then shapes the evidence into a consistent intelligence output.",
+    steps: ["Collect live market signals", "Cluster themes and momentum", "Publish a sourced trend brief"],
+    result: "A repeatable intelligence layer for creative and commercial decisions.",
     icon: Network,
   },
 ];
@@ -853,6 +868,31 @@ function OrbitalSystem() {
 
 function ProfileSection() {
   const [activeCareer, setActiveCareer] = useState(0);
+  const [activeVenture, setActiveVenture] = useState<number | null>(() => {
+    const requested = new URLSearchParams(window.location.search).get("venture");
+    const index = ventures.findIndex((venture) => venture.name.toLowerCase().replace(/\s+/g, "-") === requested);
+    return index >= 0 ? index : null;
+  });
+  const modalCloseRef = useRef<HTMLButtonElement>(null);
+  const selectedVenture = activeVenture === null ? null : ventures[activeVenture];
+  const SelectedVentureIcon = selectedVenture?.icon ?? Sparkles;
+
+  useEffect(() => {
+    if (activeVenture === null) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const focusTimer = window.setTimeout(() => modalCloseRef.current?.focus(), 50);
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setActiveVenture(null);
+    };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => {
+      window.clearTimeout(focusTimer);
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [activeVenture]);
+
   return (
     <motion.section
       className="profile-section"
@@ -877,12 +917,12 @@ function ProfileSection() {
         <OrbitalSystem />
       </div>
 
-      <div className="profile-statement">
+      <motion.div className="profile-statement alfred-highlight" whileHover={{ y: -3 }} transition={{ duration: .22 }}>
         <span className="statement-index">ALFRED / 01</span>
         <p>
           CIO and Global Operating Board Member at CPL Aromas. Former Global Head of Digitalization at Symrise. I understand the full flavour and fragrance value chain, and I still build.
         </p>
-      </div>
+      </motion.div>
 
       <div className="content-block">
         <div className="block-heading">
@@ -896,20 +936,25 @@ function ProfileSection() {
           {ventures.map((venture, index) => {
             const Icon = venture.icon;
             return (
-              <motion.article
+              <motion.button
+                type="button"
                 key={venture.name}
-                className="venture-card"
+                className={`venture-card ${venture.name === "Trend Analysis MCP" ? "trend-card" : ""}`}
                 initial={{ opacity: 0, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.16 + index * 0.08 }}
                 whileHover={{ y: -5 }}
+                onClick={() => setActiveVenture(index)}
+                aria-haspopup="dialog"
+                aria-label={`Open ${venture.name} product summary`}
               >
                 <div className="venture-top"><Icon size={20} /><span>0{index + 1}</span></div>
                 <span className="overline">{venture.meta}</span>
                 <h3>{venture.name}</h3>
                 <p>{venture.copy}</p>
-                {venture.award && <div className="venture-award"><BadgeCheck size={13} /><span>{venture.award}</span></div>}
-              </motion.article>
+                {venture.award && <div className="venture-award"><img src={venture.awardImage} alt="Beautyworld Dubai Awards 2026 finalist announcement" /><span>{venture.award}</span></div>}
+                <div className="venture-open"><span>Open product brief</span><ArrowUpRight size={14} /></div>
+              </motion.button>
             );
           })}
         </div>
@@ -955,6 +1000,47 @@ function ProfileSection() {
           </motion.div>
         </AnimatePresence>
       </div>
+
+      <AnimatePresence>
+        {selectedVenture && (
+          <motion.div className="venture-modal-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onMouseDown={() => setActiveVenture(null)}>
+            <motion.div
+              className={`venture-modal ${selectedVenture.name === "Trend Analysis MCP" ? "trend-modal" : ""}`}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="venture-modal-title"
+              initial={{ opacity: 0, y: 18, scale: .97 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 10, scale: .98 }}
+              transition={{ duration: .24 }}
+              onMouseDown={(event) => event.stopPropagation()}
+            >
+              <button ref={modalCloseRef} type="button" className="venture-modal-close" onClick={() => setActiveVenture(null)} aria-label="Close product summary"><X size={18} /></button>
+              <div className="venture-modal-copy">
+                <span className="overline">{selectedVenture.meta}</span>
+                <h2 id="venture-modal-title">{selectedVenture.name}</h2>
+                <h3>{selectedVenture.demoTitle}</h3>
+                <p>{selectedVenture.demo}</p>
+                <div className="venture-demo-flow">
+                  {selectedVenture.steps.map((step, index) => <div key={step}><span>0{index + 1}</span><i /><strong>{step}</strong></div>)}
+                </div>
+                <div className="venture-result"><BadgeCheck size={16} /><div><span>Result</span><strong>{selectedVenture.result}</strong></div></div>
+              </div>
+              <div className="venture-modal-visual">
+                {selectedVenture.awardImage ? (
+                  <div className="award-feature"><img src={selectedVenture.awardImage} alt="Olfyne finalist for Technology Innovation of the Year at Beautyworld Dubai Awards 2026" /><span>Official finalist announcement</span></div>
+                ) : (
+                  <div className="venture-demo-orbit">
+                    <div className="demo-orbit-ring ring-one" /><div className="demo-orbit-ring ring-two" />
+                    <span className="demo-signal signal-one" /><span className="demo-signal signal-two" /><span className="demo-signal signal-three" />
+                    <div className="demo-core"><SelectedVentureIcon size={24} /><strong>{selectedVenture.name}</strong><small>LIVE PRODUCT PATTERN</small></div>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.section>
   );
 }

@@ -201,7 +201,8 @@ main { width: 100%; min-height: calc(100vh - 120px); }
 .system-log p { margin: 0; color: var(--dim); font-size: 12px; line-height: 1.5; }
 .system-log svg { color: var(--green); }
 
-.profile-statement { display: grid; grid-template-columns: 1fr 4fr; gap: 44px; margin: 34px 0 116px; padding: 42px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.profile-statement { position: relative; display: grid; grid-template-columns: 1fr 4fr; gap: 44px; margin: 34px 0 116px; padding: 42px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); transition: background .24s var(--ease-out), box-shadow .24s var(--ease-out); }
+.alfred-highlight::before { position: absolute; inset: 0 -18px; z-index: -1; background: linear-gradient(90deg, rgba(231,185,106,.045), transparent 58%); opacity: 0; content: ""; transition: opacity .24s var(--ease-out); }.alfred-highlight:hover::before { opacity: 1; }.alfred-highlight:hover { box-shadow: inset 2px 0 rgba(231,185,106,.42); }
 .statement-index { color: var(--faint); font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: .11em; }
 .profile-statement p { max-width: 1000px; margin: 0; color: #cfcec5; font-family: "Cormorant Garamond", serif; font-size: clamp(30px, 3.1vw, 48px); line-height: 1.16; letter-spacing: -.025em; }
 .content-block { margin-top: 110px; }
@@ -209,14 +210,28 @@ main { width: 100%; min-height: calc(100vh - 120px); }
 .block-heading h2 { margin: 10px 0 0; font-family: "Cormorant Garamond", serif; font-size: clamp(38px, 4.5vw, 64px); font-weight: 500; line-height: .96; letter-spacing: -.035em; }
 .block-heading > p { max-width: 500px; margin: 0; color: #aaa9a1; font-size: 16px; line-height: 1.65; }
 .venture-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
-.venture-card { position: relative; min-height: 310px; padding: 30px; border: 1px solid var(--line); background: rgba(16,18,14,.72); transition: border-color .22s var(--ease-out), background .22s var(--ease-out); }
-.venture-card:hover { border-color: var(--line-hot); background: rgba(20,21,17,.92); }
+.venture-card { position: relative; display: flex; flex-direction: column; width: 100%; min-height: 354px; padding: 30px; overflow: hidden; border: 1px solid var(--line); color: inherit; text-align: left; background: rgba(16,18,14,.72); transition: border-color .22s var(--ease-out), background .22s var(--ease-out), box-shadow .22s var(--ease-out); }
+.venture-card:hover, .venture-card:focus-visible { border-color: var(--line-hot); background: rgba(20,21,17,.92); box-shadow: 0 22px 55px rgba(0,0,0,.25); outline: none; }
+.venture-card::after { position: absolute; inset: auto -25% -65% 35%; height: 80%; border-radius: 50%; background: radial-gradient(circle, rgba(231,185,106,.07), transparent 68%); opacity: 0; content: ""; pointer-events: none; transition: opacity .25s var(--ease-out), transform .35s var(--ease-out); transform: translate3d(12px,12px,0); }.venture-card:hover::after, .venture-card:focus-visible::after { opacity: 1; transform: translate3d(0,0,0); }
+.venture-card.trend-card:hover, .venture-card.trend-card:focus-visible { border-color: rgba(159,196,107,.42); box-shadow: 0 22px 60px rgba(0,0,0,.28), 0 0 34px rgba(159,196,107,.055); }.trend-card .venture-top svg { transition: transform .32s var(--ease-out), color .22s; }.trend-card:hover .venture-top svg, .trend-card:focus-visible .venture-top svg { color: var(--green); transform: rotate(7deg) scale(1.08); }
 .venture-top { display: flex; justify-content: space-between; margin-bottom: 62px; color: var(--gold); }
 .venture-top span { color: var(--faint); font-family: "IBM Plex Mono", monospace; font-size: 10px; }
 .venture-card h3 { margin: 9px 0 10px; font-family: "Cormorant Garamond", serif; font-size: 36px; font-weight: 500; }
 .venture-card p { max-width: 340px; margin: 0; color: #aaa9a1; font-size: 15px; line-height: 1.68; }
-.venture-award { display: flex; align-items: flex-start; gap: 8px; margin-top: 20px; padding-top: 14px; color: var(--green); border-top: 1px solid rgba(159,196,107,.18); }
-.venture-award svg { flex: 0 0 auto; margin-top: 1px; }.venture-award span { max-width: 310px; font-family: "IBM Plex Mono", monospace; font-size: 9px; line-height: 1.55; text-transform: uppercase; letter-spacing: .045em; }
+.venture-award { display: grid; grid-template-columns: 92px 1fr; gap: 10px; align-items: center; margin-top: 18px; padding-top: 12px; color: var(--green); border-top: 1px solid rgba(159,196,107,.18); }
+.venture-award img { width: 92px; height: 48px; object-fit: cover; border: 1px solid rgba(231,185,106,.26); }.venture-award span { font-family: "IBM Plex Mono", monospace; font-size: 7px; line-height: 1.55; text-transform: uppercase; letter-spacing: .04em; }
+.venture-open { position: relative; z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: auto; padding-top: 18px; color: #696b63; font-family: "IBM Plex Mono", monospace; font-size: 8px; text-transform: uppercase; letter-spacing: .06em; transition: color .2s; }.venture-card:hover .venture-open, .venture-card:focus-visible .venture-open { color: var(--gold); }.venture-open svg { transition: transform .2s var(--ease-out); }.venture-card:hover .venture-open svg, .venture-card:focus-visible .venture-open svg { transform: translate(2px,-2px); }
+.venture-modal-backdrop { position: fixed; z-index: 300; inset: 0; display: grid; place-items: center; padding: 28px; overflow-y: auto; background: rgba(3,4,3,.84); backdrop-filter: blur(18px) saturate(85%); }
+.venture-modal { position: relative; display: grid; grid-template-columns: minmax(0, 1.02fr) minmax(380px, .98fr); width: min(1080px, 100%); max-height: calc(100vh - 56px); overflow: auto; border: 1px solid var(--line-hot); color: var(--ink); background: radial-gradient(circle at 85% 10%, rgba(231,185,106,.07), transparent 30%), #0d0f0c; box-shadow: 0 45px 140px rgba(0,0,0,.65); }
+.venture-modal.trend-modal { background: radial-gradient(circle at 85% 10%, rgba(159,196,107,.075), transparent 32%), #0d0f0c; }
+.venture-modal-close { position: absolute; z-index: 5; top: 18px; right: 18px; display: grid; place-items: center; width: 40px; height: 40px; border: 1px solid var(--line); color: #a5a69c; background: rgba(10,11,9,.85); transition: color .18s, border-color .18s, transform .16s; }.venture-modal-close:hover, .venture-modal-close:focus-visible { color: var(--gold); border-color: var(--line-hot); outline: none; }.venture-modal-close:active { transform: scale(.96); }
+.venture-modal-copy { padding: 54px 52px; }.venture-modal-copy h2 { margin: 12px 0 26px; font-family: "Cormorant Garamond", serif; font-size: clamp(45px, 5vw, 68px); font-weight: 500; line-height: .88; letter-spacing: -.035em; }.venture-modal-copy h3 { max-width: 600px; margin: 0; color: #cfcec5; font-family: "Cormorant Garamond", serif; font-size: 28px; font-weight: 500; line-height: 1.05; }.venture-modal-copy > p { max-width: 590px; margin: 18px 0 0; color: #9d9f95; font-size: 14px; line-height: 1.72; }
+.venture-demo-flow { display: grid; grid-template-columns: repeat(3, 1fr); margin-top: 34px; border: 1px solid var(--line); }.venture-demo-flow > div { position: relative; min-height: 112px; padding: 16px; border-right: 1px solid var(--line); }.venture-demo-flow > div:last-child { border-right: 0; }.venture-demo-flow span { color: var(--gold); font-family: "IBM Plex Mono", monospace; font-size: 7px; }.venture-demo-flow i { display: block; width: 28px; height: 1px; margin: 13px 0; background: linear-gradient(90deg, var(--gold), transparent); }.venture-demo-flow strong { display: block; color: #9fa097; font-size: 10px; font-weight: 550; line-height: 1.5; }
+.venture-result { display: grid; grid-template-columns: 28px 1fr; gap: 10px; align-items: start; margin-top: 20px; padding: 17px; color: var(--green); border: 1px solid rgba(159,196,107,.2); background: rgba(159,196,107,.035); }.venture-result span { display: block; color: var(--green); font-family: "IBM Plex Mono", monospace; font-size: 7px; text-transform: uppercase; letter-spacing: .08em; }.venture-result strong { display: block; margin-top: 6px; color: #bcbdb3; font-size: 11px; font-weight: 550; line-height: 1.5; }
+.venture-modal-visual { display: grid; place-items: center; min-height: 610px; padding: 74px 38px 38px; border-left: 1px solid var(--line); background: rgba(255,255,255,.008); }.award-feature { width: 100%; }.award-feature img { display: block; width: 100%; border: 1px solid rgba(231,185,106,.24); box-shadow: 0 25px 70px rgba(0,0,0,.38); }.award-feature span { display: block; margin-top: 12px; color: #6c6e65; font-family: "IBM Plex Mono", monospace; font-size: 7px; text-align: right; text-transform: uppercase; letter-spacing: .07em; }
+.venture-demo-orbit { position: relative; width: min(390px, 100%); aspect-ratio: 1; }.demo-orbit-ring { position: absolute; top: 50%; left: 50%; border: 1px solid rgba(231,185,106,.17); border-radius: 50%; transform: translate(-50%,-50%); animation: demo-orbit 18s linear infinite; }.demo-orbit-ring.ring-one { width: 88%; height: 88%; }.demo-orbit-ring.ring-two { width: 61%; height: 61%; border-style: dashed; animation-duration: 12s; animation-direction: reverse; }.demo-core { position: absolute; top: 50%; left: 50%; display: grid; place-items: center; width: 154px; height: 154px; padding: 22px; border: 1px solid var(--line-hot); border-radius: 50%; color: var(--gold); text-align: center; background: #12130f; box-shadow: 0 0 60px rgba(231,185,106,.11); transform: translate(-50%,-50%); }.demo-core strong { margin-top: 8px; color: #d6d4ca; font-family: "Cormorant Garamond", serif; font-size: 21px; font-weight: 500; line-height: 1; }.demo-core small { margin-top: 8px; color: #66685f; font-family: "IBM Plex Mono", monospace; font-size: 6px; letter-spacing: .05em; }.demo-signal { position: absolute; z-index: 2; width: 8px; height: 8px; border: 2px solid #11120f; border-radius: 50%; background: var(--gold); box-shadow: 0 0 14px rgba(231,185,106,.7); animation: demo-signal 2.4s var(--ease-in-out) infinite; }.signal-one { top: 12%; left: 47%; }.signal-two { right: 8%; bottom: 28%; animation-delay: -.8s; background: var(--green); }.signal-three { bottom: 10%; left: 25%; animation-delay: -1.6s; }
+@keyframes demo-orbit { to { transform: translate(-50%,-50%) rotate(360deg); } }
+@keyframes demo-signal { 0%, 100% { opacity: .35; transform: scale(.8); } 50% { opacity: 1; transform: scale(1.15); } }
 .career-block { padding-bottom: 40px; }
 .brand-rail { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
 .brand-tile { position: relative; display: flex; flex-direction: column; justify-content: space-between; min-width: 0; min-height: 145px; padding: 0; overflow: hidden; border: 1px solid var(--line); background: #f1f0eb; transition: transform .22s var(--ease-out), border-color .22s; }
@@ -681,6 +696,10 @@ main { width: 100%; min-height: calc(100vh - 120px); }
   .section-heading h1 { font-size: clamp(56px, 10vw, 80px); }
   .venture-grid { grid-template-columns: 1fr; }
   .venture-card { min-height: 230px; }
+  .venture-modal { grid-template-columns: 1fr; width: min(720px, 100%); }
+  .venture-modal-copy { padding: 48px 42px; }
+  .venture-modal-visual { min-height: 440px; padding: 45px 42px; border-top: 1px solid var(--line); border-left: 0; }
+  .award-feature { max-width: 580px; }
   .career-detail { grid-template-columns: 1fr; gap: 26px; }
   .platform-topbar { grid-template-columns: 1fr auto; }
   .platform-stats { display: none; }
@@ -738,6 +757,21 @@ main { width: 100%; min-height: calc(100vh - 120px); }
   .system-log svg { display: none; }
   .content-block { margin-top: 80px; }
   .block-heading h2 { font-size: 45px; }
+  .venture-card { padding: 25px; }
+  .venture-top { margin-bottom: 45px; }
+  .venture-award { grid-template-columns: 104px 1fr; }
+  .venture-award img { width: 104px; height: 55px; }
+  .venture-modal-backdrop { place-items: start center; padding: 12px; }
+  .venture-modal { max-height: calc(100vh - 24px); }
+  .venture-modal-copy { padding: 58px 22px 28px; }
+  .venture-modal-copy h2 { font-size: 48px; }
+  .venture-modal-copy h3 { font-size: 25px; }
+  .venture-demo-flow { grid-template-columns: 1fr; }
+  .venture-demo-flow > div { min-height: 78px; border-right: 0; border-bottom: 1px solid var(--line); }
+  .venture-demo-flow > div:last-child { border-bottom: 0; }
+  .venture-modal-visual { min-height: 300px; padding: 28px 20px; }
+  .venture-demo-orbit { width: min(300px, 100%); }
+  .demo-core { width: 128px; height: 128px; }
   .brand-rail { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; }
   .brand-tile { flex: 0 0 210px; scroll-snap-align: start; }
   .career-detail { padding: 28px; }
