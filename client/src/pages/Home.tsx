@@ -24,6 +24,7 @@ import {
   Layers3,
   LockKeyhole,
   Mail,
+  MapPin,
   Maximize2,
   Minimize2,
   Network,
@@ -45,8 +46,8 @@ const ASSETS = {
   cpl: "/manus-storage/cpl-aromas-purple-square_89f03cc9.jpg",
   symrise: "/manus-storage/symrise-logo-trimmed_ae94798c.png",
   levis: "/manus-storage/levi-strauss-logo_32a09afd.jpg",
-  cognizant: "/manus-storage/cognizant-logo_b2f03f0b.png",
-  ntt: "/manus-storage/ntt-data-logo_51231f78.png",
+  cognizant: "/manus-storage/cognizant-logo-trimmed_3611bfea.png",
+  ntt: "/manus-storage/ntt-data-logo-trimmed_dc6d6fda.png",
   foundry: "/manus-storage/microsoft-foundry_b8befd3a.svg",
   copilotStudio: "/manus-storage/copilot-studio_cd239b87.png",
   fabric: "/manus-storage/microsoft-fabric_bb084905.svg",
@@ -145,6 +146,7 @@ const career = [
     name: "CPL Aromas",
     role: "CIO & Global Operating Board Member",
     years: "2017 — present",
+    locations: ["London"],
     logo: ASSETS.cpl,
     copy: "Own enterprise AI and technology strategy across 18+ countries. Built production systems for perfumery, formulation, regulatory work and predictive stability; deployed Copilot and Azure AI Foundry; created custom agents in Copilot Studio; established a Microsoft Fabric data lake; and moved the estate away from fully on-premise infrastructure.",
   },
@@ -152,29 +154,33 @@ const career = [
     name: "Symrise",
     role: "Global Head of Digitalization & IT Director",
     years: "2012 — 2017",
+    locations: ["Singapore"],
     logo: ASSETS.symrise,
-    copy: "Led the SAP rollout across the APAC region and global innovation and big-data programmes, reporting to the Global CIO and Flavor Division President. Worked on an early AI bot for perfume creation and implemented EEG-based consumer panel testing for the Fragrance Division.",
+    copy: "Led the SAP rollout across the APAC region, global innovation and big-data programmes, reporting to the Global CIO and Flavor Division President. Worked on an early AI bot for perfume creation and implemented EEG-based consumer panel testing for the Fragrance Division.",
   },
   {
     name: "Levi Strauss & Co.",
     role: "Enterprise systems & consulting leadership",
     years: "2010 — 2012",
+    locations: ["Singapore", "San Francisco"],
     logo: ASSETS.levis,
-    copy: "A 12-year foundation in SAP, ERP and global transformation delivery across Singapore, San Francisco, Belgium and India, progressing from hands-on consulting into programme and practice leadership.",
+    copy: "A two-year chapter in SAP, ERP and global transformation delivery across Singapore and San Francisco, progressing from hands-on consulting into programme and practice leadership.",
   },
   {
     name: "Cognizant",
     role: "Enterprise systems & consulting leadership",
     years: "2008 — 2010",
+    locations: ["Philadelphia"],
     logo: ASSETS.cognizant,
     copy: "Multi-country enterprise delivery and architecture discipline across global clients, with a focus on systems that had to work in the real operating environment.",
   },
   {
     name: "Caritor / NTT DATA",
-    role: "Enterprise technology delivery",
+    role: "Global delivery",
     years: "2002 — 2007",
+    locations: ["India", "France", "Spain"],
     logo: ASSETS.ntt,
-    copy: "The early consulting chapter: enterprise systems, regional delivery and the operational discipline that still underpins every agent programme today.",
+    copy: "The early consulting chapter: enterprise systems, global delivery and the operational discipline that still underpins every agent programme today.",
   },
 ];
 
@@ -978,7 +984,10 @@ function ProfileSection() {
               aria-pressed={activeCareer === index}
             >
               <img src={item.logo} alt={`${item.name} logo`} />
-              <span>{item.years}</span>
+              <div className="brand-tile-footer">
+                <span>{item.years}</span>
+                <small><MapPin size={9} />{item.locations.length === 1 ? item.locations[0] : `${item.locations.length} locations`}</small>
+              </div>
             </button>
           ))}
         </div>
@@ -995,6 +1004,9 @@ function ProfileSection() {
               <span className="career-years">{career[activeCareer].years}</span>
               <h3>{career[activeCareer].name}</h3>
               <p className="career-role">{career[activeCareer].role}</p>
+              <div className="career-locations" aria-label={`${career[activeCareer].name} locations`}>
+                {career[activeCareer].locations.map((location) => <span key={location}><MapPin size={12} />{location}</span>)}
+              </div>
             </div>
             <p>{career[activeCareer].copy}</p>
           </motion.div>
