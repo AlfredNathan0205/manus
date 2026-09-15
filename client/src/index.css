@@ -170,7 +170,9 @@ main { width: 100%; min-height: calc(100vh - 120px); }
   letter-spacing: -.045em;
 }
 .hero-copy h1 { max-width: 790px; font-size: clamp(68px, 7.7vw, 124px); line-height: .78; }
-.hero-copy h1 em { color: var(--gold); font-weight: 400; }
+.hero-copy h1 em { position: relative; z-index: 0; display: inline-block; isolation: isolate; color: var(--gold); font-weight: 400; text-shadow: 0 0 22px rgba(231,185,106,.09); }
+.hero-copy h1 em::after { position: absolute; z-index: -1; inset: 8% -10% 0; border-radius: 50%; background: radial-gradient(ellipse, rgba(231,185,106,.28), rgba(231,185,106,.06) 44%, transparent 72%); filter: blur(16px); opacity: .08; content: ""; pointer-events: none; animation: live-activation 3.4s var(--ease-in-out) infinite; transform-origin: center; }
+@keyframes live-activation { 0%, 100% { opacity: .07; transform: scale(.96); } 50% { opacity: .3; transform: scale(1.04); } }
 .hero-lede { max-width: 650px; margin: 36px 0 0; color: #b8b7ae; font-size: clamp(16px, 1.3vw, 20px); line-height: 1.65; }
 .hero-proof { display: flex; gap: 1px; margin-top: 48px; border: 1px solid var(--line); background: var(--line); }
 .metric { flex: 1; min-width: 0; padding: 19px 22px; background: rgba(9,10,8,.86); }

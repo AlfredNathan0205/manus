@@ -909,7 +909,7 @@ function ProfileSection() {
     >
       <div className="hero-grid">
         <div className="hero-copy">
-          <div className="eyebrow"><span />Production AI, not a roadmap</div>
+          <div className="eyebrow"><span />Real-world impact, delivered today</div>
           <h1>The agents are<br /><em>live.</em></h1>
           <p className="hero-lede">
             Built inside CPL Aromas, where formulation, compliance, manufacturing and customer promises meet the real world.
