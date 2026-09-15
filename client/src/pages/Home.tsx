@@ -19,6 +19,7 @@ import {
   Fingerprint,
   Gauge,
   GitBranch,
+  Globe2,
   Hand,
   Layers3,
   LockKeyhole,
@@ -230,7 +231,7 @@ const swarmAgents: { name: string; domain: string; job: string; platform: Platfo
   { name: "Invoice", domain: "Finance", job: "Listens for goods issue and dispatches the completed invoice automatically.", platform: "azure", event: "Goods issue received · invoice delivered", ring: "inner" },
 ];
 
-type EndpointKey = "email" | "whatsapp" | "crm" | "erp" | "factory";
+type EndpointKey = "email" | "whatsapp" | "crm" | "erp" | "factory" | "portal";
 type TransactionStage = {
   title: string;
   system: string;
@@ -249,6 +250,7 @@ const enterpriseEndpoints: { key: EndpointKey; name: string; role: string; icon:
   { key: "crm", name: "Dynamics 365", role: "CRM · quote · customer", icon: BadgeCheck, logo: ASSETS.dynamics365 },
   { key: "erp", name: "SAP", role: "ERP · order · credit · invoice", icon: Database, logo: ASSETS.sap },
   { key: "factory", name: "Fricke", role: "Dosing · production · status", icon: Factory, logo: ASSETS.fricke },
+  { key: "portal", name: "Customer Portal", role: "Live order status", icon: Globe2 },
 ];
 
 const transactionJourney: TransactionStage[] = [
@@ -261,9 +263,20 @@ const transactionJourney: TransactionStage[] = [
   { title: "Mini-MRP and promise", system: "Mini-MRP Agent", detail: "Raw material, safety stock, open POs, vendor lead time and factory capacity resolve the promise date.", agent: 5, platform: "fabric", packet: "PROMISE · 24 SEP", path: "M916 319 C760 390 640 510 500 591" },
   { title: "Production route released", system: "Fricke production system", detail: "The BOM and solution/base route are created and released to the correct Fricke work centre.", agent: 6, platform: "langchain", endpoint: "factory", packet: "PROD · 870144", path: "M500 591 C650 560 790 440 916 365" },
   { title: "Production and QC tracked", system: "Fricke + Status Agent", detail: "Fricke dosing and production movements, followed by packing and QC events, update the order state and customer portal continuously.", agent: 7, platform: "copilot", endpoint: "factory", packet: "QC · RELEASED", path: "M916 365 C730 300 520 210 332 91" },
+  { title: "Live status published", system: "Status Agent + Customer Portal", detail: "The Status Agent converts controlled SAP, Fricke, packing and QC events into a real-time customer timeline with source and timestamp intact.", agent: 7, platform: "copilot", endpoint: "portal", packet: "PORTAL · 5 EVENTS", path: "M916 365 C700 470 350 455 83 347" },
   { title: "Goods issue and invoice", system: "SAP ERP + Invoice Agent", detail: "Goods issue closes fulfilment, generates the invoice and writes the financial event back to SAP.", agent: 9, platform: "azure", endpoint: "erp", packet: "INV · 920184", path: "M332 91 C210 390 275 590 500 591 C700 590 780 380 916 319" },
-  { title: "Customer confirmation sent", system: "Email channel", detail: "Order confirmation, shipping documents and invoice leave through the customer channel with a complete audit trail.", agent: 8, platform: "uipath", endpoint: "email", packet: "COMPLETE · 11 EVENTS", path: "M916 319 C700 200 350 120 83 176" },
+  { title: "Customer confirmation sent", system: "Email channel", detail: "Order confirmation, shipping documents and invoice leave through the customer channel with a complete audit trail.", agent: 8, platform: "uipath", endpoint: "email", packet: "COMPLETE · 12 EVENTS", path: "M916 319 C700 200 350 120 83 176" },
 ];
+
+const portalStatusEvents = [
+  { time: "09:42:16", label: "Order accepted", source: "SAP" },
+  { time: "09:42:18", label: "Materials secured", source: "Mini-MRP" },
+  { time: "11:08:04", label: "Production started", source: "Fricke" },
+  { time: "14:26:51", label: "Packing complete", source: "Fricke" },
+  { time: "15:03:27", label: "QC released", source: "QC system" },
+];
+
+const portalTransactionStage = transactionJourney.findIndex((stage) => stage.endpoint === "portal");
 
 const briefToContract: ProcessStep[] = [
   {
@@ -945,10 +958,11 @@ function ProfileSection() {
 }
 
 function TechSection() {
+  const portalDemo = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("demo") === "portal";
   const [activePlatform, setActivePlatform] = useState<PlatformKey>("copilot");
   const [activeAgent, setActiveAgent] = useState(0);
-  const [swarmRunning, setSwarmRunning] = useState(true);
-  const [transactionStage, setTransactionStage] = useState(-1);
+  const [swarmRunning, setSwarmRunning] = useState(!portalDemo);
+  const [transactionStage, setTransactionStage] = useState(portalDemo ? portalTransactionStage : -1);
   const [transactionRunning, setTransactionRunning] = useState(false);
   const [transactionApproved, setTransactionApproved] = useState(false);
   const [transactionChannel, setTransactionChannel] = useState<"email" | "whatsapp">("email");
@@ -1129,7 +1143,7 @@ function TechSection() {
             </svg>
 
             <div className="endpoint-rail endpoint-rail-left" aria-label="Customer and commercial systems">
-              {enterpriseEndpoints.filter((endpoint) => ["email", "whatsapp", "crm"].includes(endpoint.key)).map((endpoint) => {
+              {enterpriseEndpoints.filter((endpoint) => ["email", "whatsapp", "crm", "portal"].includes(endpoint.key)).map((endpoint) => {
                 const EndpointIcon = endpoint.icon;
                 return (
                   <div key={endpoint.key} className={`enterprise-endpoint endpoint-${endpoint.key} ${displayedEndpoint === endpoint.key ? "active" : ""}`}>
@@ -1211,6 +1225,22 @@ function TechSection() {
               <p>{transactionActive ? currentTransaction.detail : selectedAgent.job}</p>
               <div className="agent-event"><i /><span>{transactionActive ? currentTransaction.packet : selectedAgent.event}</span></div>
             </div>
+            <AnimatePresence>
+              {transactionActive && transactionStage >= portalTransactionStage && (
+                <motion.div className="portal-receipt" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}>
+                  <div className="portal-receipt-head"><span><Globe2 size={13} />Customer Portal</span><b><Radio size={11} />LIVE RECEIPT</b></div>
+                  <div className="portal-order"><span>ORDER SO-54001982</span><strong>{transactionComplete ? "Delivered to customer" : "Production visible"}</strong></div>
+                  <div className="portal-event-list">
+                    {portalStatusEvents.map((event, index) => (
+                      <motion.div key={event.label} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: reduced ? 0 : index * .13 }}>
+                        <i><Check size={9} /></i><time>{event.time}</time><strong>{event.label}</strong><small>{event.source}</small>
+                      </motion.div>
+                    ))}
+                  </div>
+                  <div className="portal-receipt-foot"><ShieldCheck size={12} /><span>Source-linked · timestamped · customer-visible</span></div>
+                </motion.div>
+              )}
+            </AnimatePresence>
             <div className="platform-principle"><ShieldCheck size={18} /><div><strong>Shared platform. Bounded autonomy.</strong><p>Agents reuse the platform; authority remains explicit per job.</p></div></div>
           </aside>
         </div>
