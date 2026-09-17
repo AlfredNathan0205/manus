@@ -900,3 +900,34 @@ main { width: 100%; min-height: calc(100vh - 120px); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
+
+/* CortiSleeve: official product visualisations and verified brand positioning. */
+.venture-product-preview { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 14px; align-items: center; margin-top: 20px; }
+.venture-product-preview img { display: block; width: 112px; aspect-ratio: 4 / 3; object-fit: contain; background: #e6d7c3; border: 1px solid rgba(231,185,106,.2); }
+.venture-product-preview > span { color: #b8b6a9; font-family: "IBM Plex Mono", monospace; font-size: 10px; line-height: 1.7; }
+.venture-credentials { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+.venture-credentials > span { display: inline-flex; align-items: center; gap: 6px; padding: 7px 9px; color: #c7d6b5; border: 1px solid rgba(159,196,107,.23); background: rgba(159,196,107,.055); font-size: 11px; line-height: 1.45; }
+.venture-credentials svg { flex: none; }
+.modal-credentials { margin: -8px 0 25px; }
+.venture-future { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--line); }
+.venture-future > span { color: var(--gold); font-family: "IBM Plex Mono", monospace; font-size: 10px; line-height: 1.5; text-transform: uppercase; letter-spacing: .045em; }
+.venture-future p { margin: 9px 0 0; color: #a5a69b; font-size: 13px; line-height: 1.7; }
+.venture-site-link { display: inline-flex; align-items: center; gap: 10px; margin-top: 24px; padding: 12px 0; color: var(--gold); font-size: 13px; font-weight: 550; border-bottom: 1px solid var(--line-hot); transition: color .2s; }
+.venture-site-link:hover { color: var(--ink); }
+.venture-site-link:focus-visible, .cortisleeve-source a:focus-visible { outline: 2px solid var(--gold); outline-offset: 5px; }
+.cortisleeve-visual { padding: 64px 32px 32px; align-content: center; }
+.cortisleeve-product-story { width: 100%; }
+.cortisleeve-pilot { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; color: var(--gold); font-family: "IBM Plex Mono", monospace; font-size: 11px; line-height: 1.6; }
+.cortisleeve-product-story figure { margin: 0; }
+.cortisleeve-product-story figure > img { display: block; width: 100%; height: auto; object-fit: contain; border: 1px solid rgba(231,185,106,.18); }
+.cortisleeve-product-story figcaption { margin: 10px 0 0; color: #b6b5a9; font-size: 12px; line-height: 1.5; }
+.cortisleeve-product-story .cortisleeve-detail { display: grid; grid-template-columns: 42% 1fr; align-items: center; gap: 16px; margin-top: 26px; }
+.cortisleeve-detail figcaption { margin: 0; }
+.cortisleeve-source { margin: 26px 0 0; padding-top: 16px; border-top: 1px solid var(--line); color: #97998e; font-size: 11px; line-height: 1.7; }
+.cortisleeve-source a { display: inline-flex; align-items: center; gap: 3px; color: var(--gold); }
+@media (max-width: 680px) {
+  .cortisleeve-visual { min-height: 0; padding: 28px 22px; }
+  .cortisleeve-product-story .cortisleeve-detail { gap: 12px; }
+  .modal-credentials { margin-top: -8px; }
+  .venture-site-link { font-size: 12px; }
+}

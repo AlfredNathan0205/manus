@@ -59,6 +59,8 @@ const ASSETS = {
   dynamics365: "/manus-storage/dynamics365_b2a9ff92.svg",
   fricke: "/manus-storage/fricke-full-logo_753621e3.svg",
   olfyneAward: "/manus-storage/olfyne-beautyworld-finalist-alfred_abe3e404.png",
+  cortisleeveProduct: "/manus-storage/cortisleeve-product_dde1aac8.jpg",
+  cortisleeveDetail: "/manus-storage/cortisleeve-detail_93a2945a.jpg",
 };
 
 type SectionId = "intro" | "tech" | "b2c" | "o2c" | "impact" | "next";
@@ -121,12 +123,19 @@ const ventures = [
   },
   {
     name: "CortiSleeve",
-    meta: "Human intent layer",
-    copy: "Patent-pending middleware that keeps human intent inside autonomous agent loops.",
-    demoTitle: "Human intent becomes an enforceable runtime boundary.",
-    demo: "CortiSleeve carries purpose, constraints and escalation rules through an agent workflow so autonomy cannot quietly drift away from the original human instruction.",
-    steps: ["Capture intent and boundaries", "Monitor agent decisions", "Stop, explain or escalate"],
-    result: "Autonomy that remains accountable to the person who initiated the work.",
+    displayName: "CortiSleeve™",
+    meta: "Neural hearing technology",
+    copy: "A neural sleeve for the earbuds you already own, designed to bring the voice you’re listening for into focus.",
+    productImage: ASSETS.cortisleeveProduct,
+    detailImage: ASSETS.cortisleeveDetail,
+    credentials: ["UK trademark registered", "Patent pending · UK & US"],
+    stage: "Cambridge, UK · 2026 pilot",
+    url: "https://www.cortisleeve.com/",
+    demoTitle: "Hear the one voice you’re listening for.",
+    demo: "CortiSleeve™ fits over AirPods and other standard earbuds. Dry electrodes sense ear-EEG attention signals; a clip-on micro-pebble module decodes attention on-device and connects to a phone over Bluetooth Low Energy. The system is designed to foreground the intended speaker in a noisy room.",
+    steps: ["Sense attention with dry electrodes", "Identify the intended speaker", "Bring that voice forward"],
+    result: "Designed for clearer conversations, without gel, a clinic visit or an implant. A consumer accessory, not a clinical device.",
+    future: "A future SDK could use the same attention signal to guide software assistants and robots. This is a development horizon, separate from the hearing-focused pilot.",
     icon: Fingerprint,
   },
   {
@@ -944,7 +953,7 @@ function ProfileSection() {
             <span className="overline">Independent ventures</span>
             <h2>Built beyond the boardroom.</h2>
           </div>
-          <p>Three products, one operating principle: give AI a narrow job, real context and a visible human boundary.</p>
+          <p>Three ventures across fragrance creation, neural hearing and market intelligence, each built around a specific human need.</p>
         </div>
         <div className="venture-grid">
           {ventures.map((venture, index) => {
@@ -953,7 +962,7 @@ function ProfileSection() {
               <motion.button
                 type="button"
                 key={venture.name}
-                className={`venture-card ${venture.name === "Trend Analysis MCP" ? "trend-card" : ""}`}
+                className={`venture-card ${venture.name === "Trend Analysis MCP" ? "trend-card" : ""} ${venture.productImage ? "cortisleeve-card" : ""}`}
                 initial={{ opacity: 0, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.16 + index * 0.08 }}
@@ -964,8 +973,15 @@ function ProfileSection() {
               >
                 <div className="venture-top"><Icon size={20} /><span>0{index + 1}</span></div>
                 <span className="overline">{venture.meta}</span>
-                <h3>{venture.name}</h3>
+                <h3>{venture.displayName ?? venture.name}</h3>
                 <p>{venture.copy}</p>
+                {venture.productImage && (
+                  <div className="venture-product-preview">
+                    <img src={venture.productImage} alt="Official CortiSleeve product render showing the neural sleeve on a wireless earbud" loading="lazy" />
+                    <span>{venture.stage}</span>
+                  </div>
+                )}
+                {venture.credentials && <div className="venture-credentials">{venture.credentials.map(credential => <span key={credential}><ShieldCheck size={12} />{credential}</span>)}</div>}
                 {venture.award && <div className="venture-award"><img src={venture.awardImage} alt="Beautyworld Dubai Awards 2026 finalist announcement" /><span>{venture.award}</span></div>}
                 <div className="venture-open"><span>Open product brief</span><ArrowUpRight size={14} /></div>
               </motion.button>
@@ -1038,17 +1054,27 @@ function ProfileSection() {
               <button ref={modalCloseRef} type="button" className="venture-modal-close" onClick={() => setActiveVenture(null)} aria-label="Close product summary"><X size={18} /></button>
               <div className="venture-modal-copy">
                 <span className="overline">{selectedVenture.meta}</span>
-                <h2 id="venture-modal-title">{selectedVenture.name}</h2>
+                <h2 id="venture-modal-title">{selectedVenture.displayName ?? selectedVenture.name}</h2>
+                {selectedVenture.credentials && <div className="venture-credentials modal-credentials">{selectedVenture.credentials.map(credential => <span key={credential}><ShieldCheck size={14} />{credential}</span>)}</div>}
                 <h3>{selectedVenture.demoTitle}</h3>
                 <p>{selectedVenture.demo}</p>
                 <div className="venture-demo-flow">
                   {selectedVenture.steps.map((step, index) => <div key={step}><span>0{index + 1}</span><i /><strong>{step}</strong></div>)}
                 </div>
                 <div className="venture-result"><BadgeCheck size={16} /><div><span>Result</span><strong>{selectedVenture.result}</strong></div></div>
+                {selectedVenture.future && <div className="venture-future"><span>Next horizon · research & development</span><p>{selectedVenture.future}</p></div>}
+                {selectedVenture.url && <a className="venture-site-link" href={selectedVenture.url} target="_blank" rel="noopener noreferrer">Explore CortiSleeve & the 2026 pilot <ArrowUpRight size={16} /></a>}
               </div>
-              <div className="venture-modal-visual">
+              <div className={`venture-modal-visual ${selectedVenture.productImage ? "cortisleeve-visual" : ""}`}>
                 {selectedVenture.awardImage ? (
                   <div className="award-feature"><img src={selectedVenture.awardImage} alt="Olfyne finalist for Technology Innovation of the Year at Beautyworld Dubai Awards 2026" /><span>Official finalist announcement</span></div>
+                ) : selectedVenture.productImage ? (
+                  <div className="cortisleeve-product-story">
+                    <span className="cortisleeve-pilot"><CircleDot size={12} />{selectedVenture.stage}</span>
+                    <figure><img src={selectedVenture.productImage} alt="CortiSleeve neural earbud sleeve with a translucent sensor layer and clip-on micro-pebble module — official product render" /><figcaption>Neural sensing. Your existing earbuds.</figcaption></figure>
+                    <figure className="cortisleeve-detail"><img src={selectedVenture.detailImage} alt="Official CortiSleeve detail render: flexible sleeve, dry-electrode pads and micro-pebble module beside an earbud" /><figcaption>Flexible sleeve · dry electrodes · micro-pebble module</figcaption></figure>
+                    <p className="cortisleeve-source">Product visualisations and IP status from <a href={selectedVenture.url} target="_blank" rel="noopener noreferrer">cortisleeve.com <ArrowUpRight size={11} /></a></p>
+                  </div>
                 ) : (
                   <div className="venture-demo-orbit">
                     <div className="demo-orbit-ring ring-one" /><div className="demo-orbit-ring ring-two" />
