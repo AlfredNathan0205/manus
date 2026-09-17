@@ -1,4 +1,4 @@
-"""Regression checks for Olfyne’s official marketplace and Studio product brief.
+"""Regression checks for Olfyne’s interactive, product-native Sillage and Studio views.
 Run while the local Vite server is active: python3 tests/olfyne_experience.py
 """
 import json
@@ -16,18 +16,25 @@ with sync_playwright() as p:
         page.on("pageerror", lambda error: errors.append(str(error)))
         page.goto(URL, wait_until="networkidle")
         expect(page.locator(".olfyne-modal")).to_have_count(1)
-        art = page.locator(".olfyne-official-art > img")
-        expect(art).to_have_attribute("src", "/manus-storage/olfyne-official-share_31b89699.png")
-        expect(page.locator(".venture-brand-icon")).to_have_attribute("src", "/manus-storage/olfyne-favicon_73c2067a.svg")
-        loaded = art.evaluate("image => image.complete && image.naturalWidth === 1200 && image.naturalHeight === 630")
-        assert loaded
+        expect(page.locator(".olfyne-official-art, .olfyne-card-art")).to_have_count(0)
+        expect(page.locator(".olfyne-product-header > img")).to_have_attribute("src", "/manus-storage/olfyne-favicon_73c2067a.svg")
         expect(page.get_by_role("tab", name="Sillage")).to_have_attribute("aria-selected", "true")
-        expect(page.locator(".olfyne-mode-panel h4")).to_have_text("Commission from independent perfumers who earn royalties on every unit sold.")
+        expect(page.locator(".olfyne-workspace.sillage-workspace")).to_have_count(1)
+        expect(page.locator(".pyramid-layer")).to_have_count(3)
+        for index, expected in enumerate(["Top notes", "Heart notes", "Base notes"]):
+            page.locator(".pyramid-layer").nth(index).click()
+            expect(page.locator(".sillage-layer-detail span")).to_have_text(expected)
+            expect(page.locator(".pyramid-layer").nth(index)).to_have_attribute("aria-pressed", "true")
         page.get_by_role("tab", name="Studio").click()
         expect(page.get_by_role("tab", name="Studio")).to_have_attribute("aria-selected", "true")
-        expect(page.locator(".olfyne-mode-panel h4")).to_have_text("Formulate with live compliance, stability prediction and SDS generation.")
-        expect(page.locator(".olfyne-proof-grid article > span")).to_have_text(["1,793", "35,000+", "78"])
-        expect(page.locator(".olfyne-fact")).to_contain_text("IFRA compliant")
+        expect(page.locator(".studio-workspace")).to_have_count(1)
+        expect(page.locator(".studio-materials button")).to_have_count(4)
+        for index in range(4):
+            material = page.locator(".studio-materials button").nth(index)
+            material.click()
+            expect(material).to_have_attribute("aria-pressed", "true")
+            expect(page.locator(".studio-inspector > strong")).to_have_text(material.locator("strong").inner_text())
+        expect(page.locator(".studio-screening")).to_contain_text("IFRA compliant")
         page.get_by_role("tab", name="Studio").focus()
         page.keyboard.press("ArrowLeft")
         expect(page.get_by_role("tab", name="Sillage")).to_be_focused()

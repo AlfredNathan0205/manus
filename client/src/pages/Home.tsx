@@ -61,7 +61,6 @@ const ASSETS = {
   dynamics365: "/manus-storage/dynamics365_b2a9ff92.svg",
   fricke: "/manus-storage/fricke-full-logo_753621e3.svg",
   olfyneAward: "/manus-storage/olfyne-beautyworld-finalist-alfred_abe3e404.png",
-  olfyneOfficialArt: "/manus-storage/olfyne-official-share_31b89699.png",
   olfyneIcon: "/manus-storage/olfyne-favicon_73c2067a.svg",
   cortisleeveProduct: "/manus-storage/cortisleeve-product_dde1aac8.jpg",
   cortisleeveDetail: "/manus-storage/cortisleeve-detail_93a2945a.jpg",
@@ -118,7 +117,6 @@ const ventures = [
     name: "Olfyne",
     meta: "Fragrance platform",
     brandIcon: ASSETS.olfyneIcon,
-    officialArt: ASSETS.olfyneOfficialArt,
     copy: "From idea to shelf: one platform for brand owners, perfumers and production partners.",
     award: "Finalist · Tech Innovation of the Year · Beautyworld Middle East",
     awardImage: ASSETS.olfyneAward,
@@ -986,7 +984,7 @@ function ProfileSection() {
               <motion.button
                 type="button"
                 key={venture.name}
-                className={`venture-card ${venture.name === "Trend Analysis MCP" ? "trend-card" : ""} ${venture.productImage ? "cortisleeve-card" : ""} ${venture.officialArt ? "olfyne-card" : ""}`}
+                className={`venture-card ${venture.name === "Trend Analysis MCP" ? "trend-card" : ""} ${venture.productImage ? "cortisleeve-card" : ""} ${venture.name === "Olfyne" ? "olfyne-card" : ""}`}
                 initial={{ opacity: 0, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.16 + index * 0.08 }}
@@ -1005,7 +1003,6 @@ function ProfileSection() {
                     <span>{venture.stage}</span>
                   </div>
                 )}
-                {venture.officialArt && <div className="olfyne-card-art"><img src={venture.officialArt} alt="Official Olfyne artwork: From idea to shelf" loading="lazy" /></div>}
                 {venture.credentials && <div className="venture-credentials">{venture.credentials.map(credential => <span key={credential}><ShieldCheck size={12} />{credential}</span>)}</div>}
                 {venture.award && <div className="venture-award"><img src={venture.awardImage} alt="Beautyworld Dubai Awards 2026 finalist announcement" /><span>{venture.award}</span></div>}
                 <div className="venture-open"><span>Open product brief</span><ArrowUpRight size={14} /></div>
@@ -1090,9 +1087,9 @@ function ProfileSection() {
                 {selectedVenture.future && <div className="venture-future"><span>Next horizon · research & development</span><p>{selectedVenture.future}</p></div>}
                 {selectedVenture.url && selectedVenture.name !== "Olfyne" && <a className="venture-site-link" href={selectedVenture.url} target="_blank" rel="noopener noreferrer">Explore CortiSleeve & the 2026 pilot <ArrowUpRight size={16} /></a>}
               </div>
-              <div className={`venture-modal-visual ${selectedVenture.productImage ? "cortisleeve-visual" : ""} ${selectedVenture.officialArt ? "olfyne-visual" : ""}`}>
+              <div className={`venture-modal-visual ${selectedVenture.productImage ? "cortisleeve-visual" : ""} ${selectedVenture.name === "Olfyne" ? "olfyne-visual" : ""}`}>
                 {selectedVenture.name === "Olfyne" ? (
-                  <OlfyneExperience art={selectedVenture.officialArt!} icon={selectedVenture.brandIcon!} url={selectedVenture.url!} />
+                  <OlfyneExperience icon={selectedVenture.brandIcon!} url={selectedVenture.url!} />
                 ) : selectedVenture.awardImage ? (
                   <div className="award-feature"><img src={selectedVenture.awardImage} alt="Olfyne finalist for Technology Innovation of the Year at Beautyworld Dubai Awards 2026" /><span>Official finalist announcement</span></div>
                 ) : selectedVenture.productImage ? (
