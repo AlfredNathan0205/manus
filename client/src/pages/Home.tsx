@@ -998,7 +998,7 @@ function ProfileSection() {
                 <span className="overline">{venture.meta}</span>
                 <h3>{venture.brandLogo ? <img className="cortisleeve-wordmark" src={venture.brandLogo} alt="CortiSleeve" width={238} height={69} /> : venture.displayName ?? venture.name}</h3>
                 <p>{venture.copy}</p>
-                {venture.name === "Trend Analysis MCP" && <div className="trend-card-preview" aria-label="Four current editorial signals surfaced"><span>LIVE EVIDENCE SNAPSHOT</span><div><i className="amber" /><i className="mint" /><i className="lilac" /><i className="coral" /></div><small>4 source-linked trend signals</small></div>}
+                {venture.name === "Trend Analysis MCP" && <div className="trend-card-preview" aria-label="Four current editorial signals surfaced"><header><span>Surfaced today</span><small>4 signals</small></header><div className="trend-card-preview-list"><i className="amber"><b>01</b><strong>Elevated gourmand</strong></i><i className="mint"><b>02</b><strong>Fragrance wardrobe</strong></i><i className="lilac"><b>03</b><strong>Quiet fragrance</strong></i><i className="coral"><b>04</b><strong>Scent extensions</strong></i></div><footer><span />Source-linked evidence</footer></div>}
                 {venture.productImage && (
                   <div className="venture-product-preview">
                     <img src={venture.productImage} alt="Official CortiSleeve product render showing the neural sleeve on a wireless earbud" loading="lazy" />
