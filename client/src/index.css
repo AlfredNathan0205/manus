@@ -931,3 +931,49 @@ main { width: 100%; min-height: calc(100vh - 120px); }
   .modal-credentials { margin-top: -8px; }
   .venture-site-link { font-size: 12px; }
 }
+
+/* Supplied CortiSleeve wordmark and interactive hardware tour. */
+.cortisleeve-wordmark { display: block; width: 238px; max-width: 100%; height: auto; object-fit: contain; }
+.cortisleeve-card h3 { margin: 12px 0 18px; }
+.sensor-walkthrough { width: 100%; }
+.sensor-walkthrough-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+.sensor-walkthrough-heading > span { color: #d9d6c9; font-size: 13px; font-weight: 550; }
+.sensor-walkthrough-heading small { color: #a4a598; font-size: 11px; }
+.sensor-image-stage { position: relative; width: 100%; aspect-ratio: 4 / 3; border: 1px solid rgba(231,185,106,.25); isolation: isolate; }
+.sensor-image-stage > img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.sensor-leaders { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.sensor-leaders line { stroke: #935139; stroke-width: 1.6px; opacity: 0; transition: opacity .2s; }
+.sensor-leaders line.active { opacity: .9; }
+.sensor-hotspot { position: absolute; z-index: 2; display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 1px solid #98745b; border-radius: 50%; background: #f7f2e8; color: #714934; box-shadow: 0 3px 14px rgba(51,33,17,.16); transform: translate(-50%, -50%); transition: background .2s, color .2s, box-shadow .2s; }
+.sensor-hotspot > span { font-family: "IBM Plex Mono", monospace; font-size: 12px; font-weight: 600; }
+.sensor-hotspot.selected { color: #fff7eb; background: #965435; border-color: #965435; box-shadow: 0 0 0 5px rgba(150,84,53,.13), 0 4px 16px rgba(51,33,17,.17); }
+.sensor-hotspot:hover { box-shadow: 0 0 0 5px rgba(150,84,53,.16); }
+.sensor-hotspot:focus-visible { outline: 3px solid #102e3c; outline-offset: 5px; }
+.sensor-target { position: absolute; z-index: 1; width: 24px; height: 24px; translate: -50% -50%; border: 2px solid #965435; border-radius: 50%; background: rgba(255,248,218,.14); box-shadow: 0 0 0 5px rgba(150,84,53,.16); pointer-events: none; }
+.sensor-detail { min-height: 198px; padding: 19px 20px; border: 1px solid var(--line); border-top: 0; background: #12140f; }
+.sensor-detail-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: var(--gold); font-family: "IBM Plex Mono", monospace; font-size: 10px; line-height: 1.5; text-transform: uppercase; letter-spacing: .04em; }
+.sensor-detail h4 { margin: 10px 0 8px; color: #e1dfd4; font-family: "Cormorant Garamond", serif; font-size: 27px; font-weight: 500; line-height: 1.1; }
+.sensor-detail p { margin: 0; color: #b4b6a9; font-size: 13px; line-height: 1.65; }
+.sensor-navigation { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 0; }
+.sensor-navigation button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; padding: 0 6px; color: var(--gold); font-size: 12px; transition: color .18s; }
+.sensor-navigation button:disabled { color: #66695d; cursor: default; }
+.sensor-navigation button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.sensor-progress { display: flex; gap: 5px; }
+.sensor-progress i { width: 5px; height: 5px; border-radius: 50%; background: #494d3f; }
+.sensor-progress i.active { background: var(--gold); }
+.sensor-illustration-note { margin: 0; color: #969b8b; font-size: 10px; line-height: 1.5; }
+@media (max-width: 680px) {
+  .sensor-detail { min-height: 232px; padding: 17px 15px; }
+  .sensor-detail h4 { font-size: 25px; }
+  .sensor-detail p { font-size: 12px; }
+  .sensor-progress { gap: 4px; }
+  .sensor-navigation { gap: 5px; }
+  .sensor-navigation button { font-size: 11px; }
+  .sensor-walkthrough-heading small { font-size: 10px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sensor-leaders line, .sensor-hotspot { transition: none; }
+}
+
+.sensor-walkthrough[data-instant="true"] .sensor-leaders line,
+.sensor-walkthrough[data-instant="true"] .sensor-hotspot { transition: none; }

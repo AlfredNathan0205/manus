@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ElementType } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import CortiSleeveWalkthrough from "@/components/CortiSleeveWalkthrough";
 import {
   Activity,
   AlertTriangle,
@@ -61,6 +62,7 @@ const ASSETS = {
   olfyneAward: "/manus-storage/olfyne-beautyworld-finalist-alfred_abe3e404.png",
   cortisleeveProduct: "/manus-storage/cortisleeve-product_dde1aac8.jpg",
   cortisleeveDetail: "/manus-storage/cortisleeve-detail_93a2945a.jpg",
+  cortisleeveWordmark: "/manus-storage/cortisleeve-supplied-wordmark_30e0cbd1.png",
 };
 
 type SectionId = "intro" | "tech" | "b2c" | "o2c" | "impact" | "next";
@@ -125,6 +127,7 @@ const ventures = [
     name: "CortiSleeve",
     displayName: "CortiSleeve™",
     meta: "Neural hearing technology",
+    brandLogo: ASSETS.cortisleeveWordmark,
     copy: "A neural sleeve for the earbuds you already own, designed to bring the voice you’re listening for into focus.",
     productImage: ASSETS.cortisleeveProduct,
     detailImage: ASSETS.cortisleeveDetail,
@@ -903,16 +906,31 @@ function ProfileSection() {
   useEffect(() => {
     if (activeVenture === null) return;
     const previousOverflow = document.body.style.overflow;
+    const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     document.body.style.overflow = "hidden";
     const focusTimer = window.setTimeout(() => modalCloseRef.current?.focus(), 50);
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") setActiveVenture(null);
+      if (event.key === "Tab") {
+        const modal = modalCloseRef.current?.closest('[role="dialog"]');
+        const controls = modal ? Array.from(modal.querySelectorAll<HTMLElement>('button:not(:disabled), a[href], [tabindex="0"]')) : [];
+        const first = controls[0];
+        const last = controls[controls.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last?.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first?.focus();
+        }
+      }
     };
     window.addEventListener("keydown", closeOnEscape);
     return () => {
       window.clearTimeout(focusTimer);
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", closeOnEscape);
+      previousFocus?.focus({ preventScroll: true });
     };
   }, [activeVenture]);
 
@@ -973,7 +991,7 @@ function ProfileSection() {
               >
                 <div className="venture-top"><Icon size={20} /><span>0{index + 1}</span></div>
                 <span className="overline">{venture.meta}</span>
-                <h3>{venture.displayName ?? venture.name}</h3>
+                <h3>{venture.brandLogo ? <img className="cortisleeve-wordmark" src={venture.brandLogo} alt="CortiSleeve" width={238} height={69} /> : venture.displayName ?? venture.name}</h3>
                 <p>{venture.copy}</p>
                 {venture.productImage && (
                   <div className="venture-product-preview">
@@ -1054,7 +1072,7 @@ function ProfileSection() {
               <button ref={modalCloseRef} type="button" className="venture-modal-close" onClick={() => setActiveVenture(null)} aria-label="Close product summary"><X size={18} /></button>
               <div className="venture-modal-copy">
                 <span className="overline">{selectedVenture.meta}</span>
-                <h2 id="venture-modal-title">{selectedVenture.displayName ?? selectedVenture.name}</h2>
+                <h2 id="venture-modal-title">{selectedVenture.brandLogo ? <img className="cortisleeve-wordmark" src={selectedVenture.brandLogo} alt="CortiSleeve" width={238} height={69} /> : selectedVenture.displayName ?? selectedVenture.name}</h2>
                 {selectedVenture.credentials && <div className="venture-credentials modal-credentials">{selectedVenture.credentials.map(credential => <span key={credential}><ShieldCheck size={14} />{credential}</span>)}</div>}
                 <h3>{selectedVenture.demoTitle}</h3>
                 <p>{selectedVenture.demo}</p>
@@ -1071,7 +1089,7 @@ function ProfileSection() {
                 ) : selectedVenture.productImage ? (
                   <div className="cortisleeve-product-story">
                     <span className="cortisleeve-pilot"><CircleDot size={12} />{selectedVenture.stage}</span>
-                    <figure><img src={selectedVenture.productImage} alt="CortiSleeve neural earbud sleeve with a translucent sensor layer and clip-on micro-pebble module — official product render" /><figcaption>Neural sensing. Your existing earbuds.</figcaption></figure>
+                    <CortiSleeveWalkthrough image={selectedVenture.productImage} />
                     <figure className="cortisleeve-detail"><img src={selectedVenture.detailImage} alt="Official CortiSleeve detail render: flexible sleeve, dry-electrode pads and micro-pebble module beside an earbud" /><figcaption>Flexible sleeve · dry electrodes · micro-pebble module</figcaption></figure>
                     <p className="cortisleeve-source">Product visualisations and IP status from <a href={selectedVenture.url} target="_blank" rel="noopener noreferrer">cortisleeve.com <ArrowUpRight size={11} /></a></p>
                   </div>
