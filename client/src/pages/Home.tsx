@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type ElementType } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import CortiSleeveWalkthrough from "@/components/CortiSleeveWalkthrough";
+import OlfyneExperience from "@/components/OlfyneExperience";
 import {
   Activity,
   AlertTriangle,
@@ -60,6 +61,8 @@ const ASSETS = {
   dynamics365: "/manus-storage/dynamics365_b2a9ff92.svg",
   fricke: "/manus-storage/fricke-full-logo_753621e3.svg",
   olfyneAward: "/manus-storage/olfyne-beautyworld-finalist-alfred_abe3e404.png",
+  olfyneOfficialArt: "/manus-storage/olfyne-official-share_31b89699.png",
+  olfyneIcon: "/manus-storage/olfyne-favicon_73c2067a.svg",
   cortisleeveProduct: "/manus-storage/cortisleeve-product_dde1aac8.jpg",
   cortisleeveDetail: "/manus-storage/cortisleeve-detail_93a2945a.jpg",
   cortisleeveWordmark: "/manus-storage/cortisleeve-supplied-wordmark_30e0cbd1.png",
@@ -113,14 +116,17 @@ const navItems: { id: SectionId; label: string; kicker: string }[] = [
 const ventures = [
   {
     name: "Olfyne",
-    meta: "Creative intelligence",
-    copy: "Generative and agentic AI inside the perfumer’s creative process.",
+    meta: "Fragrance platform",
+    brandIcon: ASSETS.olfyneIcon,
+    officialArt: ASSETS.olfyneOfficialArt,
+    copy: "From idea to shelf: one platform for brand owners, perfumers and production partners.",
     award: "Finalist · Tech Innovation of the Year · Beautyworld Middle East",
     awardImage: ASSETS.olfyneAward,
-    demoTitle: "A creative brief becomes an intentional fragrance direction.",
-    demo: "Olfyne brings generative and agentic intelligence into the perfumer’s workflow without removing authorship, judgement or the final creative decision.",
-    steps: ["Structure the creative brief", "Explore governed directions", "Perfumer evaluates and decides"],
-    result: "Faster creative exploration with the perfumer visibly in control.",
+    url: "https://www.olfyne.io/",
+    demoTitle: "A one-word brief can become a compliant, shelf-ready fragrance.",
+    demo: "Olfyne connects independent perfumers, brand owners and production partners. Sillage supports commissioning through bids and royalties; Studio gives perfumers live compliance, stability and safety-data tools while they formulate.",
+    steps: ["Post a brief in plain language", "Approve the protected scent pyramid", "Sample, produce and take to shelf"],
+    result: "The creative formula stays protected; each route is screened for IFRA, CLP and allergen requirements before production.",
     icon: Sparkles,
   },
   {
@@ -980,7 +986,7 @@ function ProfileSection() {
               <motion.button
                 type="button"
                 key={venture.name}
-                className={`venture-card ${venture.name === "Trend Analysis MCP" ? "trend-card" : ""} ${venture.productImage ? "cortisleeve-card" : ""}`}
+                className={`venture-card ${venture.name === "Trend Analysis MCP" ? "trend-card" : ""} ${venture.productImage ? "cortisleeve-card" : ""} ${venture.officialArt ? "olfyne-card" : ""}`}
                 initial={{ opacity: 0, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.16 + index * 0.08 }}
@@ -989,7 +995,7 @@ function ProfileSection() {
                 aria-haspopup="dialog"
                 aria-label={`Open ${venture.name} product summary`}
               >
-                <div className="venture-top"><Icon size={20} /><span>0{index + 1}</span></div>
+                <div className="venture-top">{venture.brandIcon ? <img className="venture-brand-icon" src={venture.brandIcon} alt="Olfyne logo mark" width={32} height={32} /> : <Icon size={20} />}<span>0{index + 1}</span></div>
                 <span className="overline">{venture.meta}</span>
                 <h3>{venture.brandLogo ? <img className="cortisleeve-wordmark" src={venture.brandLogo} alt="CortiSleeve" width={238} height={69} /> : venture.displayName ?? venture.name}</h3>
                 <p>{venture.copy}</p>
@@ -999,6 +1005,7 @@ function ProfileSection() {
                     <span>{venture.stage}</span>
                   </div>
                 )}
+                {venture.officialArt && <div className="olfyne-card-art"><img src={venture.officialArt} alt="Official Olfyne artwork: From idea to shelf" loading="lazy" /></div>}
                 {venture.credentials && <div className="venture-credentials">{venture.credentials.map(credential => <span key={credential}><ShieldCheck size={12} />{credential}</span>)}</div>}
                 {venture.award && <div className="venture-award"><img src={venture.awardImage} alt="Beautyworld Dubai Awards 2026 finalist announcement" /><span>{venture.award}</span></div>}
                 <div className="venture-open"><span>Open product brief</span><ArrowUpRight size={14} /></div>
@@ -1059,7 +1066,7 @@ function ProfileSection() {
         {selectedVenture && (
           <motion.div className="venture-modal-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onMouseDown={() => setActiveVenture(null)}>
             <motion.div
-              className={`venture-modal ${selectedVenture.name === "Trend Analysis MCP" ? "trend-modal" : ""}`}
+              className={`venture-modal ${selectedVenture.name === "Trend Analysis MCP" ? "trend-modal" : ""} ${selectedVenture.name === "Olfyne" ? "olfyne-modal" : ""}`}
               role="dialog"
               aria-modal="true"
               aria-labelledby="venture-modal-title"
@@ -1081,10 +1088,12 @@ function ProfileSection() {
                 </div>
                 <div className="venture-result"><BadgeCheck size={16} /><div><span>Result</span><strong>{selectedVenture.result}</strong></div></div>
                 {selectedVenture.future && <div className="venture-future"><span>Next horizon · research & development</span><p>{selectedVenture.future}</p></div>}
-                {selectedVenture.url && <a className="venture-site-link" href={selectedVenture.url} target="_blank" rel="noopener noreferrer">Explore CortiSleeve & the 2026 pilot <ArrowUpRight size={16} /></a>}
+                {selectedVenture.url && selectedVenture.name !== "Olfyne" && <a className="venture-site-link" href={selectedVenture.url} target="_blank" rel="noopener noreferrer">Explore CortiSleeve & the 2026 pilot <ArrowUpRight size={16} /></a>}
               </div>
-              <div className={`venture-modal-visual ${selectedVenture.productImage ? "cortisleeve-visual" : ""}`}>
-                {selectedVenture.awardImage ? (
+              <div className={`venture-modal-visual ${selectedVenture.productImage ? "cortisleeve-visual" : ""} ${selectedVenture.officialArt ? "olfyne-visual" : ""}`}>
+                {selectedVenture.name === "Olfyne" ? (
+                  <OlfyneExperience art={selectedVenture.officialArt!} icon={selectedVenture.brandIcon!} url={selectedVenture.url!} />
+                ) : selectedVenture.awardImage ? (
                   <div className="award-feature"><img src={selectedVenture.awardImage} alt="Olfyne finalist for Technology Innovation of the Year at Beautyworld Dubai Awards 2026" /><span>Official finalist announcement</span></div>
                 ) : selectedVenture.productImage ? (
                   <div className="cortisleeve-product-story">
