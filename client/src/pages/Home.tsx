@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, type ElementType } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import CortiSleeveWalkthrough from "@/components/CortiSleeveWalkthrough";
 import OlfyneExperience from "@/components/OlfyneExperience";
+import TrendAnalysisExperience from "@/components/TrendAnalysisExperience";
 import {
   Activity,
   AlertTriangle,
@@ -148,11 +149,11 @@ const ventures = [
   {
     name: "Trend Analysis MCP",
     meta: "Signal intelligence",
-    copy: "An MCP-powered trend engine that turns live market signals into structured beauty and fragrance intelligence.",
-    demoTitle: "Fragmented market signals become a decision-ready trend brief.",
-    demo: "Trend Analysis MCP gives agents a structured route into current beauty, fragrance and consumer signals, then shapes the evidence into a consistent intelligence output.",
-    steps: ["Collect live market signals", "Cluster themes and momentum", "Publish a sourced trend brief"],
-    result: "A repeatable intelligence layer for creative and commercial decisions.",
+    copy: "An MCP-powered evidence console that turns current beauty and fragrance signals into decision-ready creative directions.",
+    demoTitle: "Don’t show a trend. Show the evidence that makes it actionable.",
+    demo: "Trend Analysis MCP collects relevant editorial and category evidence, surfaces the underlying theme, and translates it into a concise direction a creative or commercial team can challenge, adapt or use.",
+    steps: ["Retrieve current category evidence", "Cluster signals into a defensible theme", "Publish source-linked creative implications"],
+    result: "A traceable trend brief—signal, source and creative implication in one view.",
     icon: Network,
   },
 ];
@@ -997,6 +998,7 @@ function ProfileSection() {
                 <span className="overline">{venture.meta}</span>
                 <h3>{venture.brandLogo ? <img className="cortisleeve-wordmark" src={venture.brandLogo} alt="CortiSleeve" width={238} height={69} /> : venture.displayName ?? venture.name}</h3>
                 <p>{venture.copy}</p>
+                {venture.name === "Trend Analysis MCP" && <div className="trend-card-preview" aria-label="Four current editorial signals surfaced"><span>LIVE EVIDENCE SNAPSHOT</span><div><i className="amber" /><i className="mint" /><i className="lilac" /><i className="coral" /></div><small>4 source-linked trend signals</small></div>}
                 {venture.productImage && (
                   <div className="venture-product-preview">
                     <img src={venture.productImage} alt="Official CortiSleeve product render showing the neural sleeve on a wireless earbud" loading="lazy" />
@@ -1090,6 +1092,8 @@ function ProfileSection() {
               <div className={`venture-modal-visual ${selectedVenture.productImage ? "cortisleeve-visual" : ""} ${selectedVenture.name === "Olfyne" ? "olfyne-visual" : ""}`}>
                 {selectedVenture.name === "Olfyne" ? (
                   <OlfyneExperience icon={selectedVenture.brandIcon!} url={selectedVenture.url!} />
+                ) : selectedVenture.name === "Trend Analysis MCP" ? (
+                  <TrendAnalysisExperience />
                 ) : selectedVenture.awardImage ? (
                   <div className="award-feature"><img src={selectedVenture.awardImage} alt="Olfyne finalist for Technology Innovation of the Year at Beautyworld Dubai Awards 2026" /><span>Official finalist announcement</span></div>
                 ) : selectedVenture.productImage ? (
