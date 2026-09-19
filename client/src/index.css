@@ -1081,3 +1081,81 @@ main { width: 100%; min-height: calc(100vh - 120px); }
 .trend-mcp-footer { display: grid; grid-template-columns: auto 1fr auto; align-items: start; gap: 7px; margin-top: 11px; color: #899488; font-size: 8px; line-height: 1.45; }.trend-mcp-footer svg { margin-top: 1px; color: #a5c984; }.trend-mcp-footer a { display: inline-flex; align-items: center; gap: 4px; color: #bdd69c; white-space: nowrap; }
 @media (max-width: 680px) { .trend-modal .venture-modal-visual { padding: 28px 20px; }.trend-signal-grid { grid-template-columns: repeat(2, 1fr); }.trend-signal-card { min-height: 88px; }.trend-mcp-header > small, .trend-mcp-status small { display: none; }.trend-signal-detail { padding: 15px; }.trend-signal-detail h4 { font-size: 26px; }.signal-sources a { grid-template-columns: auto 1fr auto; }.signal-sources a small { display: none; }.trend-mcp-footer { grid-template-columns: auto 1fr; }.trend-mcp-footer a { grid-column: 2; }.trend-card-preview { margin-top: 14px; } }
 @media (prefers-reduced-motion: reduce) { .trend-card-preview i, .trend-signal-card, .signal-sources a { transition: none; } }
+
+/* Consolidated executive update: compact venture triggers, explicit assumptions and measured engagement shape. */
+.ventures-block { margin-top: 76px; }
+.ventures-block .block-heading { margin-bottom: 26px; }
+.ventures-block .block-heading > p { font-size: 14px; line-height: 1.62; }
+.ventures-block .venture-grid { gap: 10px; }
+.ventures-block .venture-card { min-height: 176px; padding: 21px 22px 18px; }
+.ventures-block .venture-card::after { inset: auto -22% -82% 42%; height: 92%; }
+.venture-compact-top { position: relative; z-index: 2; display: flex; align-items: center; justify-content: space-between; color: var(--faint); font-family: "IBM Plex Mono", monospace; font-size: 8px; letter-spacing: .09em; text-transform: uppercase; }
+.venture-compact-top span { color: var(--gold); }
+.venture-compact-top small { font-size: inherit; }
+.venture-card .venture-name { position: relative; z-index: 2; display: flex; align-items: center; min-height: 39px; margin: 14px 0 7px; color: var(--ink); font-family: "Cormorant Garamond", serif; font-size: clamp(27px, 2.5vw, 37px); font-weight: 500; line-height: .95; letter-spacing: -.025em; }
+.venture-card .venture-name .cortisleeve-wordmark { width: min(188px, 100%); max-height: 40px; object-fit: contain; object-position: left center; }
+.venture-card.cortisleeve-card h3 { margin: 14px 0 7px; }
+.venture-card .venture-category { position: relative; z-index: 2; max-width: 100%; margin: 0; color: #999a91; font-family: "IBM Plex Mono", monospace; font-size: 9px; line-height: 1.45; text-transform: uppercase; letter-spacing: .065em; }
+.ventures-block .venture-open { padding-top: 14px; font-size: 7px; }
+.ventures-block .venture-card:hover, .ventures-block .venture-card:focus-visible { box-shadow: 0 15px 42px rgba(0,0,0,.22); }
+.venture-modal-copy .venture-name { margin: 12px 0 26px; color: var(--ink); font-family: "Cormorant Garamond", serif; font-size: clamp(45px, 5vw, 68px); font-weight: 500; line-height: .88; letter-spacing: -.035em; }
+.venture-modal-copy .venture-name .cortisleeve-wordmark { max-height: 72px; }
+
+.assumptions-notice { max-width: 590px; margin: -10px 0 28px; padding: 12px 14px; color: #b8b8ae; border-left: 2px solid var(--gold); background: rgba(231,185,106,.045); font-size: 12px; line-height: 1.6; }
+
+.engagement-shape { margin-top: 76px; padding-top: 38px; border-top: 1px solid var(--line); }
+.engagement-heading { display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(290px, .68fr); gap: 50px; align-items: end; margin-bottom: 28px; }
+.engagement-heading h2 { max-width: 670px; margin: 11px 0 0; color: var(--ink); font-family: "Cormorant Garamond", serif; font-size: clamp(40px, 4.2vw, 60px); font-weight: 500; line-height: .94; letter-spacing: -.035em; }
+.engagement-heading > p { max-width: 470px; margin: 0; color: #a4a59c; font-size: 14px; line-height: 1.7; }
+.engagement-phase-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.engagement-phase-grid article { position: relative; min-height: 288px; padding: 24px; overflow: hidden; border: 1px solid var(--line); background: rgba(16,18,14,.72); }
+.engagement-phase-grid article::after { position: absolute; right: -35px; bottom: -65px; width: 155px; height: 155px; border: 1px solid var(--line); border-radius: 50%; content: ""; }
+.engagement-phase-grid article > span { position: relative; z-index: 1; color: var(--gold); font-family: "Cormorant Garamond", serif; font-size: 43px; line-height: .8; }
+.engagement-phase-grid article > small { position: relative; z-index: 1; display: block; margin-top: 18px; color: #8e9086; font-family: "IBM Plex Mono", monospace; font-size: 8px; text-transform: uppercase; letter-spacing: .08em; }
+.engagement-phase-grid h3 { position: relative; z-index: 1; margin: 13px 0 8px; color: #e2dfd5; font-family: "Cormorant Garamond", serif; font-size: 28px; font-weight: 500; line-height: .98; }
+.engagement-phase-grid p { position: relative; z-index: 1; margin: 0; color: #a1a299; font-size: 12px; line-height: 1.65; }
+.engagement-phase-grid article > div { position: relative; z-index: 1; margin-top: 17px; padding-top: 12px; border-top: 1px solid var(--line); }
+.engagement-phase-grid b { display: block; margin-bottom: 5px; color: var(--gold); font-family: "IBM Plex Mono", monospace; font-size: 7px; font-weight: 500; text-transform: uppercase; letter-spacing: .08em; }
+.engagement-phase-grid strong { color: #c7c6bd; font-size: 11px; font-weight: 550; line-height: 1.5; }
+.euroma-provides { display: grid; grid-template-columns: 160px 1fr; gap: 20px; margin: 12px 0 0; padding: 16px 20px; color: #9d9e94; border: 1px solid var(--line); background: rgba(255,255,255,.012); font-size: 12px; line-height: 1.65; }
+.euroma-provides span { color: var(--gold); font-family: "IBM Plex Mono", monospace; font-size: 8px; text-transform: uppercase; letter-spacing: .08em; }
+
+.section-advance { display: flex; align-items: center; justify-content: space-between; gap: 22px; width: min(1400px, 100%); margin: 0 auto; padding: 0 54px 68px; }
+.section-advance > span { flex: 0 0 auto; color: #77796f; font-family: "IBM Plex Mono", monospace; font-size: 9px; text-transform: uppercase; letter-spacing: .1em; }
+.section-advance > button { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 14px; width: min(540px, 100%); min-height: 58px; padding: 0 18px; border: 1px solid var(--line); color: var(--ink); text-align: left; background: rgba(16,18,14,.72); transition: transform .18s var(--ease-out), border-color .2s var(--ease-out), background .2s var(--ease-out); }
+.section-advance > button:hover, .section-advance > button:focus-visible { border-color: var(--line-hot); background: rgba(231,185,106,.05); outline: none; transform: translateX(4px); }
+.section-advance > button:active { transform: translateX(2px) scale(.985); }
+.section-advance b { color: var(--gold); font-family: "IBM Plex Mono", monospace; font-size: 9px; font-weight: 500; letter-spacing: .08em; }
+.section-advance strong { overflow: hidden; color: #dddbd0; font-size: 13px; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
+.section-advance svg { color: var(--gold); }
+
+@media (max-width: 900px) {
+  .ventures-block { margin-top: 70px; }
+  .engagement-heading { grid-template-columns: 1fr; gap: 20px; }
+  .engagement-phase-grid { grid-template-columns: 1fr; }
+  .engagement-phase-grid article { min-height: 0; }
+  .section-advance { padding: 0 24px 58px; }
+}
+
+@media (max-width: 620px) {
+  .ventures-block .block-heading { margin-bottom: 20px; }
+  .ventures-block .venture-card { min-height: 151px; padding: 18px; }
+  .venture-card .venture-name { min-height: 33px; margin: 12px 0 6px; font-size: 29px; }
+  .venture-card .venture-name .cortisleeve-wordmark { width: 165px; max-height: 34px; }
+  .venture-card .venture-category { font-size: 8px; }
+  .ventures-block .venture-open { padding-top: 11px; }
+  .venture-modal-copy .venture-name { font-size: 48px; }
+  .engagement-shape { margin-top: 60px; padding-top: 29px; }
+  .engagement-phase-grid article { padding: 21px; }
+  .euroma-provides { grid-template-columns: 1fr; gap: 7px; padding: 15px; }
+  .section-advance { align-items: flex-start; flex-direction: column; gap: 12px; padding: 0 24px 48px; }
+  .section-advance > button { width: 100%; min-height: 56px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .section-advance > button:hover { transform: none; }
+}
+
+.demo-fiction-note { display: flex; align-items: center; gap: 8px; margin: 14px 0 0; color: #808278; font-size: 10px; line-height: 1.55; }
+.demo-fiction-note svg { flex: none; color: var(--gold); }
+@media (max-width: 620px) { .demo-fiction-note { align-items: flex-start; margin-top: 12px; font-size: 9px; } }

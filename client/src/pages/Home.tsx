@@ -261,7 +261,7 @@ const swarmAgents: { name: string; domain: string; job: string; platform: Platfo
   { name: "Brief Intake", domain: "B2C", job: "Structures incoming briefs and creates the first governed record.", platform: "copilot", event: "New brief classified · CRM write queued", ring: "outer" },
   { name: "Feasibility", domain: "B2C", job: "Tests whether the request can be delivered and prepares the approval case.", platform: "foundry", event: "12 constraints evaluated · approval required", ring: "inner" },
   { name: "Library Match", domain: "B2C", job: "Searches existing formulae before new perfumer work is created.", platform: "fabric", event: "1,842 formulations searched · 3 candidates", ring: "outer" },
-  { name: "Quote Match", domain: "O2C", job: "Reconciles every PO line against the governed commercial quote.", platform: "langchain", event: "PO CO-78431 · variance branch opened", ring: "inner" },
+  { name: "Quote Match", domain: "O2C", job: "Reconciles every PO line against the governed commercial quote.", platform: "langchain", event: "PO IL-2026-0417 · variance branch opened", ring: "inner" },
   { name: "Order Creation", domain: "O2C", job: "Creates the order only after quote and credit controls clear.", platform: "uipath", event: "ERP transaction staged · control passed", ring: "outer" },
   { name: "Mini-MRP", domain: "O2C", job: "Evaluates stock, safety stock, open POs, lead time and factory capacity.", platform: "fabric", event: "RM available · promise date calculated", ring: "inner" },
   { name: "Production Planner", domain: "Factory", job: "Resolves solution/base requirements and releases the complete production route.", platform: "langchain", event: "BOM exploded · route sent to factory", ring: "outer" },
@@ -293,18 +293,18 @@ const enterpriseEndpoints: { key: EndpointKey; name: string; role: string; icon:
 ];
 
 const transactionJourney: TransactionStage[] = [
-  { title: "Purchase order received", system: "Email channel", detail: "PO CO-78431 arrives as a PDF and becomes a governed transaction packet.", platform: "copilot", endpoint: "email", packet: "PO · CO-78431", path: "M83 176 C165 176 235 112 332 91" },
+  { title: "Purchase order received", system: "Email channel", detail: "Illustrative PO IL-2026-0417 arrives as a PDF and becomes a governed transaction packet.", platform: "copilot", endpoint: "email", packet: "PO · IL-2026-0417", path: "M83 176 C165 176 235 112 332 91" },
   { title: "Document read", system: "UiPath AI OCR", detail: "Customer, product, quantity, requested date and commercial lines are extracted with source evidence.", agent: 3, platform: "uipath", packet: "OCR · 98.7%", path: "M332 91 C390 150 455 245 500 325" },
-  { title: "Customer and quote context", system: "Dynamics 365 + Microsoft Fabric", detail: "The packet retrieves the governed Dynamics 365 customer account and quote Q-78142 before any order is created.", platform: "fabric", endpoint: "crm", packet: "QUOTE · Q-78142", path: "M500 325 C365 330 225 290 83 268" },
+  { title: "Customer and quote context", system: "Dynamics 365 + Microsoft Fabric", detail: "The packet retrieves the governed Dynamics 365 customer account and illustrative quote QT-IL-417 before any order is created.", platform: "fabric", endpoint: "crm", packet: "QUOTE · QT-IL-417", path: "M500 325 C365 330 225 290 83 268" },
   { title: "Quote matched", system: "Quote Match Agent", detail: "Every PO line is reconciled against the approved quote, including price, currency, quantity and delivery terms.", agent: 3, platform: "langchain", packet: "MATCH · 4/4", path: "M83 268 C270 270 470 160 669 91" },
-  { title: "Commercial control", system: "Named human approval", detail: "The price variance is contained. Customer Service approves the correction before automation may continue.", platform: "foundry", human: true, packet: "HOLD · +£45.60", path: "M669 91 C610 130 550 175 500 201" },
-  { title: "Order and credit created", system: "SAP ERP", detail: "UiPath creates the order and SAP performs the automatic credit check against controlled master data.", agent: 4, platform: "uipath", endpoint: "erp", packet: "SO · 54001982", path: "M500 201 C650 220 800 270 916 319" },
+  { title: "Commercial control", system: "Named human approval", detail: "The illustrative price variance is contained. Customer Service approves the correction before automation may continue.", platform: "foundry", human: true, packet: "HOLD · +£52.50", path: "M669 91 C610 130 550 175 500 201" },
+  { title: "Order and credit created", system: "SAP ERP", detail: "UiPath creates the illustrative order and SAP performs the automatic credit check against controlled master data.", agent: 4, platform: "uipath", endpoint: "erp", packet: "SO · 58004192", path: "M500 201 C650 220 800 270 916 319" },
   { title: "Mini-MRP and promise", system: "Mini-MRP Agent", detail: "Raw material, safety stock, open POs, vendor lead time and factory capacity resolve the promise date.", agent: 5, platform: "fabric", packet: "PROMISE · 24 SEP", path: "M916 319 C760 390 640 510 500 591" },
-  { title: "Production route released", system: "Fricke production system", detail: "The BOM and solution/base route are created and released to the correct Fricke work centre.", agent: 6, platform: "langchain", endpoint: "factory", packet: "PROD · 870144", path: "M500 591 C650 560 790 440 916 365" },
-  { title: "Production and QC tracked", system: "Fricke + Status Agent", detail: "Fricke dosing and production movements, followed by packing and QC events, update the order state and customer portal continuously.", agent: 7, platform: "copilot", endpoint: "factory", packet: "QC · RELEASED", path: "M916 365 C730 300 520 210 332 91" },
-  { title: "Live status published", system: "Status Agent + Customer Portal", detail: "The Status Agent converts controlled SAP, Fricke, packing and QC events into a real-time customer timeline with source and timestamp intact.", agent: 7, platform: "copilot", endpoint: "portal", packet: "PORTAL · 5 EVENTS", path: "M916 365 C700 470 350 455 83 347" },
+  { title: "Production route released", system: "Illustrative factory workflow", detail: "The BOM and solution/base route are created and released to the illustrative factory work centre.", agent: 6, platform: "langchain", endpoint: "factory", packet: "PROD · 880714", path: "M500 591 C650 560 790 440 916 365" },
+  { title: "Production and QC tracked", system: "Illustrative production + Status Agent", detail: "Illustrative dosing and production movements, followed by packing and quality-release events, update the order state and customer portal continuously.", agent: 7, platform: "copilot", endpoint: "factory", packet: "QUALITY · RELEASED", path: "M916 365 C730 300 520 210 332 91" },
+  { title: "Live status published", system: "Status Agent + Customer Portal", detail: "The Status Agent converts controlled order, factory, packing and quality-release events into a real-time customer timeline with source and timestamp intact.", agent: 7, platform: "copilot", endpoint: "portal", packet: "PORTAL · 5 EVENTS", path: "M916 365 C700 470 350 455 83 347" },
   { title: "Goods issue and invoice", system: "SAP ERP + Invoice Agent", detail: "Goods issue closes fulfilment, generates the invoice and writes the financial event back to SAP.", agent: 9, platform: "azure", endpoint: "erp", packet: "INV · 920184", path: "M332 91 C210 390 275 590 500 591 C700 590 780 380 916 319" },
-  { title: "Customer confirmation sent", system: "Email channel", detail: "Order confirmation, shipping documents and invoice leave through the customer channel with a complete audit trail.", agent: 8, platform: "uipath", endpoint: "email", packet: "COMPLETE · 12 EVENTS", path: "M916 319 C700 200 350 120 83 176" },
+  { title: "Customer confirmation sent", system: "Email channel", detail: "Illustrative order confirmation, shipping documents and invoice leave through the customer channel with a complete audit trail.", agent: 8, platform: "uipath", endpoint: "email", packet: "COMPLETE · 12 EVENTS", path: "M916 319 C700 200 350 120 83 176" },
 ];
 
 const portalStatusEvents = [
@@ -394,7 +394,7 @@ const briefOutcomes: Outcome[] = [
 const orderToCash: ProcessStep[] = [
   {
     title: "PO received",
-    copy: "The customer purchase order arrives by email or, in Colombia, Brazil and parts of the Middle East, through WhatsApp. Both channels enter the same workflow.",
+    copy: "A customer purchase order arrives through the supported email or messaging channels. Both routes enter the same governed workflow.",
     kind: "agent",
     tags: ["Email", "WhatsApp", "Regional channels"],
     systems: ["Microsoft Copilot Studio · PO Intake Agent", "UiPath RPA · email and WhatsApp capture", "LangChain · O2C orchestration"],
@@ -458,14 +458,14 @@ const orderToCash: ProcessStep[] = [
     copy: "The production agent updates each movement from the dosing bot through finished production and packing. The customer portal is updated throughout.",
     kind: "agent",
     tags: ["Dosing bot", "Finished", "Packing", "Customer portal"],
-    systems: ["Microsoft Copilot Studio · Production Status Agent", "CPL · dosing bot", "Microsoft Fabric · manufacturing event stream", "Microsoft Copilot Studio · Customer Portal Update Agent"],
+    systems: ["Microsoft Copilot Studio · Production Status Agent", "Illustrative dosing event stream", "Microsoft Fabric · manufacturing event stream", "Microsoft Copilot Studio · Customer Portal Update Agent"],
   },
   {
     title: "QC notified & updated",
     copy: "Production-complete status notifies Quality. QC performs its control and the QC system records the updated status before shipping continues.",
     kind: "human",
     tags: ["Production complete", "QC control", "System update"],
-    systems: ["Microsoft Fabric · production-complete event", "LangChain · QC release checkpoint", "CPL · Quality team"],
+    systems: ["Microsoft Fabric · production-complete event", "LangChain · quality release checkpoint", "Named quality approver"],
   },
   {
     title: "Shipping & delivery tracked",
@@ -540,14 +540,14 @@ const processLensMessages: Record<"brief" | "order", Record<ExecutiveLens, LensM
 };
 
 const orderTwinEvents: TwinEvent[] = [
-  { title: "PO received", system: "PO Intake Agent · WhatsApp", copy: "Six-line customer PO captured from Colombia.", customer: "Order received", minutes: 0 },
+  { title: "PO received", system: "PO Intake Agent · WhatsApp", copy: "Illustrative six-line customer PO captured for the demonstration.", customer: "Order received", minutes: 0 },
   { title: "Document understood", system: "AI-based OCR · UiPath RPA", copy: "Products, quantities, requested dates and prices extracted.", customer: "Acknowledgement sent", minutes: 1 },
-  { title: "Quote reconciled", system: "Quote Match Agent · Microsoft Fabric", copy: "PO compared with CRM quote Q-78142.", customer: "Validation in progress", minutes: 2 },
+  { title: "Quote reconciled", system: "Quote Match Agent · Microsoft Fabric", copy: "Illustrative PO compared with CRM quote QT-IL-417.", customer: "Validation in progress", minutes: 2 },
   { title: "Order and credit", system: "Order Creation Agent · LangChain", copy: "Sales order created and credit control executed.", customer: "Order accepted", minutes: 4 },
   { title: "Materials and capacity", system: "Mini-MRP Agent · Microsoft Fabric", copy: "Safety stock, open POs, lead times and plant capacity evaluated.", customer: "Promise date calculated", minutes: 6 },
   { title: "Production route", system: "Production Planning Agent · UiPath RPA", copy: "Solution/base requirement resolved and production order released.", customer: "Production planned", minutes: 9 },
-  { title: "Factory movement", system: "Production Status Agent · CPL dosing bot", copy: "Dosing, finishing and packing events posted as they occur.", customer: "In production", minutes: 14 },
-  { title: "Quality release", system: "QC checkpoint · Quality team", copy: "Completion event routed to Quality for controlled release.", customer: "Quality check", minutes: 17 },
+  { title: "Factory movement", system: "Production Status Agent · illustrative factory event stream", copy: "Illustrative dosing, finishing and packing events post as they occur.", customer: "In production", minutes: 14 },
+  { title: "Quality release", system: "Illustrative quality-release checkpoint", copy: "Completion event routes to the illustrative quality workflow for controlled release.", customer: "Quality check", minutes: 17 },
   { title: "Shipping prepared", system: "Shipping & Documentation Agent", copy: "Shipping, customs and tracking documents generated.", customer: "Ready to ship", minutes: 19 },
   { title: "Invoice dispatched", system: "Invoice Dispatch Agent · goods issue", copy: "Goods issue triggers invoice generation and customer delivery.", customer: "Shipped and invoiced", minutes: 20 },
 ];
@@ -556,17 +556,17 @@ const discrepancyResolutions = [
   {
     id: "correct",
     title: "Correct PO to contracted quote",
-    owner: "Customer Service · Colombia",
-    detail: "Apply £27.00/kg from CRM quote Q-78142 and preserve the agreed commercial position.",
-    impact: "£45.60 variance removed",
+    owner: "Customer Service · illustrative regional queue",
+    detail: "Apply £26.40/kg from illustrative CRM quote QT-IL-417 and preserve the agreed commercial position.",
+    impact: "£52.50 variance removed",
     recommended: true,
   },
   {
     id: "accept",
     title: "Accept the PO price",
     owner: "Account manager approval",
-    detail: "Accept £27.76/kg, document the commercial exception and retain the higher order value.",
-    impact: "+£45.60 order value",
+    detail: "Accept £27.15/kg, document the commercial exception and retain the higher order value.",
+    impact: "+£52.50 order value",
     recommended: false,
   },
   {
@@ -594,14 +594,14 @@ function OrderDigitalTwin({ lens }: { lens: ExecutiveLens }) {
       {
         title: "Price discrepancy stopped",
         system: "Quote Match Agent · LangChain exception branch",
-        copy: "PO line 4 is 2.8% above quote Q-78142. The agent stops order creation and opens a Customer Service audit.",
+        copy: "Illustrative PO line 3 is 2.8% above quote QT-IL-417. The agent stops order creation and opens a Customer Service audit.",
         customer: "Validation paused",
         minutes: 2,
         exception: true,
       },
       {
         title: "Human resolution recorded",
-        system: "CPL Customer Service · human control",
+        system: "Customer Service · human control",
         copy: `Customer Service records “${selectedResolution.title}” and releases the transaction with a named decision in the audit trail.`,
         customer: "Exception resolved",
         minutes: 5,
@@ -658,7 +658,7 @@ function OrderDigitalTwin({ lens }: { lens: ExecutiveLens }) {
         <div>
           <span className="overline">Live executive demonstration</span>
           <h2>Follow one order.</h2>
-          <p>Watch a WhatsApp PO move across agents, data, human control and factory events. Inject a real exception to see the automation stop safely.</p>
+          <p>Watch an illustrative WhatsApp PO move across agents, data, human control and factory events. Inject a discrepancy to see the automation stop safely.</p>
         </div>
         <div className="twin-controls">
           <div className="scenario-toggle" role="group" aria-label="Order simulation scenario">
@@ -674,12 +674,12 @@ function OrderDigitalTwin({ lens }: { lens: ExecutiveLens }) {
 
       <div className="twin-stage">
         <div className="po-card">
-          <div className="po-top"><span>PO / CO-78431</span><b>WHATSAPP · COLOMBIA</b></div>
-          <div className="po-customer"><small>CUSTOMER</small><strong>Casa Botánica S.A.S.</strong><span>Requested delivery · 28 OCT</span></div>
+          <div className="po-top"><span>PO / IL-2026-0417</span><b>WHATSAPP · ILLUSTRATIVE</b></div>
+          <div className="po-customer"><small>CUSTOMER</small><strong>Illustrative Aromatics Ltd.</strong><span>Requested delivery · 28 OCT</span></div>
           <div className="po-lines">
-            <div><span>Jasmine Accord 41</span><b>120 KG</b><em>£46.20</em></div>
-            <div><span>Cedar Base 08</span><b>80 KG</b><em>£31.10</em></div>
-            <div className={scenario === "exception" && active >= 3 ? "flagged" : ""}><span>Amber Solution 12</span><b>60 KG</b><em>£27.76</em></div>
+            <div><span>Sample Accord 01</span><b>135 KG</b><em>£47.10</em></div>
+            <div><span>Demo Base 08</span><b>75 KG</b><em>£30.80</em></div>
+            <div className={scenario === "exception" && active >= 3 ? "flagged" : ""}><span>Illustrative Solution 12</span><b>70 KG</b><em>£27.15</em></div>
           </div>
           <div className="po-foot"><ScanLine size={15} /><span>Document confidence</span><b>99.2%</b></div>
         </div>
@@ -725,7 +725,6 @@ function OrderDigitalTwin({ lens }: { lens: ExecutiveLens }) {
             <div><span>Human interventions</span><b>{scenario === "exception" && active >= 4 ? "01 · recorded" : "00"}</b></div>
             <div><span>Audit trace</span><b>{active >= 0 ? `${active + 1}/${events.length} events` : "Ready"}</b></div>
           </div>
-          <p className="twin-disclaimer"><CircleDot size={12} />Illustrative transaction trace for the meeting—not a measured Euroma cycle-time claim.</p>
         </div>
 
         <AnimatePresence>
@@ -739,25 +738,25 @@ function OrderDigitalTwin({ lens }: { lens: ExecutiveLens }) {
             >
               <div className="exception-header">
                 <div>
-                  <span><AlertTriangle size={14} />EXCEPTION / EX-24091</span>
+                  <span><AlertTriangle size={14} />EXCEPTION / EX-IL-2417</span>
                   <h3>{exceptionResolved ? "Decision recorded. Control released." : "Commercial price variance requires a person."}</h3>
                 </div>
                 <div className="exception-owner">
-                  <span>Assigned owner</span><strong>Customer Service · Colombia</strong><b>{exceptionResolved ? "RESOLVED · T+05 MIN" : "SLA · 15 MIN"}</b>
+                  <span>Assigned owner</span><strong>Customer Service · illustrative regional queue</strong><b>{exceptionResolved ? "RESOLVED · T+05 MIN" : "SLA · 15 MIN"}</b>
                 </div>
               </div>
 
               <div className="evidence-grid">
                 <div className="evidence-card">
                   <span>01 · Source evidence</span>
-                  <div><small>CRM QUOTE · Q-78142</small><strong>Amber Solution 12</strong><p><b>60 KG</b><em>£27.00 / KG</em></p></div>
-                  <div className="evidence-po"><small>CUSTOMER PO · CO-78431</small><strong>Amber Solution 12</strong><p><b>60 KG</b><em>£27.76 / KG</em></p></div>
+                  <div><small>ILLUSTRATIVE CRM QUOTE · QT-IL-417</small><strong>Illustrative Solution 12</strong><p><b>70 KG</b><em>£26.40 / KG</em></p></div>
+                  <div className="evidence-po"><small>ILLUSTRATIVE CUSTOMER PO · IL-2026-0417</small><strong>Illustrative Solution 12</strong><p><b>70 KG</b><em>£27.15 / KG</em></p></div>
                 </div>
                 <div className="exposure-card">
                   <span>02 · Financial exposure</span>
                   <strong>+2.8%</strong>
-                  <p>Unit variance <b>+£0.76/kg</b></p>
-                  <p>Order-line exposure <b>£45.60</b></p>
+                  <p>Unit variance <b>+£0.75/kg</b></p>
+                  <p>Order-line exposure <b>£52.50</b></p>
                   <p>Downstream posting <b>blocked</b></p>
                 </div>
                 <div className="containment-card">
@@ -795,7 +794,7 @@ function OrderDigitalTwin({ lens }: { lens: ExecutiveLens }) {
                 ) : (
                   <div className="writeback-receipt">
                     <div><BadgeCheck size={19} /><span>CONTROL RECEIPT</span><b>DECISION IMMUTABLE</b></div>
-                    <p><strong>{selectedResolution.title}</strong> recorded by Customer Service · Colombia at T+05. CRM quote evidence, PO exception, decision reason and owner written to audit ID <b>EX-24091</b>. Order Creation Agent released.</p>
+                    <p><strong>{selectedResolution.title}</strong> recorded by Customer Service · illustrative regional queue at T+05. CRM quote evidence, PO exception, decision reason and owner written to illustrative audit ID <b>EX-IL-2417</b>. Order Creation Agent released.</p>
                     <div className="writeback-systems"><span>CRM exception log · updated</span><span>Customer portal · resolved</span><span>LangChain branch · released</span><span>UiPath order entry · resumed</span></div>
                   </div>
                 )}
@@ -804,6 +803,7 @@ function OrderDigitalTwin({ lens }: { lens: ExecutiveLens }) {
           )}
         </AnimatePresence>
       </div>
+      <p className="demo-fiction-note"><CircleDot size={12} />Illustrative order. Customer, document and pricing details are fictional.</p>
     </div>
   );
 }
@@ -849,6 +849,24 @@ function Metric({ value, label }: { value: string; label: string }) {
       <span>{label}</span>
     </div>
   );
+}
+
+function VentureTitle({
+  venture,
+  level,
+}: {
+  venture: { name: string; displayName?: string; brandLogo?: string };
+  level: "h2" | "h3";
+}) {
+  const [showWordmark, setShowWordmark] = useState(true);
+  const name = venture.displayName ?? venture.name;
+  const title = venture.brandLogo && showWordmark
+    ? <img className="cortisleeve-wordmark" src={venture.brandLogo} alt={name} width={238} height={69} onError={() => setShowWordmark(false)} />
+    : name;
+
+  return level === "h2"
+    ? <h2 id="venture-modal-title" className="venture-name">{title}</h2>
+    : <h3 className="venture-name">{title}</h3>;
 }
 
 function OrbitalSystem() {
@@ -970,7 +988,7 @@ function ProfileSection() {
         </p>
       </motion.div>
 
-      <div className="content-block">
+      <div className="content-block ventures-block">
         <div className="block-heading">
           <div>
             <span className="overline">Independent ventures</span>
@@ -979,9 +997,7 @@ function ProfileSection() {
           <p>Three ventures across fragrance creation, neural hearing and market intelligence, each built around a specific human need.</p>
         </div>
         <div className="venture-grid">
-          {ventures.map((venture, index) => {
-            const Icon = venture.icon;
-            return (
+          {ventures.map((venture, index) => (
               <motion.button
                 type="button"
                 key={venture.name}
@@ -989,28 +1005,17 @@ function ProfileSection() {
                 initial={{ opacity: 0, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.16 + index * 0.08 }}
-                whileHover={{ y: -5 }}
+                whileHover={{ y: -3 }}
                 onClick={() => setActiveVenture(index)}
                 aria-haspopup="dialog"
                 aria-label={`Open ${venture.name} product summary`}
               >
-                <div className="venture-top">{venture.brandIcon ? <img className="venture-brand-icon" src={venture.brandIcon} alt="Olfyne logo mark" width={32} height={32} /> : <Icon size={20} />}<span>0{index + 1}</span></div>
-                <span className="overline">{venture.meta}</span>
-                <h3>{venture.brandLogo ? <img className="cortisleeve-wordmark" src={venture.brandLogo} alt="CortiSleeve" width={238} height={69} /> : venture.displayName ?? venture.name}</h3>
-                <p>{venture.copy}</p>
-                {venture.name === "Trend Analysis MCP" && <div className="trend-card-preview" aria-label="Four current editorial signals surfaced"><header><span>Surfaced today</span><small>4 signals</small></header><div className="trend-card-preview-list"><i className="amber"><b>01</b><strong>Elevated gourmand</strong></i><i className="mint"><b>02</b><strong>Fragrance wardrobe</strong></i><i className="lilac"><b>03</b><strong>Quiet fragrance</strong></i><i className="coral"><b>04</b><strong>Scent extensions</strong></i></div><footer><span />Source-linked evidence</footer></div>}
-                {venture.productImage && (
-                  <div className="venture-product-preview">
-                    <img src={venture.productImage} alt="Official CortiSleeve product render showing the neural sleeve on a wireless earbud" loading="lazy" />
-                    <span>{venture.stage}</span>
-                  </div>
-                )}
-                {venture.credentials && <div className="venture-credentials">{venture.credentials.map(credential => <span key={credential}><ShieldCheck size={12} />{credential}</span>)}</div>}
-                {venture.award && <div className="venture-award"><img src={venture.awardImage} alt="Beautyworld Dubai Awards 2026 finalist announcement" /><span>{venture.award}</span></div>}
+                <div className="venture-compact-top"><span>0{index + 1}</span><small>Product brief</small></div>
+                <VentureTitle venture={venture} level="h3" />
+                <p className="venture-category">{venture.meta}</p>
                 <div className="venture-open"><span>Open product brief</span><ArrowUpRight size={14} /></div>
               </motion.button>
-            );
-          })}
+            ))}
         </div>
       </div>
 
@@ -1078,7 +1083,7 @@ function ProfileSection() {
               <button ref={modalCloseRef} type="button" className="venture-modal-close" onClick={() => setActiveVenture(null)} aria-label="Close product summary"><X size={18} /></button>
               <div className="venture-modal-copy">
                 <span className="overline">{selectedVenture.meta}</span>
-                <h2 id="venture-modal-title">{selectedVenture.brandLogo ? <img className="cortisleeve-wordmark" src={selectedVenture.brandLogo} alt="CortiSleeve" width={238} height={69} /> : selectedVenture.displayName ?? selectedVenture.name}</h2>
+                <VentureTitle venture={selectedVenture} level="h2" />
                 {selectedVenture.credentials && <div className="venture-credentials modal-credentials">{selectedVenture.credentials.map(credential => <span key={credential}><ShieldCheck size={14} />{credential}</span>)}</div>}
                 <h3>{selectedVenture.demoTitle}</h3>
                 <p>{selectedVenture.demo}</p>
@@ -1246,7 +1251,7 @@ function TechSection() {
             <button type="button" className={transactionChannel === "whatsapp" ? "active" : ""} onClick={() => setTransactionChannel("whatsapp")} disabled={transactionActive && transactionStage > 0}><img src={ASSETS.whatsapp} alt="" />WhatsApp</button>
           </div>
           <div className="transaction-progress">
-            <div><span>{transactionActive ? `Stage ${String(transactionStage + 1).padStart(2, "0")} / ${transactionJourney.length}` : "Ready to trace"}</span><b>{transactionActive ? currentTransaction.system : "PO CO-78431 · Colombia"}</b></div>
+            <div><span>{transactionActive ? `Stage ${String(transactionStage + 1).padStart(2, "0")} / ${transactionJourney.length}` : "Ready to trace"}</span><b>{transactionActive ? currentTransaction.system : "Illustrative PO · ready"}</b></div>
             <div className="transaction-progress-rail"><i style={{ transform: `scaleX(${transactionActive ? (transactionStage + 1) / transactionJourney.length : 0})` }} /></div>
           </div>
           <div className="transaction-actions">
@@ -1903,19 +1908,12 @@ function ImpactSection({ lens }: { lens: ExecutiveLens }) {
   }, [brief, discountRate, fundingRate, mode, order, scenario]);
 
   const source = mode === "brief" ? brief : order;
-  const kpis = lens === "cfo"
-    ? [
-        { value: formatMoney(model.recurring), label: "Annual recurring net value", note: "benefits less annual run cost" },
-        { value: model.paybackMonths ? `${formatNumber(model.paybackMonths, 1)} mo` : "—", label: "Simple payback", note: "includes year-one realization ramp" },
-        { value: formatMoney(model.npv), label: "Three-year NPV", note: `${discountRate}% discount rate` },
-        { value: mode === "order" ? formatMoney(model.workingCapital) : "—", label: "Working capital released", note: mode === "order" ? `${order.cashDays} cash-cycle days` : "not modelled for B2C" },
-      ]
-    : [
-        { value: `${formatNumber(source.days, 1)} → ${formatNumber(model.newCycle, 1)}d`, label: "Modelled cycle time", note: `${source.pct}% reduction assumption` },
-        { value: formatNumber(model.fteEquivalent, 1), label: "FTE-equivalent capacity", note: "redeployed—not assumed removed" },
-        { value: formatMoney(model.recurring), label: "Annual recurring net value", note: "funds growth and service capacity" },
-        { value: mode === "order" ? formatMoney(model.workingCapital) : "Faster", label: mode === "order" ? "Working capital released" : "Customer response", note: mode === "order" ? "cash-cycle opportunity" : "immediate agent intake" },
-      ];
+  const kpis = [
+    { value: `${formatNumber(source.days, 1)} → ${formatNumber(model.newCycle, 1)}d`, label: "Modelled cycle time", note: `${source.pct}% reduction assumption` },
+    { value: formatNumber(model.fteEquivalent, 1), label: "FTE-equivalent capacity", note: "redeployed—not assumed removed" },
+    { value: model.paybackMonths ? `${formatNumber(model.paybackMonths, 1)} mo` : "—", label: "Payback period", note: "includes year-one realization ramp" },
+    { value: formatMoney(model.npv), label: "Three-year NPV", note: `${discountRate}% discount rate` },
+  ];
 
   return (
     <SectionFrame
@@ -1944,6 +1942,7 @@ function ImpactSection({ lens }: { lens: ExecutiveLens }) {
       <div className="investment-grid">
         <div className="investment-inputs">
           <div className="panel-label"><Gauge size={17} /><span>EDITABLE OPERATING ASSUMPTIONS</span></div>
+          <p className="assumptions-notice">Sample inputs. Replace each value with a validated Euroma baseline before this case is used commercially.</p>
           <div className="input-columns">
             {mode === "brief" ? (
               <>
@@ -2009,6 +2008,11 @@ function ImpactSection({ lens }: { lens: ExecutiveLens }) {
 }
 
 function NextSection({ onNavigate }: { onNavigate: (id: SectionId) => void }) {
+  const engagementPhases = [
+    { number: "01", timing: "Days 0–30 · indicative", title: "Map and agree", copy: "Select one process, map the current path end to end, name every human approval gate, and confirm the systems of record and data access required.", output: "Signed scope with named gates and a measured baseline." },
+    { number: "02", timing: "Days 31–60 · indicative", title: "Build in the real systems", copy: "Assemble the scoped agents, connect the live systems, implement approvals and audit trail, and run against real historical volume.", output: "Working flow in a controlled environment with exceptions routing correctly." },
+    { number: "03", timing: "Days 61–90 · indicative", title: "Run live and measure", copy: "Operate the flow on live work with human approvals in place, measure against the day-zero baseline, and decide whether to widen.", output: "Live process and an evidenced decision on the second one." },
+  ];
   return (
     <SectionFrame
       eyebrow="A practical next move"
@@ -2032,12 +2036,33 @@ function NextSection({ onNavigate }: { onNavigate: (id: SectionId) => void }) {
           <a className="launch-button" href="https://euroma.aromis.io" target="_blank" rel="noreferrer">Open EuromaIQ <ArrowUpRight size={18} /></a>
         </div>
       </div>
+      <section className="engagement-shape" aria-labelledby="engagement-shape-title">
+        <div className="engagement-heading"><div><span className="overline">Indicative 90-day engagement</span><h2 id="engagement-shape-title">One process. Measured progress.</h2></div><p>Build evidence before scale: one live process, named controls and a decision based on observed operation. This is indicative scope, not a promised delivery timeline.</p></div>
+        <div className="engagement-phase-grid">
+          {engagementPhases.map((phase) => <article key={phase.number}><span>{phase.number}</span><small>{phase.timing}</small><h3>{phase.title}</h3><p>{phase.copy}</p><div><b>Output</b><strong>{phase.output}</strong></div></article>)}
+        </div>
+        <p className="euroma-provides"><span>What Euroma provides</span>A named process owner, a named business approver, access to the systems of record, and one technical contact for integration.</p>
+      </section>
       <div className="closing-line">
         <span>ALFRED × EUROMA</span>
         <strong>Production AI. Human control.</strong>
         <span>2026</span>
       </div>
     </SectionFrame>
+  );
+}
+
+function SectionAdvance({ section, onNavigate }: { section: SectionId; onNavigate: (id: SectionId) => void }) {
+  const currentIndex = navItems.findIndex((item) => item.id === section);
+  const isLast = currentIndex === navItems.length - 1;
+  const target = navItems[isLast ? 0 : currentIndex + 1];
+  return (
+    <div className="section-advance">
+      <span>{isLast ? "Deck complete" : "Next section"}</span>
+      <button type="button" onClick={() => onNavigate(target.id)} aria-label={isLast ? "Back to start" : `Open section ${target.kicker}: ${target.label}`}>
+        <b>{target.kicker}</b><strong>{isLast ? `Back to start · ${target.label}` : target.label}</strong><ArrowUpRight size={16} />
+      </button>
+    </div>
   );
 }
 
@@ -2175,6 +2200,7 @@ function AppShell() {
 
       <main>
         <AnimatePresence mode="wait">{renderSection()}</AnimatePresence>
+        <SectionAdvance section={section} onNavigate={navigate} />
       </main>
 
       <footer className="site-footer">
