@@ -988,42 +988,11 @@ function ProfileSection() {
         </p>
       </motion.div>
 
-      <div className="content-block ventures-block">
-        <div className="block-heading">
-          <div>
-            <span className="overline">Independent ventures</span>
-            <h2>Built beyond the boardroom.</h2>
-          </div>
-          <p>Three ventures across fragrance creation, neural hearing and market intelligence, each built around a specific human need.</p>
-        </div>
-        <div className="venture-grid">
-          {ventures.map((venture, index) => (
-              <motion.button
-                type="button"
-                key={venture.name}
-                className={`venture-card ${venture.name === "Trend Analysis MCP" ? "trend-card" : ""} ${venture.productImage ? "cortisleeve-card" : ""} ${venture.name === "Olfyne" ? "olfyne-card" : ""}`}
-                initial={{ opacity: 0, y: 14 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.16 + index * 0.08 }}
-                whileHover={{ y: -3 }}
-                onClick={() => setActiveVenture(index)}
-                aria-haspopup="dialog"
-                aria-label={`Open ${venture.name} product summary`}
-              >
-                <div className="venture-compact-top"><span>0{index + 1}</span><small>Product brief</small></div>
-                <VentureTitle venture={venture} level="h3" />
-                <p className="venture-category">{venture.meta}</p>
-                <div className="venture-open"><span>Open product brief</span><ArrowUpRight size={14} /></div>
-              </motion.button>
-            ))}
-        </div>
-      </div>
-
       <div className="content-block career-block">
         <div className="block-heading">
           <div>
             <span className="overline">Operating record</span>
-            <h2>Brands where the work shipped.</h2>
+            <h2>My work to date.</h2>
           </div>
           <p>Select a company to see the work behind the logo.</p>
         </div>
@@ -1064,6 +1033,37 @@ function ProfileSection() {
             <p>{career[activeCareer].copy}</p>
           </motion.div>
         </AnimatePresence>
+      </div>
+
+      <div className="content-block ventures-block">
+        <div className="block-heading">
+          <div>
+            <span className="overline">Independent ventures</span>
+            <h2>Built beyond the boardroom.</h2>
+          </div>
+          <p>Three ventures across fragrance creation, neural hearing and market intelligence, each built around a specific human need.</p>
+        </div>
+        <div className="venture-grid">
+          {ventures.map((venture, index) => (
+              <motion.button
+                type="button"
+                key={venture.name}
+                className={`venture-card ${venture.name === "Trend Analysis MCP" ? "trend-card" : ""} ${venture.productImage ? "cortisleeve-card" : ""} ${venture.name === "Olfyne" ? "olfyne-card" : ""}`}
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.16 + index * 0.08 }}
+                whileHover={{ y: -3 }}
+                onClick={() => setActiveVenture(index)}
+                aria-haspopup="dialog"
+                aria-label={`Open ${venture.name} product summary`}
+              >
+                <div className="venture-compact-top"><span>0{index + 1}</span><small>Product brief</small></div>
+                <VentureTitle venture={venture} level="h3" />
+                <p className="venture-category">{venture.meta}</p>
+                <div className="venture-open"><span>Open product brief</span><ArrowUpRight size={14} /></div>
+              </motion.button>
+            ))}
+        </div>
       </div>
 
       <AnimatePresence>
