@@ -1250,3 +1250,11 @@ main { width: 100%; min-height: calc(100vh - 120px); }
 @keyframes aps-handoff-flow { from { opacity: .5; } to { opacity: 1; box-shadow: 0 0 14px rgba(159,196,107,.72); } }
 @media (max-width: 760px) { .aps-agent-connector { display: none; } }
 @media (prefers-reduced-motion: reduce) { .aps-agent-connector.active > i::after { animation: none; } }
+
+/* Unified process handoff arrow: a line plus geometric chevron, not a font glyph. */
+.flow-connector .connector-track, .flow-connector .connector-energy { right: 22px; }.connector-arrow { top: 5px; right: 7px; width: 13px; height: 13px; color: transparent; border: solid rgba(242,238,229,.33); border-width: 0 2px 2px 0; font-size: 0; transform: rotate(-45deg); transition: border-color .24s var(--ease-out), filter .24s var(--ease-out); }.flow-connector.passed .connector-arrow { border-color: var(--green); filter: drop-shadow(0 0 4px rgba(159,196,107,.38)); }
+@media (min-width: 761px) { .aps-agent-connector > b { top: 7px; right: 2px; width: 11px; height: 11px; color: transparent; border: solid rgba(242,238,229,.33); border-width: 0 2px 2px 0; font-size: 0; transform: rotate(-45deg); transition: border-color .2s var(--ease-out), filter .2s var(--ease-out); }.aps-agent-connector.passed > b { color: transparent; border-color: var(--green); filter: drop-shadow(0 0 4px rgba(159,196,107,.38)); }.aps-agent-connector.active > b { color: transparent; border-color: var(--gold); transform: rotate(-45deg) translate(2px, -2px); filter: drop-shadow(0 0 4px rgba(231,185,106,.36)); } }
+
+/* Executive-screen calibration for the shared handoff arrow. */
+.flow-connector .connector-track, .flow-connector .connector-energy { top: 11px; height: 2px; }.connector-arrow { top: 3px; right: 6px; width: 15px; height: 15px; border-width: 0 3px 3px 0; }.flow-connector.passed .connector-energy { box-shadow: 0 0 10px rgba(159,196,107,.52); }
+@media (min-width: 761px) { .aps-agent-list { column-gap: 44px; }.aps-agent-connector { right: -44px; width: 44px; }.aps-agent-connector > i { top: 13px; right: 10px; height: 2px; }.aps-agent-connector > b { top: 5px; right: 2px; width: 14px; height: 14px; border-width: 0 3px 3px 0; } }

@@ -1766,7 +1766,7 @@ function ProcessFlow({
                       animate={{ scaleX: active > index ? 1 : 0 }}
                       transition={{ duration: 0.42, ease: [0.23, 1, 0.32, 1] }}
                     />
-                    <span className="connector-arrow">›</span>
+                    <span className="connector-arrow" aria-hidden="true" />
                     {running && active === index && <span className="connector-ticks" aria-hidden="true"><i /><i /><i /></span>}
                     {running && active === index && (
                       <motion.span className="signal-dot" initial={{ x: 0, opacity: 0 }} animate={{ x: 56, opacity: [0, 1, 1, 0] }} transition={{ duration: .72, repeat: Infinity, ease: "linear" }} />
