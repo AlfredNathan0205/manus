@@ -30,8 +30,23 @@ def main():
         assert "bounded decision" in dossier_text and "human control" in dossier_text
         desktop.get_by_role("button", name="Close Sequencing Agent details").click()
         dossier.wait_for(state="detached")
+
+        output_titles = [
+            "Forecast confidence",
+            "Capacity heatmap",
+            "Recommended production sequence",
+            "Protected scenario comparison",
+            "Schedule recovery proposal",
+        ]
+        for index, title in enumerate(output_titles):
+            desktop.locator(".aps-agent").nth(index).click()
+            dossier.wait_for(state="visible")
+            assert title.lower() in desktop.locator(".aps-output-card").inner_text().lower()
+
         desktop.get_by_role("button", name="Demand surge").click()
         assert desktop.locator(".aps-shell").get_attribute("data-aps-scenario") == "surge"
+        desktop.locator(".aps-agent").nth(0).click()
+        assert "+18%" in desktop.locator(".aps-output-card").inner_text()
         desktop.get_by_role("button", name="Run plan").click()
         desktop.wait_for_timeout(5200)
         assert desktop.locator(".aps-agent.complete").count() == 5
@@ -51,6 +66,7 @@ def main():
         mobile_dossier = mobile.locator(".aps-agent-dossier")
         mobile_dossier.wait_for(state="visible")
         assert "Schedule Adjustment Agent" in mobile_dossier.inner_text()
+        assert "Schedule recovery proposal" in mobile.locator(".aps-output-card").inner_text()
         overflow = mobile.evaluate("document.documentElement.scrollWidth > window.innerWidth")
         assert not overflow, "Expanded APS dossier creates horizontal overflow on mobile"
         mobile.screenshot(path=SCREENSHOT, full_page=False)

@@ -129,6 +129,69 @@ const SCENARIOS: Record<ScenarioKey, { label: string; signal: string; impact: st
   },
 };
 
+function AgentSampleOutput({ agentIndex, scenario }: { agentIndex: number; scenario: ScenarioKey }) {
+  const scenarioLabel = SCENARIOS[scenario].label;
+  const scenarioSignal = scenario === "surge" ? "+18%" : scenario === "delay" ? "ETA +4d" : "+3%";
+
+  if (agentIndex === 0) {
+    const path = scenario === "surge"
+      ? "M4 64 C19 59 26 55 40 58 S61 51 75 45 S100 39 112 24 S135 16 156 12"
+      : scenario === "delay"
+        ? "M4 55 C19 50 27 53 40 48 S61 44 76 46 S99 38 112 40 S135 34 156 30"
+        : "M4 62 C19 57 26 61 40 54 S61 52 76 45 S99 49 112 38 S135 39 156 29";
+    return (
+      <div className="aps-output-card aps-output-forecast" role="img" aria-label={`Illustrative forecast confidence chart for ${scenarioLabel}`}>
+        <div className="aps-output-head"><span>Illustrative sample output</span><strong>Forecast confidence</strong><small>{scenarioSignal} demand signal</small></div>
+        <svg viewBox="0 0 160 76" aria-hidden="true"><path className="aps-chart-grid" d="M4 15H156M4 38H156M4 61H156" /><path className="aps-chart-band" d={`${path} L156 32 C136 42 124 51 112 56 S91 62 76 60 S53 69 40 67 S18 72 4 71Z`} /><path className="aps-chart-line" d={path} /><circle cx="156" cy={scenario === "surge" ? "12" : scenario === "delay" ? "30" : "29"} r="3" /></svg>
+        <div className="aps-output-axis"><span>W1</span><span>W2</span><span>W3</span><span>W4</span><span>W5</span></div>
+        <div className="aps-output-metrics"><span><b>{scenario === "surge" ? "87%" : "92%"}</b>confidence</span><span><b>{scenario === "surge" ? "+18%" : "+3%"}</b>forecast delta</span><span><b>3</b>planner checks</span></div>
+      </div>
+    );
+  }
+
+  if (agentIndex === 1) {
+    const loads = scenario === "surge" ? [[62, 74, 86, 96, 93], [54, 67, 81, 88, 92], [49, 62, 72, 80, 86]] : scenario === "delay" ? [[58, 65, 46, 73, 69], [50, 61, 39, 70, 64], [44, 58, 42, 63, 60]] : [[51, 62, 68, 71, 64], [46, 55, 63, 66, 58], [41, 49, 57, 60, 54]];
+    const rows = ["Mixer 02", "Filling 01", "Packing"];
+    return (
+      <div className="aps-output-card aps-output-capacity" role="img" aria-label={`Illustrative capacity heatmap for ${scenarioLabel}`}>
+        <div className="aps-output-head"><span>Illustrative sample output</span><strong>Capacity heatmap</strong><small>{scenario === "surge" ? "Threshold detected" : "Finite-capacity view"}</small></div>
+        <div className="aps-heatmap"><div className="aps-heatmap-days"><i /><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span></div>{loads.map((row, rowIndex) => <div className="aps-heatmap-row" key={rows[rowIndex]}><b>{rows[rowIndex]}</b>{row.map((load, cellIndex) => <i key={`${rows[rowIndex]}-${cellIndex}`} data-load={load >= 90 ? "critical" : load >= 75 ? "high" : load >= 60 ? "medium" : "normal"}><span>{load}%</span></i>)}</div>)}</div>
+        <div className="aps-output-metrics"><span><b>{scenario === "surge" ? "2" : "0"}</b>resource alerts</span><span><b>{scenario === "delay" ? "1" : "3"}</b>route options</span><span><b>5d</b>planning horizon</span></div>
+      </div>
+    );
+  }
+
+  if (agentIndex === 2) {
+    const lanes = scenario === "delay" ? [["Order 188", "Order 204", "Order 197"], ["Order 204", "Order 188", "Order 197"], ["Order 197", "Order 188", "Order 204"]] : [["Order 188", "Order 204", "Order 197"], ["Order 204", "Order 197", "Order 188"], ["Order 197", "Order 188", "Order 204"]];
+    return (
+      <div className="aps-output-card aps-output-sequence" role="img" aria-label={`Illustrative production sequence for ${scenarioLabel}`}>
+        <div className="aps-output-head"><span>Illustrative sample output</span><strong>Recommended production sequence</strong><small>{scenario === "delay" ? "Material-aware resequence" : "Changeover-minimised"}</small></div>
+        <div className="aps-sequence-grid"><div className="aps-sequence-days"><i /><span>08:00</span><span>12:00</span><span>16:00</span></div>{lanes.map((lane, index) => <div className="aps-sequence-lane" key={`lane-${index}`}><b>{["Mixer 02", "Filling 01", "Packing"][index]}</b><div>{lane.map((order, orderIndex) => <i key={order} data-tone={orderIndex === 1 ? "gold" : orderIndex === 2 ? "soft" : "green"}>{order}</i>)}</div></div>)}</div>
+        <div className="aps-output-metrics"><span><b>−22%</b>changeover time</span><span><b>0</b>late-risk orders</span><span><b>3</b>routes compared</span></div>
+      </div>
+    );
+  }
+
+  if (agentIndex === 3) {
+    const bars = scenario === "surge" ? [43, 84, 63] : scenario === "delay" ? [45, 77, 54] : [36, 40, 32];
+    return (
+      <div className="aps-output-card aps-output-scenario" role="img" aria-label={`Illustrative scenario comparison for ${scenarioLabel}`}>
+        <div className="aps-output-head"><span>Illustrative sample output</span><strong>Protected scenario comparison</strong><small>Shop floor unchanged</small></div>
+        <div className="aps-scenario-bars">{["Current", "Stress test", "Recommended"].map((label, index) => <div key={label}><i style={{ height: `${bars[index]}%` }} data-tone={index === 1 ? "risk" : index === 2 ? "green" : "muted"} /><span>{label}</span><b>{index === 1 && scenario !== "baseline" ? "+1.5d" : index === 2 ? "0d" : "+0.2d"}</b></div>)}</div>
+        <div className="aps-output-metrics"><span><b>3</b>alternatives tested</span><span><b>0</b>live changes</span><span><b>{scenario === "baseline" ? "Low" : "Medium"}</b>risk selected</span></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="aps-output-card aps-output-adjustment" role="img" aria-label={`Illustrative schedule recovery view for ${scenarioLabel}`}>
+      <div className="aps-output-head"><span>Illustrative sample output</span><strong>Schedule recovery proposal</strong><small>Audit-ready change set</small></div>
+      <div className="aps-recovery-view"><div><span>Before</span><p><i data-tone="gold" />Order 188 <b>Tue 14:00</b></p><p><i data-tone="muted" />Order 204 <b>Wed 08:00</b></p></div><strong>→</strong><div><span>Proposed</span><p><i data-tone="green" />Order 204 <b>Tue 14:00</b></p><p><i data-tone="gold" />Order 188 <b>Wed 08:00</b></p></div></div>
+      <div className="aps-output-metrics"><span><b>2</b>orders resequenced</span><span><b>1</b>approval required</span><span><b>100%</b>change trace</span></div>
+    </div>
+  );
+}
+
 export default function APSOrchestrationExperience({ langchainLogo }: { langchainLogo: string }) {
   const reduced = useReducedMotion();
   const [scenario, setScenario] = useState<ScenarioKey>("baseline");
@@ -268,6 +331,7 @@ export default function APSOrchestrationExperience({ langchainLogo }: { langchai
                       <button type="button" onClick={() => setExpandedAgent(null)} aria-label={`Close ${dossierAgent.name} details`}><ChevronDown size={16} />Close</button>
                     </div>
                     <p className="aps-dossier-summary">{dossierAgent.detail}</p>
+                    <AgentSampleOutput agentIndex={expandedAgent ?? 0} scenario={scenario} />
                     <div className="aps-dossier-grid">
                       <div><span>Reads</span><ul>{dossierAgent.inputs.map((item) => <li key={item}>{item}</li>)}</ul></div>
                       <div><span>Tests</span><ul>{dossierAgent.checks.map((item) => <li key={item}>{item}</li>)}</ul></div>
