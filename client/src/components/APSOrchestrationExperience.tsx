@@ -1,4 +1,4 @@
-import { useEffect, useState, type ElementType } from "react";
+import { Fragment, useEffect, useState, type ElementType } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
   Activity,
@@ -286,23 +286,26 @@ export default function APSOrchestrationExperience({ langchainLogo }: { langchai
                 const isComplete = index < activeAgent || (complete && index === activeAgent);
                 const isActive = index === activeAgent;
                 return (
-                  <motion.button
-                    key={agent.name}
-                    type="button"
-                    className={`aps-agent ${isActive ? "active" : ""} ${isComplete ? "complete" : ""} ${expandedAgent === index ? "expanded" : ""}`}
-                    onClick={() => inspectAgent(index)}
-                    aria-pressed={isActive}
-                    aria-expanded={expandedAgent === index}
-                    aria-controls="aps-agent-dossier"
-                    initial={false}
-                    animate={{ opacity: index > activeAgent + 1 ? 0.56 : 1 }}
-                    transition={{ duration: reduced ? 0 : 0.18 }}
-                  >
-                    <span className="aps-agent-index">{String(index + 1).padStart(2, "0")}</span>
-                    <span className="aps-agent-icon"><Icon size={15} /></span>
-                    <span className="aps-agent-copy"><strong>{agent.name}</strong></span>
-                    <span className="aps-agent-status">{isActive && running ? "Working" : isActive ? "Inspect" : isComplete ? "Done" : "Queued"}</span>
-                  </motion.button>
+                  <Fragment key={agent.name}>
+                    <motion.button
+                      key={agent.name}
+                      type="button"
+                      className={`aps-agent ${isActive ? "active" : ""} ${isComplete ? "complete" : ""} ${expandedAgent === index ? "expanded" : ""}`}
+                      onClick={() => inspectAgent(index)}
+                      aria-pressed={isActive}
+                      aria-expanded={expandedAgent === index}
+                      aria-controls="aps-agent-dossier"
+                      initial={false}
+                      animate={{ opacity: index > activeAgent + 1 ? 0.56 : 1 }}
+                      transition={{ duration: reduced ? 0 : 0.18 }}
+                    >
+                      <span className="aps-agent-index">{String(index + 1).padStart(2, "0")}</span>
+                      <span className="aps-agent-icon"><Icon size={15} /></span>
+                      <span className="aps-agent-copy"><strong>{agent.name}</strong></span>
+                      <span className="aps-agent-status">{isActive && running ? "Working" : isActive ? "Inspect" : isComplete ? "Done" : "Queued"}</span>
+                      {index < APS_AGENTS.length - 1 && <span className={`aps-agent-connector ${index < activeAgent || complete ? "passed" : ""} ${index === activeAgent && running ? "active" : ""}`} aria-hidden="true"><i /><b>→</b></span>}
+                    </motion.button>
+                  </Fragment>
                 );
               })}
             </div>

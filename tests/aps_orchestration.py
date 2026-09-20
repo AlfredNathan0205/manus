@@ -20,6 +20,8 @@ def main():
         wait_for_aps(desktop)
 
         assert desktop.locator(".aps-agent").count() == 5
+        assert desktop.locator(".aps-agent-connector").count() == 4
+        assert desktop.locator(".aps-agent-connector.active").count() == 0
         assert "Constraint-aware orchestration" in desktop.locator(".aps-supervisor").inner_text()
         desktop.locator(".aps-agent").nth(2).click()
         dossier = desktop.locator(".aps-agent-dossier")
@@ -48,8 +50,12 @@ def main():
         desktop.locator(".aps-agent").nth(0).click()
         assert "+18%" in desktop.locator(".aps-output-card").inner_text()
         desktop.get_by_role("button", name="Run plan").click()
+        desktop.wait_for_timeout(900)
+        assert desktop.locator(".aps-agent-connector.passed").count() >= 1
+        assert desktop.locator(".aps-agent-connector.active").count() == 1
         desktop.wait_for_timeout(5200)
         assert desktop.locator(".aps-agent.complete").count() == 5
+        assert desktop.locator(".aps-agent-connector.passed").count() == 4
         approval = desktop.locator(".aps-approval-card button")
         assert not approval.is_disabled()
         approval.click()
@@ -62,6 +68,8 @@ def main():
         overflow = mobile.evaluate("document.documentElement.scrollWidth > window.innerWidth")
         assert not overflow, "APS layout creates horizontal overflow on mobile"
         assert mobile.locator(".aps-agent").count() == 5
+        assert mobile.locator(".aps-agent-connector").count() == 4
+        assert mobile.locator(".aps-agent-connector").first.evaluate("node => getComputedStyle(node).display") == "none"
         mobile.locator(".aps-agent").nth(4).click()
         mobile_dossier = mobile.locator(".aps-agent-dossier")
         mobile_dossier.wait_for(state="visible")
