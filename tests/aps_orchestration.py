@@ -3,7 +3,7 @@ from pathlib import Path
 
 from playwright.sync_api import sync_playwright
 
-BASE = "https://3000-ibanmbq9326wl25su5fcc-824f3904.us1.manus.computer/?section=tech"
+BASE = "https://3000-ibanmbq9326wl25su5fcc-824f3904.us1.manus.computer/?section=aps"
 SCREENSHOT = "/tmp/aps-orchestration-mobile.png"
 
 

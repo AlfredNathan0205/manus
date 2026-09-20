@@ -69,7 +69,7 @@ const ASSETS = {
   cortisleeveWordmark: "/manus-storage/cortisleeve-supplied-wordmark_30e0cbd1.png",
 };
 
-type SectionId = "intro" | "tech" | "b2c" | "o2c" | "impact" | "next";
+type SectionId = "intro" | "tech" | "aps" | "b2c" | "o2c" | "impact" | "next";
 type StepKind = "agent" | "human" | "decision";
 type ExecutiveLens = "ceo" | "cfo";
 
@@ -108,10 +108,11 @@ type TwinEvent = {
 const navItems: { id: SectionId; label: string; kicker: string }[] = [
   { id: "intro", label: "Alfred", kicker: "01" },
   { id: "tech", label: "Technology", kicker: "02" },
-  { id: "b2c", label: "Brief → contract", kicker: "03" },
-  { id: "o2c", label: "Order → cash", kicker: "04" },
-  { id: "impact", label: "Impact", kicker: "05" },
-  { id: "next", label: "Next", kicker: "06" },
+  { id: "o2c", label: "O2C", kicker: "03" },
+  { id: "aps", label: "APS", kicker: "04" },
+  { id: "b2c", label: "B2C", kicker: "05" },
+  { id: "impact", label: "Impact", kicker: "06" },
+  { id: "next", label: "Next", kicker: "07" },
 ];
 
 const ventures = [
@@ -1465,6 +1466,17 @@ function TechSection() {
           })}
         </div>
       </div>
+    </SectionFrame>
+  );
+}
+
+function APSSection() {
+  return (
+    <SectionFrame
+      eyebrow="Advanced planning and scheduling"
+      title="A schedule that can explain itself."
+      intro="A LangChain-only APS concept that turns ERP constraints into a governed production plan, tests disruption before it reaches the floor, and feeds execution events back into the next decision."
+    >
       <APSOrchestrationExperience langchainLogo={ASSETS.langchain} />
     </SectionFrame>
   );
@@ -2151,6 +2163,7 @@ function AppShell() {
   const renderSection = () => {
     if (section === "intro") return <ProfileSection />;
     if (section === "tech") return <TechSection />;
+    if (section === "aps") return <APSSection />;
     if (section === "b2c") return (
       <ProcessFlow
         steps={briefToContract}
