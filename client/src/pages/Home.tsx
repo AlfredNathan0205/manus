@@ -3,6 +3,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import CortiSleeveWalkthrough from "@/components/CortiSleeveWalkthrough";
 import OlfyneExperience from "@/components/OlfyneExperience";
 import TrendAnalysisExperience from "@/components/TrendAnalysisExperience";
+import APSOrchestrationExperience from "@/components/APSOrchestrationExperience";
 import {
   Activity,
   AlertTriangle,
@@ -1464,6 +1465,7 @@ function TechSection() {
           })}
         </div>
       </div>
+      <APSOrchestrationExperience langchainLogo={ASSETS.langchain} />
     </SectionFrame>
   );
 }
