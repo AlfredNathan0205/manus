@@ -31,6 +31,7 @@ import {
   MapPin,
   Maximize2,
   Minimize2,
+  MousePointer2,
   Network,
   Pause,
   Play,
@@ -2121,21 +2122,63 @@ function AppShell() {
   });
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isPresenting, setIsPresenting] = useState(false);
+  const [laserPointer, setLaserPointer] = useState(false);
   const [lens, setLens] = useState<ExecutiveLens>("ceo");
+  const laserPointerRef = useRef<HTMLDivElement>(null);
   const currentIndex = navItems.findIndex((item) => item.id === section);
 
   useEffect(() => {
     const syncFullscreenState = () => {
-      if (!document.fullscreenElement) setIsPresenting(false);
+      if (!document.fullscreenElement) {
+        setIsPresenting(false);
+        setLaserPointer(false);
+      }
     };
     document.addEventListener("fullscreenchange", syncFullscreenState);
     return () => document.removeEventListener("fullscreenchange", syncFullscreenState);
   }, []);
 
+  useEffect(() => {
+    if (!isPresenting || !laserPointer) return;
+    const placePointer = (x: number, y: number) => {
+      laserPointerRef.current?.style.setProperty("transform", `translate3d(${x - 17}px, ${y - 17}px, 0)`);
+    };
+    placePointer(window.innerWidth / 2, window.innerHeight / 2);
+    let frame = 0;
+    const followPointer = (event: PointerEvent) => {
+      window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(() => placePointer(event.clientX, event.clientY));
+    };
+    window.addEventListener("pointermove", followPointer, { passive: true });
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener("pointermove", followPointer);
+    };
+  }, [isPresenting, laserPointer]);
+
+  useEffect(() => {
+    if (!isPresenting) {
+      setLaserPointer(false);
+      return;
+    }
+    const handleKey = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (target instanceof HTMLElement && target.matches("input, textarea, select, [contenteditable='true']")) return;
+      if (event.key.toLowerCase() === "l") {
+        event.preventDefault();
+        setLaserPointer((enabled) => !enabled);
+      }
+      if (event.key === "Escape" && !document.fullscreenElement) setIsPresenting(false);
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [isPresenting]);
+
   const togglePresentation = async () => {
     if (isPresenting) {
       if (document.fullscreenElement) await document.exitFullscreen();
       setIsPresenting(false);
+      setLaserPointer(false);
       return;
     }
 
@@ -2207,9 +2250,10 @@ function AppShell() {
   };
 
   return (
-    <div className={`app-shell ${isPresenting ? "presenting" : ""}`}>
+    <div className={`app-shell ${isPresenting ? "presenting" : ""} ${laserPointer ? "pointer-active" : ""}`}>
       <div className="ambient ambient-one" />
       <div className="ambient ambient-two" />
+      {isPresenting && laserPointer && <div ref={laserPointerRef} className="presentation-pointer" aria-hidden="true"><i /></div>}
       <header className="site-header">
         <button className="brand-lockup" type="button" onClick={() => navigate("intro")} aria-label="Go to Alfred profile">
           <span className="nevodia-mark"><i>A</i><b>Alfred</b></span>
@@ -2240,6 +2284,7 @@ function AppShell() {
             <button type="button" className={lens === "cfo" ? "active" : ""} onClick={() => setLens("cfo")} aria-pressed={lens === "cfo"}>CFO</button>
             <motion.i animate={{ x: lens === "ceo" ? 0 : "100%" }} transition={{ duration: .28, ease: [0.23, 1, 0.32, 1] }} />
           </div>
+          {isPresenting && <button type="button" className={`pointer-button ${laserPointer ? "active" : ""}`} onClick={() => setLaserPointer((enabled) => !enabled)} aria-pressed={laserPointer} title="Toggle laser pointer (L)"><MousePointer2 size={14} /><span>{laserPointer ? "Pointer on" : "Pointer"}</span></button>}
           <button type="button" className="presentation-button" onClick={togglePresentation} aria-pressed={isPresenting} title={isPresenting ? "Exit presentation mode" : "Enter full-screen presentation mode"}>
             {isPresenting ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
             <span>{isPresenting ? "Exit full screen" : "Present"}</span>
