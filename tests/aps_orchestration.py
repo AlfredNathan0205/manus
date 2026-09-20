@@ -21,6 +21,15 @@ def main():
 
         assert desktop.locator(".aps-agent").count() == 5
         assert "Constraint-aware orchestration" in desktop.locator(".aps-supervisor").inner_text()
+        desktop.locator(".aps-agent").nth(2).click()
+        dossier = desktop.locator(".aps-agent-dossier")
+        dossier.wait_for(state="visible")
+        dossier_text = dossier.inner_text().lower()
+        assert "sequencing agent" in dossier_text
+        assert "reads" in dossier_text and "tests" in dossier_text
+        assert "bounded decision" in dossier_text and "human control" in dossier_text
+        desktop.get_by_role("button", name="Close Sequencing Agent details").click()
+        dossier.wait_for(state="detached")
         desktop.get_by_role("button", name="Demand surge").click()
         assert desktop.locator(".aps-shell").get_attribute("data-aps-scenario") == "surge"
         desktop.get_by_role("button", name="Run plan").click()
@@ -38,6 +47,12 @@ def main():
         overflow = mobile.evaluate("document.documentElement.scrollWidth > window.innerWidth")
         assert not overflow, "APS layout creates horizontal overflow on mobile"
         assert mobile.locator(".aps-agent").count() == 5
+        mobile.locator(".aps-agent").nth(4).click()
+        mobile_dossier = mobile.locator(".aps-agent-dossier")
+        mobile_dossier.wait_for(state="visible")
+        assert "Schedule Adjustment Agent" in mobile_dossier.inner_text()
+        overflow = mobile.evaluate("document.documentElement.scrollWidth > window.innerWidth")
+        assert not overflow, "Expanded APS dossier creates horizontal overflow on mobile"
         mobile.screenshot(path=SCREENSHOT, full_page=False)
 
         browser.close()

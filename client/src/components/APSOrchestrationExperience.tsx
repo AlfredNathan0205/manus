@@ -5,6 +5,7 @@ import {
   Box,
   BrainCircuit,
   Check,
+  ChevronDown,
   CircleDot,
   Database,
   Factory,
@@ -27,6 +28,11 @@ type ApsAgent = {
   role: string;
   output: string;
   detail: string;
+  inputs: string[];
+  checks: string[];
+  decision: string;
+  humanControl: string;
+  handoff: string;
   icon: ElementType;
   duration: number;
 };
@@ -37,6 +43,11 @@ const APS_AGENTS: ApsAgent[] = [
     role: "Forecast horizon",
     output: "Demand signal validated",
     detail: "Reads sales history, confirmed orders and market signals to create a demand view planners can challenge.",
+    inputs: ["Historic sales by product family", "Confirmed customer orders", "Market and promotional signals"],
+    checks: ["Separates orders from forecast demand", "Flags new-product and sparse-history confidence", "Preserves planner override evidence"],
+    decision: "Produces a time-phased demand signal with a confidence band rather than silently overwriting the plan.",
+    humanControl: "Planner can accept, amend or suppress material demand exceptions before capacity is committed.",
+    handoff: "Passes demand volume, date profile and confidence to the Capacity Agent.",
     icon: Activity,
     duration: 760,
   },
@@ -45,6 +56,11 @@ const APS_AGENTS: ApsAgent[] = [
     role: "Constraint check",
     output: "Feasible resource envelope",
     detail: "Tests machines, tools, labour shifts and planned maintenance before a production promise is made.",
+    inputs: ["Demand profile from Forecast Agent", "Machine and tool availability", "Labour roster, shifts and maintenance windows"],
+    checks: ["Tests finite machine capacity", "Includes labour and specialist tool constraints", "Surfaces overloads before promise dates change"],
+    decision: "Returns the feasible production envelope and the constrained resources that need a scheduling choice.",
+    humanControl: "Planner reviews overload trade-offs, overtime and any capacity assumption before release.",
+    handoff: "Passes feasible slots, bottlenecks and alternatives to the Sequencing Agent.",
     icon: Gauge,
     duration: 980,
   },
@@ -53,6 +69,11 @@ const APS_AGENTS: ApsAgent[] = [
     role: "Changeover optimisation",
     output: "Low-changeover production order",
     detail: "Groups compatible work, respects dependencies and sequences jobs to reduce avoidable setup time.",
+    inputs: ["Feasible resource envelope", "Routing, BOM and allergen or cleaning rules", "Due dates and current work in progress"],
+    checks: ["Respects route and dependency order", "Groups compatible jobs to reduce changeovers", "Protects due-date and service commitments"],
+    decision: "Creates a constraint-aware work sequence, clearly showing any late-risk or deliberate trade-off.",
+    humanControl: "Planner can pin an order, alter priority or approve a deliberate service-versus-efficiency trade-off.",
+    handoff: "Passes the candidate schedule to the What-if Agent for protected scenario comparison.",
     icon: Layers3,
     duration: 860,
   },
@@ -61,6 +82,11 @@ const APS_AGENTS: ApsAgent[] = [
     role: "Protected simulation",
     output: "Scenario compared — no shop-floor change",
     detail: "Models demand surges, downtime and material risk in a sandbox before any live schedule is touched.",
+    inputs: ["Candidate sequence", "Selected disruption or demand scenario", "Current materials, capacity and delivery commitments"],
+    checks: ["Runs in a protected planning sandbox", "Measures lateness, utilisation and knock-on effects", "Keeps the active shop-floor schedule unchanged"],
+    decision: "Compares viable alternatives, highlighting the operational and customer consequences of each option.",
+    humanControl: "Planner chooses which scenario, if any, becomes the recommended schedule change.",
+    handoff: "Passes the selected scenario and audit evidence to the Schedule Adjustment Agent.",
     icon: Sparkles,
     duration: 1080,
   },
@@ -69,6 +95,11 @@ const APS_AGENTS: ApsAgent[] = [
     role: "Event response",
     output: "Constraint-aware plan ready",
     detail: "Replans when material ETA, equipment availability or live production progress changes, preserving the audit trail.",
+    inputs: ["Approved scenario outcome", "Live MES events and progress", "Material ETA, machine status and new order signals"],
+    checks: ["Revalidates every affected task", "Protects released work from uncontrolled resequencing", "Records why and when a plan changed"],
+    decision: "Produces a governed schedule proposal for planner approval and controlled MES dispatch.",
+    humanControl: "Named planner approval is required before a revised plan is released to MES / Fricke.",
+    handoff: "Releases the approved plan to MES and listens for execution events that trigger the next planning loop.",
     icon: RefreshCw,
     duration: 920,
   },
@@ -102,11 +133,13 @@ export default function APSOrchestrationExperience({ langchainLogo }: { langchai
   const reduced = useReducedMotion();
   const [scenario, setScenario] = useState<ScenarioKey>("baseline");
   const [activeAgent, setActiveAgent] = useState(0);
+  const [expandedAgent, setExpandedAgent] = useState<number | null>(null);
   const [running, setRunning] = useState(false);
   const [released, setReleased] = useState(false);
 
   const selectedScenario = SCENARIOS[scenario];
   const currentAgent = APS_AGENTS[activeAgent];
+  const dossierAgent = expandedAgent === null ? null : APS_AGENTS[expandedAgent];
   const complete = activeAgent === APS_AGENTS.length - 1 && !running;
 
   useEffect(() => {
@@ -124,6 +157,7 @@ export default function APSOrchestrationExperience({ langchainLogo }: { langchai
   const chooseScenario = (key: ScenarioKey) => {
     setScenario(key);
     setActiveAgent(0);
+    setExpandedAgent(null);
     setRunning(false);
     setReleased(false);
   };
@@ -131,12 +165,14 @@ export default function APSOrchestrationExperience({ langchainLogo }: { langchai
   const runFlow = () => {
     setReleased(false);
     setActiveAgent(0);
+    setExpandedAgent(0);
     setRunning(true);
   };
 
   const inspectAgent = (index: number) => {
     setRunning(false);
     setActiveAgent(index);
+    setExpandedAgent((current) => current === index ? null : index);
   };
 
   return (
@@ -190,9 +226,11 @@ export default function APSOrchestrationExperience({ langchainLogo }: { langchai
                   <motion.button
                     key={agent.name}
                     type="button"
-                    className={`aps-agent ${isActive ? "active" : ""} ${isComplete ? "complete" : ""}`}
+                    className={`aps-agent ${isActive ? "active" : ""} ${isComplete ? "complete" : ""} ${expandedAgent === index ? "expanded" : ""}`}
                     onClick={() => inspectAgent(index)}
                     aria-pressed={isActive}
+                    aria-expanded={expandedAgent === index}
+                    aria-controls="aps-agent-dossier"
                     initial={false}
                     animate={{ opacity: index > activeAgent + 1 ? 0.56 : 1 }}
                     transition={{ duration: reduced ? 0 : 0.18 }}
@@ -207,9 +245,46 @@ export default function APSOrchestrationExperience({ langchainLogo }: { langchai
             </div>
 
             <div className="aps-agent-detail" aria-live="polite">
-              <div><span>Active evidence</span><strong>{currentAgent.output}</strong><p>{currentAgent.detail}</p></div>
+              <div><span>Active evidence · click a tile for the complete decision dossier</span><strong>{currentAgent.output}</strong><p>{currentAgent.detail}</p></div>
               <div className="aps-agent-progress" aria-label={`Stage ${activeAgent + 1} of ${APS_AGENTS.length}`}><i style={{ transform: `scaleX(${(activeAgent + 1) / APS_AGENTS.length})` }} /></div>
             </div>
+
+            <AnimatePresence initial={false}>
+              {dossierAgent ? (() => {
+                const DossierIcon = dossierAgent.icon;
+                return (
+                  <motion.section
+                    id="aps-agent-dossier"
+                    className="aps-agent-dossier"
+                    aria-label={`${dossierAgent.name} decision dossier`}
+                    initial={reduced ? false : { opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={reduced ? undefined : { opacity: 0, y: -8 }}
+                    transition={{ duration: reduced ? 0 : 0.22, ease: [0.23, 1, 0.32, 1] }}
+                  >
+                    <div className="aps-dossier-head">
+                      <div className="aps-dossier-icon"><DossierIcon size={17} /></div>
+                      <div><span>LangChain agent dossier · {String((expandedAgent ?? 0) + 1).padStart(2, "0")}</span><h3>{dossierAgent.name}</h3><p>{dossierAgent.role} · {dossierAgent.output}</p></div>
+                      <button type="button" onClick={() => setExpandedAgent(null)} aria-label={`Close ${dossierAgent.name} details`}><ChevronDown size={16} />Close</button>
+                    </div>
+                    <p className="aps-dossier-summary">{dossierAgent.detail}</p>
+                    <div className="aps-dossier-grid">
+                      <div><span>Reads</span><ul>{dossierAgent.inputs.map((item) => <li key={item}>{item}</li>)}</ul></div>
+                      <div><span>Tests</span><ul>{dossierAgent.checks.map((item) => <li key={item}>{item}</li>)}</ul></div>
+                    </div>
+                    <div className="aps-dossier-decision"><BrainCircuit size={17} /><div><span>Bounded decision</span><strong>{dossierAgent.decision}</strong></div></div>
+                    <div className="aps-dossier-foot">
+                      <div><UserCheck size={14} /><span>Human control</span><p>{dossierAgent.humanControl}</p></div>
+                      <div><Workflow size={14} /><span>Next handoff</span><p>{dossierAgent.handoff}</p></div>
+                    </div>
+                  </motion.section>
+                );
+              })() : (
+                <motion.div className="aps-dossier-prompt" initial={reduced ? false : { opacity: 0 }} animate={{ opacity: 1 }} exit={reduced ? undefined : { opacity: 0 }}>
+                  <CircleDot size={14} /><span>Choose any LangChain agent tile to open its inputs, constraints, decision boundary and controlled handoff.</span>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           <article className="aps-system-card aps-mes" aria-label="Manufacturing execution system">
