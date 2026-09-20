@@ -300,7 +300,7 @@ export default function APSOrchestrationExperience({ langchainLogo }: { langchai
                   >
                     <span className="aps-agent-index">{String(index + 1).padStart(2, "0")}</span>
                     <span className="aps-agent-icon"><Icon size={15} /></span>
-                    <span className="aps-agent-copy"><strong>{agent.name}</strong><small>LangChain · {agent.role}</small></span>
+                    <span className="aps-agent-copy"><strong>{agent.name}</strong></span>
                     <span className="aps-agent-status">{isActive && running ? "Working" : isActive ? "Inspect" : isComplete ? "Done" : "Queued"}</span>
                   </motion.button>
                 );
@@ -308,8 +308,8 @@ export default function APSOrchestrationExperience({ langchainLogo }: { langchai
             </div>
 
             <div className="aps-agent-detail" aria-live="polite">
-              <div><span>Active evidence · click a tile for the complete decision dossier</span><strong>{currentAgent.output}</strong><p>{currentAgent.detail}</p></div>
-              <div className="aps-agent-progress" aria-label={`Stage ${activeAgent + 1} of ${APS_AGENTS.length}`}><i style={{ transform: `scaleX(${(activeAgent + 1) / APS_AGENTS.length})` }} /></div>
+              <div><span>Selected planning step · click for full decision dossier</span><strong>{currentAgent.output}</strong><p>{currentAgent.detail}</p></div>
+              <div className="aps-agent-progress" aria-label={`Stage ${activeAgent + 1} of ${APS_AGENTS.length}`}><span>{String(activeAgent + 1).padStart(2, "0")} / {String(APS_AGENTS.length).padStart(2, "0")}</span><i style={{ transform: `scaleX(${(activeAgent + 1) / APS_AGENTS.length})` }} /></div>
             </div>
 
             <AnimatePresence initial={false}>
