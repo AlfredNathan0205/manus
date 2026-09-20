@@ -1126,9 +1126,11 @@ function ProfileSection() {
 
 function TechSection() {
   const portalDemo = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("demo") === "portal";
+  const meetingRequested = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("mode") === "meeting";
   const [activePlatform, setActivePlatform] = useState<PlatformKey>("copilot");
   const [activeAgent, setActiveAgent] = useState(0);
-  const [swarmRunning, setSwarmRunning] = useState(!portalDemo);
+  const [meetingMode, setMeetingMode] = useState(meetingRequested);
+  const [swarmRunning, setSwarmRunning] = useState(!portalDemo && !meetingRequested);
   const [transactionStage, setTransactionStage] = useState(portalDemo ? portalTransactionStage : -1);
   const [transactionRunning, setTransactionRunning] = useState(false);
   const [transactionApproved, setTransactionApproved] = useState(false);
@@ -1197,6 +1199,28 @@ function TechSection() {
     setSwarmRunning(true);
   };
 
+  const toggleMeetingMode = () => {
+    const next = !meetingMode;
+    setMeetingMode(next);
+    setTransactionStage(-1);
+    setTransactionRunning(false);
+    setTransactionApproved(false);
+    if (next) {
+      setActiveAgent(0);
+      setActivePlatform(swarmAgents[0].platform);
+      setSwarmRunning(false);
+      return;
+    }
+    setSwarmRunning(true);
+  };
+
+  const advanceMeetingNarrative = () => {
+    const nextAgent = (activeAgent + 1) % swarmAgents.length;
+    setActiveAgent(nextAgent);
+    setActivePlatform(swarmAgents[nextAgent].platform);
+    setSwarmRunning(false);
+  };
+
   const runTransaction = () => {
     setSwarmRunning(false);
     setTransactionApproved(false);
@@ -1232,16 +1256,19 @@ function TechSection() {
       title="A single agentic platform."
       intro="They swarm around one governed enterprise platform—sharing models, context, controls and system access while each agent keeps a narrow operating job."
     >
-      <div className="platform-shell">
+      <div className={`platform-shell ${meetingMode ? "meeting-mode" : ""}`}>
         <div className="platform-topbar">
           <div><i /><span>EUROMA AGENT PLATFORM</span><b>PRODUCTION PATTERN</b></div>
-          <div className="platform-stats"><span><strong>10</strong> agents online</span><span><strong>6</strong> shared services</span><span><strong>2</strong> flows live</span></div>
-          <button type="button" onClick={toggleSwarm} disabled={transactionActive}>
-            {transactionActive ? <CircleDot size={14} /> : swarmRunning ? <Pause size={14} /> : <Play size={14} fill="currentColor" />}{transactionActive ? "Journey active" : swarmRunning ? "Pause swarm" : "Run swarm"}
+          <div className="platform-stats">{meetingMode ? <><span><strong>FOCUS</strong> meeting view</span><span><strong>{String(activeAgent + 1).padStart(2, "0")}</strong> active story</span></> : <><span><strong>10</strong> agents online</span><span><strong>6</strong> shared services</span><span><strong>2</strong> flows live</span></>}</div>
+          <button type="button" className={`meeting-toggle ${meetingMode ? "active" : ""}`} onClick={toggleMeetingMode} aria-pressed={meetingMode} aria-label={meetingMode ? "Return to full platform map" : "Enter simplified meeting view"}>
+            <Layers3 size={14} />{meetingMode ? "Full map" : "Meeting view"}
           </button>
+          {!meetingMode && <button type="button" onClick={toggleSwarm} disabled={transactionActive}>
+            {transactionActive ? <CircleDot size={14} /> : swarmRunning ? <Pause size={14} /> : <Play size={14} fill="currentColor" />}{transactionActive ? "Journey active" : swarmRunning ? "Pause swarm" : "Run swarm"}
+          </button>}
         </div>
 
-        <div className={`transaction-console ${transactionActive ? "active" : ""} ${currentTransaction?.human ? "control" : ""}`}>
+        {!meetingMode && <div className={`transaction-console ${transactionActive ? "active" : ""} ${currentTransaction?.human ? "control" : ""}`}>
           <div className="transaction-intro">
             <span><Zap size={14} />Follow one order</span>
             <strong>{transactionActive ? currentTransaction.title : "Watch a customer PO cross the entire platform."}</strong>
@@ -1265,14 +1292,21 @@ function TechSection() {
             )}
             {transactionActive && <button type="button" className="transaction-exit" onClick={exitTransaction}>Exit</button>}
           </div>
-        </div>
+        </div>}
+
+        {meetingMode && <div className="meeting-narrative" aria-live="polite">
+          <div><span>Presenter focus</span><strong>{selectedAgent.name}</strong><p>{selectedAgent.job}</p></div>
+          <div className="meeting-narrative-flow"><span>Customer signal</span><i /><span>{selectedPlatform.name}</span><i /><span>Named approval</span><i /><span>Visible outcome</span></div>
+          <button type="button" onClick={advanceMeetingNarrative}><Play size={13} fill="currentColor" />Next agent</button>
+        </div>}
 
         <div className="platform-workspace">
-          <div className={`platform-map ${swarmRunning && !transactionActive ? "running" : "paused"} ${transactionActive ? "transaction-mode" : ""}`}>
+          <div className={`platform-map ${swarmRunning && !transactionActive ? "running" : "paused"} ${transactionActive ? "transaction-mode" : ""} ${meetingMode ? "meeting-focus" : ""}`}>
             <div className="platform-gridlines" />
             <div className="azure-perimeter"><Cloud size={14} /><span>AZURE SECURITY · IDENTITY · OBSERVABILITY · RESIDENCY</span></div>
             <div className="platform-orbit orbit-outer" />
             <div className="platform-orbit orbit-inner" />
+            {meetingMode && <div className="meeting-focus-path" aria-hidden="true"><span>Customer</span><i /><span>Agent</span><i /><span>Human</span><i /><span>Outcome</span></div>}
             <svg className="platform-connections" viewBox="0 0 1000 650" preserveAspectRatio="none" aria-hidden="true">
               <defs>
                 <linearGradient id="platformLine" x1="0" x2="1"><stop offset="0" stopColor="#e7b96a" stopOpacity=".08" /><stop offset=".5" stopColor="#e7b96a" stopOpacity=".68" /><stop offset="1" stopColor="#9fc46b" stopOpacity=".12" /></linearGradient>
