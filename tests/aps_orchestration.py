@@ -53,9 +53,11 @@ def main():
         desktop.wait_for_timeout(900)
         assert desktop.locator(".aps-agent-connector.passed").count() >= 1
         assert desktop.locator(".aps-agent-connector.active").count() == 1
+        assert desktop.locator(".aps-signal-packet").count() == 1
         desktop.wait_for_timeout(5200)
         assert desktop.locator(".aps-agent.complete").count() == 5
         assert desktop.locator(".aps-agent-connector.passed").count() == 4
+        assert desktop.locator(".aps-signal-packet").count() == 0
         approval = desktop.locator(".aps-approval-card button")
         assert not approval.is_disabled()
         approval.click()
@@ -78,6 +80,12 @@ def main():
         overflow = mobile.evaluate("document.documentElement.scrollWidth > window.innerWidth")
         assert not overflow, "Expanded APS dossier creates horizontal overflow on mobile"
         mobile.screenshot(path=SCREENSHOT, full_page=False)
+
+        reduced = browser.new_page(viewport={"width": 1440, "height": 1000}, reduced_motion="reduce")
+        wait_for_aps(reduced)
+        reduced.get_by_role("button", name="Run plan").click()
+        reduced.wait_for_timeout(900)
+        assert reduced.locator(".aps-signal-packet").count() == 0
 
         browser.close()
     assert Path(SCREENSHOT).is_file()

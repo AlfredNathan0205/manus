@@ -303,7 +303,7 @@ export default function APSOrchestrationExperience({ langchainLogo }: { langchai
                       <span className="aps-agent-icon"><Icon size={15} /></span>
                       <span className="aps-agent-copy"><strong>{agent.name}</strong></span>
                       <span className="aps-agent-status">{isActive && running ? "Working" : isActive ? "Inspect" : isComplete ? "Done" : "Queued"}</span>
-                      {index < APS_AGENTS.length - 1 && <span className={`aps-agent-connector ${index < activeAgent || complete ? "passed" : ""} ${index === activeAgent && running ? "active" : ""}`} aria-hidden="true"><i /><b /></span>}
+                      {index < APS_AGENTS.length - 1 && <span className={`aps-agent-connector ${index < activeAgent || complete ? "passed" : ""} ${index === activeAgent && running ? "active" : ""}`} aria-hidden="true"><i /><b />{!reduced && index === activeAgent && running && <span className="aps-signal-packet" />}</span>}
                     </motion.button>
                   </Fragment>
                 );

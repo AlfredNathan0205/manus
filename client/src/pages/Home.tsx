@@ -1767,9 +1767,9 @@ function ProcessFlow({
                       transition={{ duration: 0.42, ease: [0.23, 1, 0.32, 1] }}
                     />
                     <span className="connector-arrow" aria-hidden="true" />
-                    {running && active === index && <span className="connector-ticks" aria-hidden="true"><i /><i /><i /></span>}
-                    {running && active === index && (
-                      <motion.span className="signal-dot" initial={{ x: 0, opacity: 0 }} animate={{ x: 56, opacity: [0, 1, 1, 0] }} transition={{ duration: .72, repeat: Infinity, ease: "linear" }} />
+                    {!reduced && running && active === index && <span className="connector-ticks" aria-hidden="true"><i /><i /><i /></span>}
+                    {!reduced && running && active === index && (
+                      <motion.span className="signal-packet" aria-hidden="true" initial={{ x: 0, opacity: 0, scale: .75, rotate: 45 }} animate={{ x: 50, opacity: [0, 1, 1, 0], scale: [.75, 1, 1, .75], rotate: 45 }} transition={{ duration: .82, repeat: Infinity, ease: "linear" }} />
                     )}
                   </div>
                 )}
