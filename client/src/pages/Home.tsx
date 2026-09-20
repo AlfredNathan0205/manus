@@ -55,7 +55,7 @@ const ASSETS = {
   copilotStudio: "/manus-storage/copilot-studio_cd239b87.png",
   fabric: "/manus-storage/microsoft-fabric_bb084905.svg",
   uipath: "/manus-storage/uipath_b6902e84.svg",
-  langchain: "/manus-storage/langchain-lockup-black_23052684.svg",
+  langchain: "/manus-storage/langchain-lockup-official-black_0e88f37a.svg",
   azure: "/manus-storage/microsoft-azure_7e3847cf.svg",
   whatsapp: "/manus-storage/whatsapp_9008dd98.svg",
   sap: "/manus-storage/sap_713309ae.svg",
