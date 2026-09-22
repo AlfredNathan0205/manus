@@ -17,14 +17,14 @@ LENS_EXPECTATIONS = {
         "team": "750 to 1,500 orders per operating person",
     },
     "CFO": {
-        "cards": ["£100k", "60 → 30", "£2.22"],
+        "cards": ["£100k", "60 → 30", "£630k"],
         "details": [
             "£100K changed the operating control model",
             "30 people rather than 60",
-            "£2.22 per annual customer order",
+            "£630K annualised gross CS cost delta",
         ],
-        "monthly": "Track operating leverage without inventing the savings case",
-        "team": "Payroll, utilisation and run-cost data",
+        "monthly": "Track the cost basis, flow speed and human-review load",
+        "team": "£52.5K monthly and £630K annualised gross cost delta",
     },
 }
 
@@ -59,7 +59,7 @@ def check_lens(page, lens):
 
     dashboard_tabs = page.locator(".monthly-dashboard-tabs button")
     assert dashboard_tabs.count() == 3
-    monthly_expected = [expected["team"], "Order → cash", "Awaiting verified monthly exception feed"]
+    monthly_expected = [expected["team"], "Order → cash", "Human intervention rate"]
     for index, copy in enumerate(monthly_expected):
         dashboard_tabs.nth(index).click()
         page.wait_for_timeout(300)
@@ -69,8 +69,10 @@ def check_lens(page, lens):
         assert copy.lower() in panel.inner_text().lower(), panel.inner_text()
 
     exception_panel = page.locator(".monthly-dashboard-panel--exceptions")
+    assert "7%" in exception_panel.inner_text()
+    assert "3,150" in exception_panel.inner_text()
+    assert "263" in exception_panel.inner_text()
     assert "Jan" not in exception_panel.inner_text()
-    assert "P1" in exception_panel.inner_text()
 
 
 def main():
