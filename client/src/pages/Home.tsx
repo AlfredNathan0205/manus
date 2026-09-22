@@ -1851,207 +1851,79 @@ function ProcessFlow({
   );
 }
 
-function NumberField({ label, value, onChange, prefix, hint }: { label: string; value: number; onChange: (value: number) => void; prefix?: string; hint?: string }) {
-  return (
-    <label className="number-field">
-      <span>{label}</span>
-      <div className="input-wrap">{prefix && <b>{prefix}</b>}<input type="number" value={value} onChange={(event) => onChange(Number(event.target.value) || 0)} /></div>
-      {hint && <small>{hint}</small>}
-    </label>
-  );
-}
-
-function SliderField({ label, value, onChange }: { label: string; value: number; onChange: (value: number) => void }) {
-  return (
-    <label className="slider-field">
-      <div><span>{label}</span><b>{value}%</b></div>
-      <input type="range" min="0" max="90" value={value} onChange={(event) => onChange(Number(event.target.value))} />
-      <div className="scale"><span>0</span><span>Manual effort removed</span><span>90</span></div>
-    </label>
-  );
-}
-
-function OutputCard({ value, label, formula, accent }: { value: string; label: string; formula: string; accent?: boolean }) {
-  return (
-    <motion.div className={`output-card ${accent ? "accent" : ""}`} layout>
-      <div className="output-signal"><i /><span>CALCULATED</span></div>
-      <AnimatePresence mode="popLayout" initial={false}>
-        <motion.strong key={value} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -7 }} transition={{ duration: 0.22 }}>
-          {value}
-        </motion.strong>
-      </AnimatePresence>
-      <p>{label}</p>
-      <small>{formula}</small>
-    </motion.div>
-  );
-}
-
-function formatNumber(value: number, decimals = 0) {
-  return value.toLocaleString("en-GB", { maximumFractionDigits: decimals });
-}
-
-function formatMoney(value: number) {
-  const sign = value < 0 ? "−" : "";
-  const absolute = Math.abs(value);
-  if (absolute >= 1_000_000) return `${sign}£${(absolute / 1_000_000).toFixed(2)}m`;
-  if (absolute >= 1_000) return `${sign}£${Math.round(absolute / 1_000)}k`;
-  return `${sign}£${Math.round(absolute)}`;
-}
-
 function ImpactSection({ lens }: { lens: ExecutiveLens }) {
-  const [mode, setMode] = useState<"brief" | "order">("order");
-  const [scenario, setScenario] = useState<"conservative" | "base" | "upside" | "custom">("base");
-  const [brief, setBrief] = useState({ volume: 1800, days: 12, hours: 5, cost: 45, pct: 55, implementation: 180000, run: 75000 });
-  const [order, setOrder] = useState({ volume: 6000, days: 18, hours: 2.5, cost: 45, pct: 55, exceptionRate: 4, exceptionCost: 250, revenue: 25000000, cashDays: 2, implementation: 350000, run: 110000 });
-  const [discountRate, setDiscountRate] = useState(10);
-  const [fundingRate, setFundingRate] = useState(8);
-
-  const setScenarioValues = (next: "conservative" | "base" | "upside") => {
-    const assumptions = {
-      conservative: { pct: 35, cashDays: 1 },
-      base: { pct: 55, cashDays: 2 },
-      upside: { pct: 70, cashDays: 4 },
-    }[next];
-    setScenario(next);
-    setBrief((current) => ({ ...current, pct: assumptions.pct }));
-    setOrder((current) => ({ ...current, pct: assumptions.pct, cashDays: assumptions.cashDays }));
-  };
-
-  const model = useMemo(() => {
-    const realization = { conservative: .6, base: .75, upside: .9, custom: .75 }[scenario];
-    const source = mode === "brief" ? brief : order;
-    const capacity = source.volume * source.hours * source.cost * (source.pct / 100);
-    const rework = mode === "order" ? order.volume * (order.exceptionRate / 100) * order.exceptionCost * (order.pct / 100) : 0;
-    const workingCapital = mode === "order" ? order.revenue * (order.cashDays / 365) : 0;
-    const financingBenefit = workingCapital * (fundingRate / 100);
-    const gross = capacity + rework + financingBenefit;
-    const recurring = gross - source.run;
-    const yearOne = gross * realization - source.run;
-    const discount = discountRate / 100;
-    const npv = -source.implementation + yearOne / (1 + discount) + recurring / Math.pow(1 + discount, 2) + recurring / Math.pow(1 + discount, 3);
-    let paybackMonths: number | null = null;
-    if (yearOne > 0 && recurring > 0) {
-      paybackMonths = yearOne >= source.implementation
-        ? (source.implementation / yearOne) * 12
-        : 12 + ((source.implementation - yearOne) / recurring) * 12;
-    }
-    const newCycle = source.days * (1 - source.pct / 100);
-    const fteEquivalent = (source.volume * source.hours * (source.pct / 100)) / 1760;
-    const contributions = [
-      { label: "Capacity released", value: capacity },
-      ...(mode === "order" ? [{ label: "Avoided rework", value: rework }, { label: "Cash benefit", value: financingBenefit }] : []),
-      { label: "Annual run cost", value: -source.run },
-    ];
-    const maxBridge = Math.max(gross, recurring, 1);
-    let cumulative = 0;
-    const bridge = contributions.map((item) => {
-      const before = cumulative;
-      cumulative += item.value;
-      return {
-        ...item,
-        bottom: (Math.min(before, cumulative) / maxBridge) * 100,
-        height: (Math.abs(item.value) / maxBridge) * 100,
-      };
-    });
-    return { capacity, rework, workingCapital, financingBenefit, gross, recurring, yearOne, npv, paybackMonths, newCycle, fteEquivalent, bridge, maxBridge, realization };
-  }, [brief, discountRate, fundingRate, mode, order, scenario]);
-
-  const source = mode === "brief" ? brief : order;
-  const kpis = [
-    { value: `${formatNumber(source.days, 1)} → ${formatNumber(model.newCycle, 1)}d`, label: "Modelled cycle time", note: `${source.pct}% reduction assumption` },
-    { value: formatNumber(model.fteEquivalent, 1), label: "FTE-equivalent capacity", note: "redeployed—not assumed removed" },
-    { value: model.paybackMonths ? `${formatNumber(model.paybackMonths, 1)} mo` : "—", label: "Payback period", note: "includes year-one realization ramp" },
-    { value: formatMoney(model.npv), label: "Three-year NPV", note: `${discountRate}% discount rate` },
+  const [focus, setFocus] = useState<"team" | "time" | "build">("team");
+  const evidence = [
+    {
+      id: "team" as const,
+      icon: UserCheck,
+      value: "60 → 30",
+      label: "Global team footprint",
+      note: "Customer service & planning",
+      eyebrow: "Operating model changed",
+      title: "Half the global service and planning team is now needed.",
+      copy: "The customer-service and planning organisation moved from 60 people to 30. The impact is an operating model that needs 30 fewer people to support the same connected work.",
+    },
+    {
+      id: "time" as const,
+      icon: Activity,
+      value: "1,440×",
+      label: "Processing compression",
+      note: "Across both live flows",
+      eyebrow: "Time released to higher-value work",
+      title: "Time stopped being absorbed by hand-offs and status chasing.",
+      copy: "The live processes now move in minutes rather than days. This releases time for customer judgement, exception resolution and planning decisions—not repetitive administration.",
+    },
+    {
+      id: "build" as const,
+      icon: Banknote,
+      value: "£100k",
+      label: "One-time solution build",
+      note: "Reported build cost",
+      eyebrow: "Capital deployed",
+      title: "A £100K build changed the operating equation.",
+      copy: "The reported solution-build cost is £100K. The visible impact is not a theoretical future model: it is the changed team footprint and the operating time now released every day.",
+    },
   ];
+  const selected = evidence.find((item) => item.id === focus) ?? evidence[0];
+  const SelectedIcon = selected.icon;
 
   return (
     <SectionFrame
-      eyebrow={lens === "cfo" ? "CFO lens · investment case" : "CEO lens · scalable operating leverage"}
-      title={lens === "cfo" ? "Bridge automation to cash." : "Scale service without scaling friction."}
-      intro={lens === "cfo" ? "A live, editable investment case with operating benefits, delivery costs, payback and three-year discounted value." : "See how faster cycles and released specialist capacity become a commercial growth platform—with the financial case still visible."}
+      eyebrow={lens === "cfo" ? "CFO lens · operating proof" : "CEO lens · operating leverage delivered"}
+      title={lens === "cfo" ? "£100K changed the global operating model." : "Less operational drag. More time for judgement."}
+      intro={lens === "cfo" ? "This page now shows the reported operating result—not a synthetic forecast: £100K to build, a 60-to-30 global customer-service and planning team, and processing cycles compressed from days to minutes." : "The agent flows removed repeatable hand-offs from customer service and planning. The team is now 30 people rather than 60, while the work moves in minutes where it previously moved in days."}
     >
-      <div className="investment-toolbar">
-        <div className="impact-tabs">
-          <button className={mode === "brief" ? "active" : ""} onClick={() => setMode("brief")} type="button">Brief → contract</button>
-          <button className={mode === "order" ? "active" : ""} onClick={() => setMode("order")} type="button">Order → cash</button>
-        </div>
-        <div className="scenario-tabs" role="group" aria-label="Investment scenario">
-          {(["conservative", "base", "upside"] as const).map((item) => <button type="button" key={item} className={scenario === item ? "active" : ""} onClick={() => setScenarioValues(item)}>{item}</button>)}
-        </div>
+      <div className="impact-proof-rail" role="tablist" aria-label="Operating impact evidence">
+        {evidence.map((item, index) => {
+          const Icon = item.icon;
+          return (
+            <button key={item.id} type="button" role="tab" aria-selected={focus === item.id} aria-controls="impact-evidence-detail" className={focus === item.id ? "active" : ""} onClick={() => setFocus(item.id)}>
+              <span>0{index + 1}</span><Icon size={18} /><strong>{item.value}</strong><b>{item.label}</b><small>{item.note}</small>
+            </button>
+          );
+        })}
       </div>
 
-      <div className={`executive-kpis ${lens}`}>
-        {kpis.map((item, index) => (
-          <motion.article key={item.label} layout>
-            <span>0{index + 1}</span><strong>{item.value}</strong><h3>{item.label}</h3><p>{item.note}</p>
-          </motion.article>
-        ))}
-      </div>
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.section key={focus} id="impact-evidence-detail" role="tabpanel" className={`impact-focus impact-focus--${focus}`} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.24, ease: [0.23, 1, 0.32, 1] }}>
+          <div className="impact-focus-copy">
+            <span className="panel-label"><SelectedIcon size={17} />{selected.eyebrow}</span>
+            <h2>{selected.title}</h2>
+            <p>{selected.copy}</p>
+          </div>
+          {focus === "team" && <div className="team-shift" aria-label="Global team changed from 60 to 30 people"><div><span>Before</span><strong>60</strong><small>People across customer service & planning</small></div><i><ArrowUpRight size={20} /></i><div className="today"><span>Today</span><strong>30</strong><small>People operating the connected model</small></div><b>30-person lower operating footprint</b></div>}
+          {focus === "time" && <div className="time-compression" aria-label="Processing time comparisons"><div><span>Brief → contract</span><strong>2 days</strong><i><ArrowUpRight size={17} /></i><b>2 minutes</b></div><div><span>Order → cash</span><strong>3 days</strong><i><ArrowUpRight size={17} /></i><b>3 minutes</b></div><small>Both are 1,440× administrative processing compression. Order-to-cash excludes physical manufacturing, production queues and delivery transit.</small></div>}
+          {focus === "build" && <div className="build-cost"><div><span>One-time build</span><strong>£100k</strong><small>Reported solution-build cost</small></div><p>This is the cost side of the equation. The demonstrated operating result is a 30-person lower team footprint alongside time released from days-to-minutes process execution.</p><b>No synthetic payback or NPV is shown without validated payroll, utilisation and run-cost baselines.</b></div>}
+        </motion.section>
+      </AnimatePresence>
 
-      <div className="investment-grid">
-        <div className="investment-inputs">
-          <div className="panel-label"><Gauge size={17} /><span>EDITABLE OPERATING ASSUMPTIONS</span></div>
-          <p className="assumptions-notice">Sample inputs. Replace each value with a validated Euroma baseline before this case is used commercially.</p>
-          <div className="input-columns">
-            {mode === "brief" ? (
-              <>
-                <NumberField label="Enquiries per year" value={brief.volume} onChange={(volume) => { setScenario("custom"); setBrief({ ...brief, volume }); }} />
-                <NumberField label="Current cycle" value={brief.days} onChange={(days) => { setScenario("custom"); setBrief({ ...brief, days }); }} hint="days" />
-                <NumberField label="Person-hours per brief" value={brief.hours} onChange={(hours) => { setScenario("custom"); setBrief({ ...brief, hours }); }} />
-                <NumberField label="Loaded cost per hour" value={brief.cost} onChange={(cost) => { setScenario("custom"); setBrief({ ...brief, cost }); }} prefix="£" />
-                <NumberField label="One-time implementation" value={brief.implementation} onChange={(implementation) => { setScenario("custom"); setBrief({ ...brief, implementation }); }} prefix="£" />
-                <NumberField label="Annual run cost" value={brief.run} onChange={(run) => { setScenario("custom"); setBrief({ ...brief, run }); }} prefix="£" />
-                <NumberField label="NPV discount rate" value={discountRate} onChange={(value) => { setScenario("custom"); setDiscountRate(value); }} hint="percent" />
-              </>
-            ) : (
-              <>
-                <NumberField label="Orders per year" value={order.volume} onChange={(volume) => { setScenario("custom"); setOrder({ ...order, volume }); }} />
-                <NumberField label="Current O2C cycle" value={order.days} onChange={(days) => { setScenario("custom"); setOrder({ ...order, days }); }} hint="days" />
-                <NumberField label="Person-hours per order" value={order.hours} onChange={(hours) => { setScenario("custom"); setOrder({ ...order, hours }); }} />
-                <NumberField label="Loaded cost per hour" value={order.cost} onChange={(cost) => { setScenario("custom"); setOrder({ ...order, cost }); }} prefix="£" />
-                <NumberField label="Exception rate" value={order.exceptionRate} onChange={(exceptionRate) => { setScenario("custom"); setOrder({ ...order, exceptionRate }); }} hint="percent" />
-                <NumberField label="Cost per exception" value={order.exceptionCost} onChange={(exceptionCost) => { setScenario("custom"); setOrder({ ...order, exceptionCost }); }} prefix="£" />
-                <NumberField label="Annual revenue touched" value={order.revenue} onChange={(revenue) => { setScenario("custom"); setOrder({ ...order, revenue }); }} prefix="£" />
-                <NumberField label="Cash-cycle days released" value={order.cashDays} onChange={(cashDays) => { setScenario("custom"); setOrder({ ...order, cashDays }); }} />
-                <NumberField label="One-time implementation" value={order.implementation} onChange={(implementation) => { setScenario("custom"); setOrder({ ...order, implementation }); }} prefix="£" />
-                <NumberField label="Annual run cost" value={order.run} onChange={(run) => { setScenario("custom"); setOrder({ ...order, run }); }} prefix="£" />
-                <NumberField label="NPV discount rate" value={discountRate} onChange={(value) => { setScenario("custom"); setDiscountRate(value); }} hint="percent" />
-                <NumberField label="Cost of capital on cash released" value={fundingRate} onChange={(value) => { setScenario("custom"); setFundingRate(value); }} hint="percent" />
-              </>
-            )}
-          </div>
-          <SliderField label="Repeatable effort automated" value={source.pct} onChange={(pct) => { setScenario("custom"); mode === "brief" ? setBrief({ ...brief, pct }) : setOrder({ ...order, pct }); }} />
-        </div>
-
-        <div className="waterfall-panel">
-          <div className="waterfall-head">
-            <div><span className="panel-label"><Banknote size={17} />ANNUAL VALUE BRIDGE</span><h2>{formatMoney(model.recurring)} recurring net value</h2></div>
-            <span className="scenario-stamp">{scenario} case</span>
-          </div>
-          <div className="waterfall-chart" aria-label="Annual value waterfall">
-            <div className="waterfall-baseline" />
-            {model.bridge.map((item) => (
-              <div className="waterfall-step" key={item.label}>
-                <div className="waterfall-value">{item.value >= 0 ? "+" : "−"}{formatMoney(Math.abs(item.value))}</div>
-                <div className={`waterfall-bar ${item.value >= 0 ? "positive" : "negative"}`} style={{ "--bar-bottom": `${item.bottom}%`, "--bar-height": `${Math.max(item.height, 2)}%` } as React.CSSProperties} />
-                <span>{item.label}</span>
-              </div>
-            ))}
-            <div className="waterfall-step total">
-              <div className="waterfall-value">{formatMoney(model.recurring)}</div>
-              <div className="waterfall-bar total" style={{ "--bar-bottom": "0%", "--bar-height": `${Math.max((model.recurring / model.maxBridge) * 100, 2)}%` } as React.CSSProperties} />
-              <span>Recurring net value</span>
-            </div>
-          </div>
-          <div className="investment-summary">
-            <div><span>Year-one realization</span><b>{formatNumber(model.realization * 100)}%</b></div>
-            <div><span>Implementation</span><b>{formatMoney(source.implementation)}</b></div>
-            <div><span>Annual run cost</span><b>{formatMoney(source.run)}</b></div>
-            <div><span>Three-year undiscounted net</span><b>{formatMoney(model.yearOne + model.recurring * 2 - source.implementation)}</b></div>
-          </div>
-        </div>
+      <div className="impact-evidence-grid">
+        <article><span>01</span><b>Team impact</b><strong>60 → 30</strong><p>Customer service and planning now operate with a 30-person team rather than 60.</p></article>
+        <article><span>02</span><b>Time impact</b><strong>Days → minutes</strong><p>Agent flows eliminate repeated capture, checks, routing and status chasing across the two live processes.</p></article>
+        <article><span>03</span><b>Financial next step</b><strong>Price the evidence</strong><p>Apply validated loaded cost, volume and utilisation data to turn the operating result into a CFO-approved benefit case.</p></article>
       </div>
-      <p className="model-note"><CircleDot size={13} /> Illustrative management case, not a Euroma forecast. Replace every sample input with validated Euroma baselines; capacity value is redeployment potential, and only the modelled financing benefit—not the working-capital balance—is counted in recurring value.</p>
+      <p className="model-note"><CircleDot size={13} /> Reported operating results: £100K one-time build and a global customer-service and planning team moving from 60 to 30. The time comparisons cover the illustrated agent-processing flows; no payroll saving, annual run cost, payback or NPV has been invented here.</p>
     </SectionFrame>
   );
 }
