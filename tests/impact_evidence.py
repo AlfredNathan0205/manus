@@ -33,6 +33,25 @@ def check_page(page):
     assert "Payback period" not in page_text
     assert "£100K one-time build" in page_text
 
+    dashboard_tabs = page.locator(".monthly-dashboard-tabs button")
+    assert dashboard_tabs.count() == 3
+    expected_dashboard_copy = [
+        "60-person to a 30-person operating team",
+        "Order → cash",
+        "Awaiting verified monthly exception feed",
+    ]
+    for index, copy in enumerate(expected_dashboard_copy):
+        dashboard_tabs.nth(index).click()
+        page.wait_for_timeout(300)
+        panel = page.locator(".monthly-dashboard-panel")
+        panel.wait_for(state="visible")
+        assert dashboard_tabs.nth(index).get_attribute("aria-pressed") == "true"
+        assert copy.lower() in panel.inner_text().lower(), panel.inner_text()
+
+    exception_panel = page.locator(".monthly-dashboard-panel--exceptions")
+    assert "Jan" not in exception_panel.inner_text()
+    assert "P1" in exception_panel.inner_text()
+
 
 def main():
     with sync_playwright() as playwright:

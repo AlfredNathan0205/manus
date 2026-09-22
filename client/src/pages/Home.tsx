@@ -1851,6 +1851,44 @@ function ProcessFlow({
   );
 }
 
+function MonthlyOperatingDashboard() {
+  const [view, setView] = useState<"team" | "cycle" | "exceptions">("team");
+  const tabs = [
+    { id: "team" as const, label: "Team capacity" },
+    { id: "cycle" as const, label: "Cycle time" },
+    { id: "exceptions" as const, label: "Exception volumes" },
+  ];
+
+  return (
+    <section className="monthly-dashboard" aria-labelledby="monthly-dashboard-title">
+      <header className="monthly-dashboard-heading">
+        <div><span className="panel-label"><Activity size={17} />MONTHLY OPERATING REVIEW</span><h2 id="monthly-dashboard-title">A simple monthly view of capacity, time and control.</h2></div>
+        <p>Use this as the operating review layer. The reported before-and-now facts are shown below; the exception series stays intentionally blank until a verified monthly feed is connected.</p>
+      </header>
+      <div className="monthly-dashboard-tabs" role="group" aria-label="Monthly operating dashboard measure">
+        {tabs.map((tab) => <button key={tab.id} type="button" aria-pressed={view === tab.id} className={view === tab.id ? "active" : ""} onClick={() => setView(tab.id)}>{tab.label}</button>)}
+      </div>
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.div key={view} className={`monthly-dashboard-panel monthly-dashboard-panel--${view}`} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -7 }} transition={{ duration: .22, ease: [0.23, 1, 0.32, 1] }}>
+          {view === "team" && <>
+            <div className="monthly-panel-copy"><span>REPORTED OPERATING SNAPSHOT</span><h3>Team capacity</h3><p>Global customer service and planning moved from a 60-person to a 30-person operating team.</p><b>Monthly measure: rostered people in customer service & planning</b></div>
+            <div className="capacity-compare" aria-label="Team capacity changed from 60 people to 30 people"><div><span>Before</span><i className="capacity-bar before"><b>60</b></i><small>People</small></div><div><span>Today</span><i className="capacity-bar today"><b>30</b></i><small>People</small></div><strong>−50%</strong></div>
+          </>}
+          {view === "cycle" && <>
+            <div className="monthly-panel-copy"><span>REPORTED FLOW COMPARISON</span><h3>Cycle time</h3><p>Track administrative processing time from first intake to completed system action. Physical production, factory queues and transit remain outside the O2C measure.</p><b>Monthly measure: median administrative processing time by flow</b></div>
+            <div className="cycle-compare" aria-label="Cycle-time comparisons for Brief to Contract and Order to Cash"><div><span>Brief → contract</span><p><strong>2 days</strong><i /><b>2 min</b></p><small>1,440× compression</small></div><div><span>Order → cash</span><p><strong>3 days</strong><i /><b>3 min</b></p><small>1,440× compression</small></div></div>
+          </>}
+          {view === "exceptions" && <>
+            <div className="monthly-panel-copy"><span>DATA CONNECTION REQUIRED</span><h3>Exception volumes</h3><p>No verified month-by-month exception count has been supplied. The dashboard keeps this panel empty rather than fabricating a trend line.</p><b>Monthly measure: exceptions raised, resolved and aged by owner</b></div>
+            <div className="exception-empty-state" aria-label="No exception-volume data is loaded"><div className="exception-placeholder-bars">{["P1", "P2", "P3", "P4", "P5", "P6"].map((period) => <i key={period}><span>{period}</span></i>)}</div><strong>Awaiting verified monthly exception feed</strong><p>Connect Dynamics 365, SAP and Fricke event data to show volume, age and resolution route by reporting period.</p></div>
+          </>}
+        </motion.div>
+      </AnimatePresence>
+      <p className="monthly-dashboard-note"><CircleDot size={13} /> The team and cycle panels use the reported before-and-now operating figures already in this deck. Exception-volume history requires a validated monthly extract before it can be visualised.</p>
+    </section>
+  );
+}
+
 function ImpactSection({ lens }: { lens: ExecutiveLens }) {
   const [focus, setFocus] = useState<"team" | "time" | "build">("team");
   const evidence = [
@@ -1917,6 +1955,8 @@ function ImpactSection({ lens }: { lens: ExecutiveLens }) {
           {focus === "build" && <div className="build-cost"><div><span>One-time build</span><strong>£100k</strong><small>Reported solution-build cost</small></div><p>This is the cost side of the equation. The demonstrated operating result is a 30-person lower team footprint alongside time released from days-to-minutes process execution.</p><b>No synthetic payback or NPV is shown without validated payroll, utilisation and run-cost baselines.</b></div>}
         </motion.section>
       </AnimatePresence>
+
+      <MonthlyOperatingDashboard />
 
       <div className="impact-evidence-grid">
         <article><span>01</span><b>Team impact</b><strong>60 → 30</strong><p>Customer service and planning now operate with a 30-person team rather than 60.</p></article>
