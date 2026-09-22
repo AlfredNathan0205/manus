@@ -1936,7 +1936,7 @@ function ImpactSection({ lens }: { lens: ExecutiveLens }) {
   return (
     <SectionFrame
       eyebrow={lens === "cfo" ? "CFO lens · cost, control and evidence" : "CEO lens · customer scale and operating leverage"}
-      title={lens === "cfo" ? "£100K changed a £630K annualised gross CS cost basis." : "45,000 customer orders deserve a faster operating model."}
+      title={lens === "cfo" ? "£100K changed a £630K annualised gross CS cost basis." : "45,000 customer orders managed by agents."}
       intro={lens === "cfo" ? "The reported inputs are £100K to build, a 60-to-30 global customer-service and planning team, 45,000 annual customer orders and a supplied £1,750 average monthly CS employee cost. That produces a £52.5K monthly and £630K annualised gross CS cost delta before benefit-realisation adjustments." : "45,000 annual customer orders now move through a connected operating model. The live agents remove repeatable hand-offs, protecting response speed while people focus on exceptions and customer judgement."}
     >
       <div className={`impact-proof-rail impact-proof-rail--${lens}`} role="tablist" aria-label={`${lens.toUpperCase()} operating impact evidence`}>
