@@ -1851,7 +1851,7 @@ function ProcessFlow({
   );
 }
 
-function MonthlyOperatingDashboard() {
+function MonthlyOperatingDashboard({ lens }: { lens: ExecutiveLens }) {
   const [view, setView] = useState<"team" | "cycle" | "exceptions">("team");
   const tabs = [
     { id: "team" as const, label: "Team capacity" },
@@ -1862,8 +1862,8 @@ function MonthlyOperatingDashboard() {
   return (
     <section className="monthly-dashboard" aria-labelledby="monthly-dashboard-title">
       <header className="monthly-dashboard-heading">
-        <div><span className="panel-label"><Activity size={17} />MONTHLY OPERATING REVIEW</span><h2 id="monthly-dashboard-title">A simple monthly view of capacity, time and control.</h2></div>
-        <p>Use this as the operating review layer. The reported before-and-now facts are shown below; the exception series stays intentionally blank until a verified monthly feed is connected.</p>
+        <div><span className="panel-label"><Activity size={17} />{lens === "ceo" ? "MONTHLY CUSTOMER OPERATING REVIEW" : "MONTHLY COST & CONTROL REVIEW"}</span><h2 id="monthly-dashboard-title">{lens === "ceo" ? "Protect the customer promise across 45,000 annual orders." : "Track operating leverage without inventing the savings case."}</h2></div>
+        <p>{lens === "ceo" ? "This view turns capacity and cycle-time change into a customer-scale conversation. It shows the reported before-and-now operating facts while preserving the blank exception series until verified monthly data is connected." : "This view separates the reported operating change from financial assumptions. It gives finance a monthly control surface for team footprint, processing time and exceptions before payroll or cash benefits are booked."}</p>
       </header>
       <div className="monthly-dashboard-tabs" role="group" aria-label="Monthly operating dashboard measure">
         {tabs.map((tab) => <button key={tab.id} type="button" aria-pressed={view === tab.id} className={view === tab.id ? "active" : ""} onClick={() => setView(tab.id)}>{tab.label}</button>)}
@@ -1871,68 +1871,46 @@ function MonthlyOperatingDashboard() {
       <AnimatePresence mode="wait" initial={false}>
         <motion.div key={view} className={`monthly-dashboard-panel monthly-dashboard-panel--${view}`} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -7 }} transition={{ duration: .22, ease: [0.23, 1, 0.32, 1] }}>
           {view === "team" && <>
-            <div className="monthly-panel-copy"><span>REPORTED OPERATING SNAPSHOT</span><h3>Team capacity</h3><p>Global customer service and planning moved from a 60-person to a 30-person operating team.</p><b>Monthly measure: rostered people in customer service & planning</b></div>
-            <div className="capacity-compare" aria-label="Team capacity changed from 60 people to 30 people"><div><span>Before</span><i className="capacity-bar before"><b>60</b></i><small>People</small></div><div><span>Today</span><i className="capacity-bar today"><b>30</b></i><small>People</small></div><strong>−50%</strong></div>
+            <div className="monthly-panel-copy"><span>{lens === "ceo" ? "CUSTOMER-SCALE CAPACITY" : "REPORTED OPERATING SNAPSHOT"}</span><h3>{lens === "ceo" ? "More orders per operating person" : "Team capacity"}</h3><p>{lens === "ceo" ? "At 45,000 annual customer orders, the 60-to-30 shift doubles the order capacity supported by each person: 750 to 1,500 orders per operating person." : "Global customer service and planning moved from a 60-person to a 30-person operating team. Payroll, utilisation and run-cost data are still required before this becomes a booked financial saving."}</p><b>Monthly measure: rostered people in customer service & planning</b></div>
+            <div className="capacity-compare" aria-label="Team capacity changed from 60 people to 30 people"><div><span>Before</span><i className="capacity-bar before"><b>60</b></i><small>750 orders / person / year</small></div><div><span>Today</span><i className="capacity-bar today"><b>30</b></i><small>1,500 orders / person / year</small></div><strong>−50% team footprint</strong><em>45,000 annual customer orders</em></div>
           </>}
           {view === "cycle" && <>
-            <div className="monthly-panel-copy"><span>REPORTED FLOW COMPARISON</span><h3>Cycle time</h3><p>Track administrative processing time from first intake to completed system action. Physical production, factory queues and transit remain outside the O2C measure.</p><b>Monthly measure: median administrative processing time by flow</b></div>
+            <div className="monthly-panel-copy"><span>{lens === "ceo" ? "CUSTOMER PROMISE SPEED" : "REPORTED FLOW COMPARISON"}</span><h3>{lens === "ceo" ? "Faster answers at customer scale" : "Cycle time"}</h3><p>{lens === "ceo" ? "When 45,000 orders flow through the operation every year, reducing administrative work from days to minutes protects response speed and leaves people available for the exceptions that need judgement." : "Track administrative processing time from first intake to completed system action. Physical production, factory queues and transit remain outside the O2C measure."}</p><b>Monthly measure: median administrative processing time by flow</b></div>
             <div className="cycle-compare" aria-label="Cycle-time comparisons for Brief to Contract and Order to Cash"><div><span>Brief → contract</span><p><strong>2 days</strong><i /><b>2 min</b></p><small>1,440× compression</small></div><div><span>Order → cash</span><p><strong>3 days</strong><i /><b>3 min</b></p><small>1,440× compression</small></div></div>
           </>}
           {view === "exceptions" && <>
-            <div className="monthly-panel-copy"><span>DATA CONNECTION REQUIRED</span><h3>Exception volumes</h3><p>No verified month-by-month exception count has been supplied. The dashboard keeps this panel empty rather than fabricating a trend line.</p><b>Monthly measure: exceptions raised, resolved and aged by owner</b></div>
+            <div className="monthly-panel-copy"><span>DATA CONNECTION REQUIRED</span><h3>{lens === "ceo" ? "Customer exceptions" : "Exception volumes"}</h3><p>{lens === "ceo" ? "Customer-facing exceptions are the final protection for the promise made across 45,000 annual orders. No verified monthly count has been supplied, so the trend stays intentionally blank." : "No verified month-by-month exception count has been supplied. The dashboard keeps this panel empty rather than fabricating a trend line."}</p><b>Monthly measure: exceptions raised, resolved and aged by owner</b></div>
             <div className="exception-empty-state" aria-label="No exception-volume data is loaded"><div className="exception-placeholder-bars">{["P1", "P2", "P3", "P4", "P5", "P6"].map((period) => <i key={period}><span>{period}</span></i>)}</div><strong>Awaiting verified monthly exception feed</strong><p>Connect Dynamics 365, SAP and Fricke event data to show volume, age and resolution route by reporting period.</p></div>
           </>}
         </motion.div>
       </AnimatePresence>
-      <p className="monthly-dashboard-note"><CircleDot size={13} /> The team and cycle panels use the reported before-and-now operating figures already in this deck. Exception-volume history requires a validated monthly extract before it can be visualised.</p>
+      <p className="monthly-dashboard-note"><CircleDot size={13} /> {lens === "ceo" ? "The team and cycle panels combine the reported 60-to-30 team shift, 45,000 annual customer orders and the live process-time comparisons. Exception-volume history requires a validated monthly extract." : "The team and cycle panels use the reported operating figures already in this deck. Exception-volume history, loaded payroll cost and run cost require validated monthly extracts before finance benefits can be booked."}</p>
     </section>
   );
 }
 
 function ImpactSection({ lens }: { lens: ExecutiveLens }) {
-  const [focus, setFocus] = useState<"team" | "time" | "build">("team");
-  const evidence = [
-    {
-      id: "team" as const,
-      icon: UserCheck,
-      value: "60 → 30",
-      label: "Global team footprint",
-      note: "Customer service & planning",
-      eyebrow: "Operating model changed",
-      title: "Half the global service and planning team is now needed.",
-      copy: "The customer-service and planning organisation moved from 60 people to 30. The impact is an operating model that needs 30 fewer people to support the same connected work.",
-    },
-    {
-      id: "time" as const,
-      icon: Activity,
-      value: "1,440×",
-      label: "Processing compression",
-      note: "Across both live flows",
-      eyebrow: "Time released to higher-value work",
-      title: "Time stopped being absorbed by hand-offs and status chasing.",
-      copy: "The live processes now move in minutes rather than days. This releases time for customer judgement, exception resolution and planning decisions—not repetitive administration.",
-    },
-    {
-      id: "build" as const,
-      icon: Banknote,
-      value: "£100k",
-      label: "One-time solution build",
-      note: "Reported build cost",
-      eyebrow: "Capital deployed",
-      title: "A £100K build changed the operating equation.",
-      copy: "The reported solution-build cost is £100K. The visible impact is not a theoretical future model: it is the changed team footprint and the operating time now released every day.",
-    },
+  const [focus, setFocus] = useState<"team" | "time" | "build" | "scale">("team");
+  useEffect(() => setFocus(lens === "ceo" ? "scale" : "build"), [lens]);
+  const evidence = lens === "ceo" ? [
+    { id: "scale" as const, icon: Activity, value: "45k", label: "Annual customer orders", note: "Reported annual order volume", eyebrow: "Customer promise at scale", title: "45,000 customer orders need a faster operating model.", copy: "At this volume, every hand-off matters. The agents remove repeatable administration so people can spend their attention on customer decisions, exceptions and service recovery." },
+    { id: "team" as const, icon: UserCheck, value: "2×", label: "Orders per operating person", note: "750 → 1,500 each year", eyebrow: "Capacity released", title: "The same customer scale now runs with double the order capacity per person.", copy: "With 45,000 annual customer orders and the operating team moving from 60 to 30, each person supports 1,500 orders rather than 750. This is a capacity measure, not a payroll-saving claim." },
+    { id: "time" as const, icon: Activity, value: "1,440×", label: "Processing compression", note: "Across both live flows", eyebrow: "Customer speed protected", title: "Days became minutes before the customer has to wait.", copy: "The live processes move through administrative checks, routing and status updates in minutes rather than days, protecting response speed at customer scale." },
+  ] : [
+    { id: "build" as const, icon: Banknote, value: "£100k", label: "One-time solution build", note: "Reported build cost", eyebrow: "Capital deployed", title: "£100K changed the operating control model.", copy: "The reported solution-build cost is £100K. Finance can now validate the continuing cost base against the changed team footprint and the processing time released every day." },
+    { id: "team" as const, icon: UserCheck, value: "60 → 30", label: "Global team footprint", note: "Customer service & planning", eyebrow: "Operating footprint changed", title: "The service and planning model now needs 30 people rather than 60.", copy: "This is a reported operating change. It becomes a booked financial benefit only when loaded cost, redeployment decisions, utilisation and run cost are validated." },
+    { id: "time" as const, icon: Activity, value: "£2.22", label: "Build cost per annual order", note: "£100K ÷ 45,000 orders", eyebrow: "Unit-cost context", title: "The first-year build cost is £2.22 per annual customer order.", copy: "This is a simple reported-input ratio, not a forecasted ROI. It gives finance a common unit of scale while payroll, run cost and benefit-realisation data are gathered." },
   ];
   const selected = evidence.find((item) => item.id === focus) ?? evidence[0];
   const SelectedIcon = selected.icon;
 
   return (
     <SectionFrame
-      eyebrow={lens === "cfo" ? "CFO lens · operating proof" : "CEO lens · operating leverage delivered"}
-      title={lens === "cfo" ? "£100K changed the global operating model." : "Less operational drag. More time for judgement."}
-      intro={lens === "cfo" ? "This page now shows the reported operating result—not a synthetic forecast: £100K to build, a 60-to-30 global customer-service and planning team, and processing cycles compressed from days to minutes." : "The agent flows removed repeatable hand-offs from customer service and planning. The team is now 30 people rather than 60, while the work moves in minutes where it previously moved in days."}
+      eyebrow={lens === "cfo" ? "CFO lens · cost, control and evidence" : "CEO lens · customer scale and operating leverage"}
+      title={lens === "cfo" ? "£100K needs to earn its place in the operating model." : "45,000 customer orders deserve a faster operating model."}
+      intro={lens === "cfo" ? "The reported facts are £100K to build, a 60-to-30 global customer-service and planning team, and 45,000 annual customer orders. Payroll saving, annual run cost and ROI remain unbooked until validated." : "45,000 annual customer orders now move through a connected operating model. The live agents remove repeatable hand-offs, protecting response speed while people focus on exceptions and customer judgement."}
     >
-      <div className="impact-proof-rail" role="tablist" aria-label="Operating impact evidence">
+      <div className={`impact-proof-rail impact-proof-rail--${lens}`} role="tablist" aria-label={`${lens.toUpperCase()} operating impact evidence`}>
         {evidence.map((item, index) => {
           const Icon = item.icon;
           return (
@@ -1950,20 +1928,19 @@ function ImpactSection({ lens }: { lens: ExecutiveLens }) {
             <h2>{selected.title}</h2>
             <p>{selected.copy}</p>
           </div>
-          {focus === "team" && <div className="team-shift" aria-label="Global team changed from 60 to 30 people"><div><span>Before</span><strong>60</strong><small>People across customer service & planning</small></div><i><ArrowUpRight size={20} /></i><div className="today"><span>Today</span><strong>30</strong><small>People operating the connected model</small></div><b>30-person lower operating footprint</b></div>}
-          {focus === "time" && <div className="time-compression" aria-label="Processing time comparisons"><div><span>Brief → contract</span><strong>2 days</strong><i><ArrowUpRight size={17} /></i><b>2 minutes</b></div><div><span>Order → cash</span><strong>3 days</strong><i><ArrowUpRight size={17} /></i><b>3 minutes</b></div><small>Both are 1,440× administrative processing compression. Order-to-cash excludes physical manufacturing, production queues and delivery transit.</small></div>}
+          {focus === "scale" && <div className="order-scale" aria-label="45,000 annual customer orders supported by the operating model"><div><span>Annual customer orders</span><strong>45,000</strong><small>Reported order volume</small></div><i><ArrowUpRight size={20} /></i><div className="today"><span>Order capacity per person</span><strong>1,500</strong><small>45,000 orders ÷ 30 people</small></div><b>2× more annual order capacity per operating person</b></div>}
+          {focus === "team" && <div className="team-shift" aria-label="Global team changed from 60 to 30 people"><div><span>Before</span><strong>60</strong><small>People across customer service & planning</small></div><i><ArrowUpRight size={20} /></i><div className="today"><span>Today</span><strong>30</strong><small>People operating the connected model</small></div><b>{lens === "ceo" ? "45,000 annual orders · 1,500 orders per person" : "30-person lower operating footprint"}</b></div>}
+          {focus === "time" && (lens === "cfo" ? <div className="build-cost"><div><span>First-year build unit</span><strong>£2.22</strong><small>£100K ÷ 45,000 annual orders</small></div><p>This is a unit-cost context based only on the reported build cost and annual order volume. It is not a payback, ROI or annual run-cost forecast.</p><b>Validate loaded payroll, utilisation, run cost and benefit ownership before booking any financial benefit.</b></div> : <div className="time-compression" aria-label="Processing time comparisons"><div><span>Brief → contract</span><strong>2 days</strong><i><ArrowUpRight size={17} /></i><b>2 minutes</b></div><div><span>Order → cash</span><strong>3 days</strong><i><ArrowUpRight size={17} /></i><b>3 minutes</b></div><small>Both are 1,440× administrative processing compression. Order-to-cash excludes physical manufacturing, production queues and delivery transit.</small></div>)}
           {focus === "build" && <div className="build-cost"><div><span>One-time build</span><strong>£100k</strong><small>Reported solution-build cost</small></div><p>This is the cost side of the equation. The demonstrated operating result is a 30-person lower team footprint alongside time released from days-to-minutes process execution.</p><b>No synthetic payback or NPV is shown without validated payroll, utilisation and run-cost baselines.</b></div>}
         </motion.section>
       </AnimatePresence>
 
-      <MonthlyOperatingDashboard />
+      <MonthlyOperatingDashboard lens={lens} />
 
       <div className="impact-evidence-grid">
-        <article><span>01</span><b>Team impact</b><strong>60 → 30</strong><p>Customer service and planning now operate with a 30-person team rather than 60.</p></article>
-        <article><span>02</span><b>Time impact</b><strong>Days → minutes</strong><p>Agent flows eliminate repeated capture, checks, routing and status chasing across the two live processes.</p></article>
-        <article><span>03</span><b>Financial next step</b><strong>Price the evidence</strong><p>Apply validated loaded cost, volume and utilisation data to turn the operating result into a CFO-approved benefit case.</p></article>
+        {lens === "ceo" ? <><article><span>01</span><b>Customer scale</b><strong>45,000 orders</strong><p>Annual customer order volume supported by the connected operating model.</p></article><article><span>02</span><b>Capacity</b><strong>2× per person</strong><p>Order capacity rises from 750 to 1,500 annual orders for each operating person.</p></article><article><span>03</span><b>Service speed</b><strong>Days → minutes</strong><p>Live flows remove repeatable administration before the exception needs human judgement.</p></article></> : <><article><span>01</span><b>Capital deployed</b><strong>£100k</strong><p>Reported one-time solution build cost.</p></article><article><span>02</span><b>Operating footprint</b><strong>60 → 30</strong><p>Reported customer-service and planning team change; savings still require validation.</p></article><article><span>03</span><b>Unit-cost context</b><strong>£2.22 / order</strong><p>£100K build divided by 45,000 annual customer orders; this is not an ROI forecast.</p></article></>}
       </div>
-      <p className="model-note"><CircleDot size={13} /> Reported operating results: £100K one-time build and a global customer-service and planning team moving from 60 to 30. The time comparisons cover the illustrated agent-processing flows; no payroll saving, annual run cost, payback or NPV has been invented here.</p>
+      <p className="model-note"><CircleDot size={13} /> {lens === "ceo" ? "Reported operating context: 45,000 annual customer orders, a global customer-service and planning team moving from 60 to 30, and live agent-processing comparisons from days to minutes." : "Reported operating context: £100K one-time build, 45,000 annual customer orders and a global customer-service and planning team moving from 60 to 30. No payroll saving, annual run cost, payback or NPV has been invented here."}</p>
     </SectionFrame>
   );
 }
