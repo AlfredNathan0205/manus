@@ -4,6 +4,7 @@ import CortiSleeveWalkthrough from "@/components/CortiSleeveWalkthrough";
 import OlfyneExperience from "@/components/OlfyneExperience";
 import TrendAnalysisExperience from "@/components/TrendAnalysisExperience";
 import APSOrchestrationExperience from "@/components/APSOrchestrationExperience";
+import CPLInnovationPortfolio from "@/components/CPLInnovationPortfolio";
 import {
   Activity,
   AlertTriangle,
@@ -920,6 +921,7 @@ function OrbitalSystem() {
 
 function ProfileSection() {
   const [activeCareer, setActiveCareer] = useState(0);
+  const [cplInnovationOpen, setCplInnovationOpen] = useState(() => new URLSearchParams(window.location.search).get("cpl") === "innovation");
   const [activeVenture, setActiveVenture] = useState<number | null>(() => {
     const requested = new URLSearchParams(window.location.search).get("venture");
     const index = ventures.findIndex((venture) => venture.name.toLowerCase().replace(/\s+/g, "-") === requested);
@@ -928,15 +930,19 @@ function ProfileSection() {
   const modalCloseRef = useRef<HTMLButtonElement>(null);
   const selectedVenture = activeVenture === null ? null : ventures[activeVenture];
   const SelectedVentureIcon = selectedVenture?.icon ?? Sparkles;
+  const isProfileDialogOpen = activeVenture !== null || cplInnovationOpen;
 
   useEffect(() => {
-    if (activeVenture === null) return;
+    if (!isProfileDialogOpen) return;
     const previousOverflow = document.body.style.overflow;
     const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     document.body.style.overflow = "hidden";
     const focusTimer = window.setTimeout(() => modalCloseRef.current?.focus(), 50);
     const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setActiveVenture(null);
+      if (event.key === "Escape") {
+        setActiveVenture(null);
+        setCplInnovationOpen(false);
+      }
       if (event.key === "Tab") {
         const modal = modalCloseRef.current?.closest('[role="dialog"]');
         const controls = modal ? Array.from(modal.querySelectorAll<HTMLElement>('button:not(:disabled), a[href], [tabindex="0"]')) : [];
@@ -958,7 +964,7 @@ function ProfileSection() {
       window.removeEventListener("keydown", closeOnEscape);
       previousFocus?.focus({ preventScroll: true });
     };
-  }, [activeVenture]);
+  }, [isProfileDialogOpen]);
 
   return (
     <motion.section
@@ -1032,6 +1038,7 @@ function ProfileSection() {
               <div className="career-locations" aria-label={`${career[activeCareer].name} locations`}>
                 {career[activeCareer].locations.map((location) => <span key={location}><MapPin size={12} />{location}</span>)}
               </div>
+              {career[activeCareer].name === "CPL Aromas" && <button type="button" className="cpl-innovation-launch" onClick={() => setCplInnovationOpen(true)} aria-haspopup="dialog"><Sparkles size={15} />Open industry-transformative apps & agents <ArrowUpRight size={15} /></button>}
             </div>
             <p>{career[activeCareer].copy}</p>
           </motion.div>
@@ -1070,6 +1077,28 @@ function ProfileSection() {
       </div>
 
       <AnimatePresence>
+        {cplInnovationOpen && (
+          <motion.div className="venture-modal-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onMouseDown={() => setCplInnovationOpen(false)}>
+            <motion.div
+              className="venture-modal cpl-innovation-modal"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="cpl-innovation-title"
+              initial={{ opacity: 0, y: 18, scale: .97 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 10, scale: .98 }}
+              transition={{ duration: .24 }}
+              onMouseDown={(event) => event.stopPropagation()}
+            >
+              <button ref={modalCloseRef} type="button" className="venture-modal-close" onClick={() => setCplInnovationOpen(false)} aria-label="Close CPL innovation portfolio"><X size={18} /></button>
+              <header className="cpl-modal-heading">
+                <img src={ASSETS.cpl} alt="CPL Aromas logo" />
+                <div><span className="overline">CPL Aromas · operating innovation</span><h2 id="cpl-innovation-title">Industry-transformative<br />apps & agents.</h2><p>Five capability families built inside the fragrance industry—connecting invention, prediction, regulatory control, creative intelligence and emotional response.</p></div>
+              </header>
+              <CPLInnovationPortfolio />
+            </motion.div>
+          </motion.div>
+        )}
         {selectedVenture && (
           <motion.div className="venture-modal-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onMouseDown={() => setActiveVenture(null)}>
             <motion.div
