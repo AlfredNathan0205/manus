@@ -5,6 +5,7 @@ import OlfyneExperience from "@/components/OlfyneExperience";
 import TrendAnalysisExperience from "@/components/TrendAnalysisExperience";
 import APSOrchestrationExperience from "@/components/APSOrchestrationExperience";
 import CPLInnovationPortfolio from "@/components/CPLInnovationPortfolio";
+import AgentOperationsDashboard from "@/components/AgentOperationsDashboard";
 import {
   Activity,
   AlertTriangle,
@@ -71,7 +72,7 @@ const ASSETS = {
   cortisleeveWordmark: "/manus-storage/cortisleeve-supplied-wordmark_30e0cbd1.png",
 };
 
-type SectionId = "intro" | "tech" | "aps" | "b2c" | "o2c" | "impact" | "next";
+type SectionId = "intro" | "tech" | "aps" | "b2c" | "o2c" | "impact" | "operations" | "next";
 type StepKind = "agent" | "human" | "decision";
 type ExecutiveLens = "ceo" | "cfo";
 
@@ -114,6 +115,7 @@ const navItems: { id: SectionId; label: string; kicker: string }[] = [
   { id: "aps", label: "APS", kicker: "04" },
   { id: "b2c", label: "B2C", kicker: "05" },
   { id: "impact", label: "Impact", kicker: "06" },
+  { id: "operations", label: "Agent Ops", kicker: "07" },
 ];
 
 const ventures = [
@@ -2164,6 +2166,7 @@ function AppShell() {
       />
     );
     if (section === "impact") return <ImpactSection lens={lens} />;
+    if (section === "operations") return <AgentOperationsDashboard />;
     return <NextSection onNavigate={navigate} />;
   };
 
