@@ -114,7 +114,6 @@ const navItems: { id: SectionId; label: string; kicker: string }[] = [
   { id: "aps", label: "APS", kicker: "04" },
   { id: "b2c", label: "B2C", kicker: "05" },
   { id: "impact", label: "Impact", kicker: "06" },
-  { id: "next", label: "Next", kicker: "07" },
 ];
 
 const ventures = [
